@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\RecurringExpenseController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\TransferController;
+use App\Http\Controllers\Admin\Menu\MenuController as AdminMenuController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -24,6 +25,11 @@ Route::middleware('auth:api')->group(function () {
     Route::get('categories', [CategoryController::class, 'index']);
     Route::post('categories', [CategoryController::class, 'store']);
     Route::put('categories/{categoryId}', [CategoryController::class, 'update']);
+    Route::get('admin/menu_items', [AdminMenuController::class, 'index']);
+    Route::post('admin/menu_items', [AdminMenuController::class, 'store']);
+    Route::get('admin/menu_items/{id}', [AdminMenuController::class, 'show']);
+    Route::post('admin/menu_items/update/{id}', [AdminMenuController::class, 'update']);
+    Route::delete('admin/menu_items/{id}', [AdminMenuController::class, 'destroy']);
 
     Route::prefix('transactions')->group(function () {
         Route::get('/', [TransactionController::class, 'index']);
