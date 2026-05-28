@@ -40,5 +40,9 @@ return [
         'ttl' => (int) env('JWT_TTL', 60 * 24),
         'issuer' => env('JWT_ISSUER', env('APP_URL', 'expense-tracker')),
     ],
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'chat_id'  => env('TELEGRAM_CHAT_ID'),
+    ],
 
 ];

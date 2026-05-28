@@ -9,14 +9,26 @@ use Illuminate\Support\Facades\DB;
 
 class ReportService extends BaseFinanceService
 {
+
+     public function send(TelegramService $telegram,$message)
+    {
+        $telegram->sendMessage($message);
+
+        return 1;
+    }
     public function summary(int $userId, array $filters): array
     {
+
+
         $baseQuery = DB::table('transactions')->where('user_id', $userId);
         $this->applyTransactionDateFilters($baseQuery, $filters);
 
         $currentBalance = DB::table('accounts')
             ->where('user_id', $userId)
             ->sum('current_balance');
+        $msg = "I am telegram bot and here is the summary of your transactions:\n\n";
+        $this->send(app(TelegramService::class),$msg);
+        
 
         return [
             'from_date' => $filters['from_date'] ?? null,
