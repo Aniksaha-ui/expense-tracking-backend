@@ -56,6 +56,99 @@ class TransferService extends BaseFinanceService
         return $this->processTransfer($data, $userId, true);
     }
 
+    public function updateTransfer(int $transferId, array $data, int $userId): object
+    {
+        return DB::transaction(function () use ($transferId, $data, $userId) {
+            $existingTransfer = $this->getOwnedTransfer($userId, $transferId, true);
+            $fromAccount = $this->getOwnedAccount($userId, (int) $data['from_account_id']);
+            $toAccount = $this->getOwnedAccount($userId, (int) $data['to_account_id']);
+
+            if ($fromAccount->id === $toAccount->id) {
+                throw new RuntimeException('Source and destination accounts must be different.');
+            }
+
+            if ($existingTransfer->is_withdrawal) {
+                if ($fromAccount->type === AccountType::CASH->value) {
+                    throw new RuntimeException('Cash account cannot be used as the withdrawal source.');
+                }
+
+                if ($toAccount->type !== AccountType::CASH->value) {
+                    throw new RuntimeException('Withdrawal destination must be a cash account.');
+                }
+            }
+
+            $ledgerTransactions = DB::table('transactions')
+                ->where('user_id', $userId)
+                ->where('reference_type', 'TRANSFER')
+                ->where('reference_id', $transferId)
+                ->lockForUpdate()
+                ->orderBy('id')
+                ->get();
+
+            $sourceTransaction = $ledgerTransactions->first(
+                fn (object $transaction): bool => (int) $transaction->account_id === (int) $existingTransfer->from_account_id
+                    && strtoupper($transaction->type) !== TransactionType::DEPOSIT->value
+            );
+            $destinationTransaction = $ledgerTransactions->first(
+                fn (object $transaction): bool => (int) $transaction->account_id === (int) $existingTransfer->to_account_id
+                    && strtoupper($transaction->type) === TransactionType::DEPOSIT->value
+            );
+
+            if (! $sourceTransaction || ! $destinationTransaction) {
+                throw new RuntimeException('Transfer ledger entries are missing.');
+            }
+
+            $amount = $this->normalizeMoney($data['amount']);
+            $note = $data['note'] ?? null;
+            $transferDate = $data['transfer_date'] ?? $existingTransfer->transfer_date;
+
+            DB::table('transfers')
+                ->where('user_id', $userId)
+                ->where('id', $transferId)
+                ->update([
+                    'from_account_id' => $fromAccount->id,
+                    'to_account_id' => $toAccount->id,
+                    'amount' => $amount,
+                    'note' => $note,
+                    'transfer_date' => $transferDate,
+                    'updated_at' => now(),
+                ]);
+
+            DB::table('transactions')
+                ->where('id', $sourceTransaction->id)
+                ->update([
+                    'account_id' => $fromAccount->id,
+                    'related_account_id' => $toAccount->id,
+                    'type' => $existingTransfer->is_withdrawal ? TransactionType::WITHDRAW->value : TransactionType::TRANSFER->value,
+                    'amount' => $amount,
+                    'note' => $note,
+                    'transaction_date' => $transferDate,
+                    'updated_at' => now(),
+                ]);
+
+            DB::table('transactions')
+                ->where('id', $destinationTransaction->id)
+                ->update([
+                    'account_id' => $toAccount->id,
+                    'related_account_id' => $fromAccount->id,
+                    'type' => TransactionType::DEPOSIT->value,
+                    'amount' => $amount,
+                    'note' => $note,
+                    'transaction_date' => $transferDate,
+                    'updated_at' => now(),
+                ]);
+
+            $this->recalculateAccountBalances($userId, [
+                (int) $existingTransfer->from_account_id,
+                (int) $existingTransfer->to_account_id,
+                $fromAccount->id,
+                $toAccount->id,
+            ]);
+
+            return $this->fetchTransferRecord($userId, $transferId);
+        });
+    }
+
     private function processTransfer(array $data, int $userId, bool $isWithdrawal): object
     {
         return DB::transaction(function () use ($data, $userId, $isWithdrawal) {

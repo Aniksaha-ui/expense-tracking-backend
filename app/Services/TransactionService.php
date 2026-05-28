@@ -80,6 +80,48 @@ class TransactionService extends BaseFinanceService
         );
     }
 
+    public function updateTransaction(int $transactionId, array $data, int $userId): object
+    {
+        return DB::transaction(function () use ($transactionId, $data, $userId) {
+            $existingTransaction = $this->getOwnedTransaction($userId, $transactionId, true);
+
+            if (
+                $existingTransaction->reference_type !== null
+                || ! in_array($existingTransaction->type, [
+                    TransactionType::INCOME->value,
+                    TransactionType::EXPENSE->value,
+                    TransactionType::DEPOSIT->value,
+                ], true)
+            ) {
+                throw new RuntimeException('Only manual income, expense, and deposit transactions can be updated.');
+            }
+
+            $accountId = (int) ($data['account_id'] ?? $existingTransaction->account_id);
+            $account = $this->getOwnedAccount($userId, $accountId);
+            $amount = $this->normalizeMoney($data['amount'] ?? $existingTransaction->amount);
+            $categoryId = $this->resolveUpdatedCategoryId($existingTransaction->type, $data, $userId);
+
+            DB::table('transactions')
+                ->where('user_id', $userId)
+                ->where('id', $transactionId)
+                ->update([
+                    'account_id' => $account->id,
+                    'category_id' => $categoryId,
+                    'amount' => $amount,
+                    'note' => $data['note'] ?? null,
+                    'transaction_date' => $data['transaction_date'] ?? $existingTransaction->transaction_date,
+                    'updated_at' => now(),
+                ]);
+
+            $this->recalculateAccountBalances($userId, [
+                (int) $existingTransaction->account_id,
+                $account->id,
+            ]);
+
+            return $this->fetchTransactionRecord($userId, $transactionId);
+        });
+    }
+
     private function createTransaction(
         array $data,
         int $userId,
@@ -143,5 +185,35 @@ class TransactionService extends BaseFinanceService
 
             return $this->fetchTransactionRecord($userId, $transactionId);
         });
+    }
+
+    private function resolveUpdatedCategoryId(string $transactionType, array $data, int $userId): ?int
+    {
+        $normalizedType = strtoupper($transactionType);
+
+        if ($normalizedType === TransactionType::DEPOSIT->value) {
+            if (! empty($data['category_id'])) {
+                throw new RuntimeException('Deposit transactions cannot use a category.');
+            }
+
+            return null;
+        }
+
+        if (empty($data['category_id'])) {
+            if ($normalizedType === TransactionType::EXPENSE->value) {
+                throw new RuntimeException('Category is required for this transaction.');
+            }
+
+            return null;
+        }
+
+        $category = $this->getOwnedCategory($userId, (int) $data['category_id']);
+        $expectedCategoryType = $normalizedType === TransactionType::EXPENSE->value ? 'EXPENSE' : 'INCOME';
+
+        if (strtoupper($category->type) !== $expectedCategoryType) {
+            throw new RuntimeException('Invalid category type for this transaction.');
+        }
+
+        return $category->id;
     }
 }

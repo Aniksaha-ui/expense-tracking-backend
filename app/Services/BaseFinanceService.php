@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Enums\TransactionType;
 use Brick\Math\BigDecimal;
+use App\Support\MoneyHelper;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -44,6 +46,61 @@ abstract class BaseFinanceService
         }
 
         return $category;
+    }
+
+    protected function getOwnedTransaction(int $userId, int $transactionId, bool $lockForUpdate = false): object
+    {
+        $query = DB::table('transactions')
+            ->where('user_id', $userId)
+            ->where('id', $transactionId);
+
+        if ($lockForUpdate) {
+            $query->lockForUpdate();
+        }
+
+        $transaction = $query->first();
+
+        if (! $transaction) {
+            throw new RuntimeException('Invalid transaction id.');
+        }
+
+        return $transaction;
+    }
+
+    protected function getOwnedTransfer(int $userId, int $transferId, bool $lockForUpdate = false): object
+    {
+        $query = DB::table('transfers')
+            ->where('user_id', $userId)
+            ->where('id', $transferId);
+
+        if ($lockForUpdate) {
+            $query->lockForUpdate();
+        }
+
+        $transfer = $query->first();
+
+        if (! $transfer) {
+            throw new RuntimeException('Invalid transfer id.');
+        }
+
+        return $transfer;
+    }
+
+    protected function recalculateAccountBalances(int $userId, array $accountIds): void
+    {
+        $normalizedAccountIds = array_values(array_unique(array_map(
+            static fn (mixed $accountId): int => (int) $accountId,
+            array_filter(
+                $accountIds,
+                static fn (mixed $accountId): bool => $accountId !== null && $accountId !== ''
+            )
+        )));
+
+        sort($normalizedAccountIds);
+
+        foreach ($normalizedAccountIds as $accountId) {
+            $this->recalculateAccountBalance($userId, $accountId);
+        }
     }
 
     protected function fetchAccountRecord(int $userId, int $accountId): object
@@ -144,5 +201,70 @@ abstract class BaseFinanceService
         }
 
         return $recurringExpense;
+    }
+
+    private function recalculateAccountBalance(int $userId, int $accountId): void
+    {
+        $this->getOwnedAccount($userId, $accountId, true);
+
+        $transactions = DB::table('transactions')
+            ->where('user_id', $userId)
+            ->where('account_id', $accountId)
+            ->orderByRaw('CASE WHEN type = ? THEN 0 ELSE 1 END', [TransactionType::OPENING_BALANCE->value])
+            ->orderBy('transaction_date')
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+
+        $runningBalance = '0.00';
+
+        foreach ($transactions as $transaction) {
+            $balanceBefore = $runningBalance;
+            $balanceAfter = $this->calculateBalanceAfter(
+                $balanceBefore,
+                $this->normalizeMoney($transaction->amount),
+                (string) $transaction->type
+            );
+
+            DB::table('transactions')
+                ->where('id', $transaction->id)
+                ->update([
+                    'balance_before' => $balanceBefore,
+                    'balance_after' => $balanceAfter,
+                    'updated_at' => now(),
+                ]);
+
+            $runningBalance = $balanceAfter;
+        }
+
+        DB::table('accounts')
+            ->where('user_id', $userId)
+            ->where('id', $accountId)
+            ->update([
+                'current_balance' => $runningBalance,
+                'updated_at' => now(),
+            ]);
+    }
+
+    private function calculateBalanceAfter(string $balanceBefore, string $amount, string $type): string
+    {
+        if ($this->isCreditTransactionType($type)) {
+            return MoneyHelper::add($balanceBefore, $amount);
+        }
+
+        if (MoneyHelper::greaterThan($amount, $balanceBefore)) {
+            throw new RuntimeException('Insufficient account balance.');
+        }
+
+        return MoneyHelper::subtract($balanceBefore, $amount);
+    }
+
+    private function isCreditTransactionType(string $type): bool
+    {
+        return in_array(strtoupper($type), [
+            TransactionType::OPENING_BALANCE->value,
+            TransactionType::INCOME->value,
+            TransactionType::DEPOSIT->value,
+        ], true);
     }
 }

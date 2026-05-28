@@ -7,6 +7,7 @@ use App\Http\Requests\Api\Transactions\StoreDepositRequest;
 use App\Http\Requests\Api\Transactions\StoreExpenseRequest;
 use App\Http\Requests\Api\Transactions\StoreIncomeRequest;
 use App\Http\Requests\Api\Transactions\TransactionFilterRequest;
+use App\Http\Requests\Api\Transactions\UpdateTransactionRequest;
 use App\Http\Resources\Api\TransactionResource;
 use App\Services\TransactionService;
 use Illuminate\Http\JsonResponse;
@@ -77,6 +78,24 @@ class TransactionController extends Controller
             );
         } catch (\RuntimeException $exception) {
             return $this->errorResponse($exception->getMessage(), status: 422);
+        } catch (\Exception $exception) {
+            return $this->errorResponse($exception->getMessage(), status: 500);
+        }
+    }
+
+    public function update(UpdateTransactionRequest $request, int $transactionId): JsonResponse
+    {
+        try {
+            $transaction = $this->transactionService->updateTransaction($transactionId, $request->validated(), auth()->id());
+
+            return $this->successResponse(
+                new TransactionResource($transaction),
+                'Transaction updated successfully.'
+            );
+        } catch (\RuntimeException $exception) {
+            $status = $exception->getMessage() === 'Invalid transaction id.' ? 404 : 422;
+
+            return $this->errorResponse($exception->getMessage(), status: $status);
         } catch (\Exception $exception) {
             return $this->errorResponse($exception->getMessage(), status: 500);
         }

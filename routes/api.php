@@ -36,12 +36,16 @@ Route::middleware('auth:api')->group(function () {
         Route::post('income', [TransactionController::class, 'storeIncome']);
         Route::post('expense', [TransactionController::class, 'storeExpense']);
         Route::post('deposit', [TransactionController::class, 'storeDeposit']);
+        Route::put('{transactionId}', [TransactionController::class, 'update']);
+        Route::patch('{transactionId}', [TransactionController::class, 'update']);
     });
 
     Route::prefix('transfers')->group(function () {
         Route::get('/', [TransferController::class, 'index']);
         Route::post('/', [TransferController::class, 'store']);
         Route::post('withdraw-to-cash', [TransferController::class, 'withdrawToCash']);
+        Route::put('{transferId}', [TransferController::class, 'update']);
+        Route::patch('{transferId}', [TransferController::class, 'update']);
     });
 
     Route::prefix('recurring-expenses')->group(function () {
