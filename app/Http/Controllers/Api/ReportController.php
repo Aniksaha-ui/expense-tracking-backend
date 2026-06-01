@@ -46,6 +46,15 @@ class ReportController extends Controller
         }
     }
 
+    public function daywiseExpenses(ReportFilterRequest $request): JsonResponse
+    {
+        try {
+            return $this->successResponse($this->reportService->daywiseExpenses(auth()->id(), $request->validated()));
+        } catch (\Exception $exception) {
+            return $this->errorResponse($exception->getMessage(), status: 500);
+        }
+    }
+
     public function cashFlow(ReportFilterRequest $request): JsonResponse
     {
         try {

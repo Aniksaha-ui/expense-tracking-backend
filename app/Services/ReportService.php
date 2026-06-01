@@ -71,6 +71,41 @@ class ReportService extends BaseFinanceService
         return $query->get();
     }
 
+    public function daywiseExpenses(int $userId, array $filters): \Illuminate\Support\Collection
+    {
+        $query = DB::table('transactions')
+            ->join('categories', 'categories.id', '=', 'transactions.category_id')
+            ->select([
+                DB::raw('DATE(transactions.transaction_date) as expense_date'),
+                'transactions.category_id',
+                'categories.name as category_name',
+                'categories.type as category_type',
+                DB::raw('COUNT(transactions.id) as transaction_count'),
+                DB::raw('SUM(transactions.amount) as total_amount'),
+            ])
+            ->where('transactions.user_id', $userId)
+            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
+            ->groupBy(
+                DB::raw('DATE(transactions.transaction_date)'),
+                'transactions.category_id',
+                'categories.name',
+                'categories.type'
+            )
+            ->orderByDesc('expense_date')
+            ->orderByDesc('total_amount');
+
+        $this->applyTransactionDateFilters($query, $filters);
+
+        return $query->get()->map(fn (object $item): array => [
+            'expense_date' => $item->expense_date,
+            'category_id' => $item->category_id,
+            'category_name' => $item->category_name,
+            'category_type' => $item->category_type,
+            'transaction_count' => (int) $item->transaction_count,
+            'total_amount' => $this->formatAggregate($item->total_amount),
+        ]);
+    }
+
     public function cashFlow(int $userId, array $filters): \Illuminate\Support\Collection
     {
         $query = DB::table('transactions')
