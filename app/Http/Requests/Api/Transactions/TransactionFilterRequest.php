@@ -13,6 +13,7 @@ class TransactionFilterRequest extends ApiFormRequest
         return [
             'account_id' => ['nullable', 'integer'],
             'category_id' => ['nullable', 'integer'],
+            'search' => ['nullable', 'string', 'max:255'],
             'type' => ['nullable', Rule::in(TransactionType::values())],
             'from_date' => ['nullable', 'date'],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],

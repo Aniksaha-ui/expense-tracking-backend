@@ -160,6 +160,70 @@ class ExpenseFlowTest extends TestCase
         $this->assertSame('750.00', $accounts[$cashAccountId]['current_balance']);
     }
 
+    public function test_transactions_can_be_filtered_by_backend_search_query(): void
+    {
+        $registerResponse = $this->postJson('/api/auth/register', [
+            'name' => 'Search Example',
+            'email' => 'search@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $token = $registerResponse->json('data.token');
+
+        $cashAccountResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/accounts', [
+                'name' => 'Office Cash',
+                'type' => 'CASH',
+                'opening_balance' => '1200.00',
+                'opening_balance_date' => '2026-02-01',
+            ])
+            ->assertCreated();
+
+        $cashAccountId = $cashAccountResponse->json('data.id');
+
+        $categoriesResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/categories')
+            ->assertOk();
+
+        $foodCategoryId = collect($categoriesResponse->json('data'))
+            ->firstWhere('name', 'Food')['id'];
+
+        $transportCategoryId = collect($categoriesResponse->json('data'))
+            ->firstWhere('name', 'Transportation')['id'];
+
+        $groceriesResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/transactions/expense', [
+                'account_id' => $cashAccountId,
+                'category_id' => $foodCategoryId,
+                'amount' => '150.00',
+                'note' => 'Monthly groceries',
+                'transaction_date' => '2026-02-02',
+            ])
+            ->assertCreated();
+
+        $taxiResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/transactions/expense', [
+                'account_id' => $cashAccountId,
+                'category_id' => $transportCategoryId,
+                'amount' => '80.00',
+                'note' => 'Taxi fare',
+                'transaction_date' => '2026-02-03',
+            ])
+            ->assertCreated();
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/transactions?search=grocer')
+            ->assertOk();
+
+        $transactions = $response->json('data');
+
+        $this->assertCount(1, $transactions);
+        $this->assertSame($groceriesResponse->json('data.id'), $transactions[0]['id']);
+        $this->assertSame('Monthly groceries', $transactions[0]['note']);
+        $this->assertNotSame($taxiResponse->json('data.id'), $transactions[0]['id']);
+    }
+
     public function test_updating_transfer_recalculates_transfer_and_following_cash_transaction_balances(): void
     {
         $registerResponse = $this->postJson('/api/auth/register', [

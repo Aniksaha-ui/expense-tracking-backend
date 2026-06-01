@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\TransactionType;
 use App\Support\MoneyHelper;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -34,6 +35,10 @@ class TransactionService extends BaseFinanceService
             $query->where('transactions.category_id', $filters['category_id']);
         }
 
+        if (! empty($filters['search'])) {
+            $this->applySearchFilter($query, $filters['search']);
+        }
+
         if (! empty($filters['type'])) {
             $query->where('transactions.type', strtoupper($filters['type']));
         }
@@ -50,6 +55,43 @@ class TransactionService extends BaseFinanceService
             ->orderByDesc('transactions.transaction_date')
             ->orderByDesc('transactions.id')
             ->get();
+    }
+
+    private function applySearchFilter(Builder $query, string $search): void
+    {
+        $normalizedSearch = mb_strtolower(trim($search));
+
+        if ($normalizedSearch === '') {
+            return;
+        }
+
+        $likeSearch = '%'.$normalizedSearch.'%';
+        $numericSearch = ctype_digit($normalizedSearch) ? (int) $normalizedSearch : null;
+
+        $query->where(function (Builder $searchQuery) use ($likeSearch, $numericSearch) {
+            $searchQuery
+                ->whereRaw('LOWER(accounts.name) LIKE ?', [$likeSearch])
+                ->orWhereRaw('LOWER(REPLACE(accounts.type, "_", " ")) LIKE ?', [$likeSearch])
+                ->orWhereRaw('LOWER(accounts.type) LIKE ?', [$likeSearch])
+                ->orWhereRaw("LOWER(COALESCE(categories.name, '')) LIKE ?", [$likeSearch])
+                ->orWhereRaw("LOWER(REPLACE(COALESCE(categories.type, ''), '_', ' ')) LIKE ?", [$likeSearch])
+                ->orWhereRaw("LOWER(COALESCE(categories.type, '')) LIKE ?", [$likeSearch])
+                ->orWhereRaw("LOWER(COALESCE(related_accounts.name, '')) LIKE ?", [$likeSearch])
+                ->orWhereRaw("LOWER(REPLACE(COALESCE(related_accounts.type, ''), '_', ' ')) LIKE ?", [$likeSearch])
+                ->orWhereRaw("LOWER(COALESCE(related_accounts.type, '')) LIKE ?", [$likeSearch])
+                ->orWhereRaw("LOWER(COALESCE(transactions.note, '')) LIKE ?", [$likeSearch])
+                ->orWhereRaw('LOWER(REPLACE(transactions.type, "_", " ")) LIKE ?', [$likeSearch])
+                ->orWhereRaw('LOWER(transactions.type) LIKE ?', [$likeSearch])
+                ->orWhereRaw("LOWER(REPLACE(COALESCE(transactions.reference_type, ''), '_', ' ')) LIKE ?", [$likeSearch])
+                ->orWhereRaw("LOWER(COALESCE(transactions.reference_type, '')) LIKE ?", [$likeSearch])
+                ->orWhereRaw("LOWER(COALESCE(transactions.transaction_date, '')) LIKE ?", [$likeSearch]);
+
+            if ($numericSearch !== null) {
+                $searchQuery
+                    ->orWhere('transactions.id', $numericSearch)
+                    ->orWhere('transactions.reference_id', $numericSearch);
+            }
+        });
     }
 
     public function createIncome(array $data, int $userId): object
