@@ -59,6 +59,7 @@ class ReportService extends BaseFinanceService
                 'transactions.category_id',
                 'categories.name as category_name',
                 'categories.type as category_type',
+                DB::raw('COUNT(transactions.id) as transaction_count'),
                 DB::raw('SUM(transactions.amount) as total_amount'),
             ])
             ->where('transactions.user_id', $userId)
