@@ -33,6 +33,8 @@ const pageTitles = {
   '/reports': 'Reports Center',
   '/reports/account-balances': 'Account Balances Report',
   '/reports/category-breakdown': 'Category Breakdown Report',
+  '/reports/category-usage-analysis': 'Category Usage Analysis',
+  '/reports/current-vs-previous-month-analysis': 'Current vs Previous Month Analysis',
   '/reports/daywise-expenses': 'Daywise Expense Report',
   '/reports/weekly-current-month-analysis': 'Weekly Current Month Analysis',
   '/reports/summary': 'Summary Report',

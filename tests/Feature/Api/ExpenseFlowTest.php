@@ -524,4 +524,270 @@ class ExpenseFlowTest extends TestCase
 
         Carbon::setTestNow();
     }
+
+    public function test_current_vs_previous_month_analysis_returns_graph_and_table_data(): void
+    {
+        Carbon::setTestNow('2026-07-15 10:00:00');
+
+        $registerResponse = $this->postJson('/api/auth/register', [
+            'name' => 'Monthly Comparison Example',
+            'email' => 'monthly-comparison@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $token = $registerResponse->json('data.token');
+
+        $cashAccountResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/accounts', [
+                'name' => 'Comparison Cash',
+                'type' => 'CASH',
+                'opening_balance' => '5000.00',
+                'opening_balance_date' => '2026-06-01',
+            ])
+            ->assertCreated();
+
+        $cashAccountId = $cashAccountResponse->json('data.id');
+
+        $categoriesResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/categories')
+            ->assertOk();
+
+        $foodCategoryId = collect($categoriesResponse->json('data'))
+            ->firstWhere('name', 'Food')['id'];
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/transactions/income', [
+                'account_id' => $cashAccountId,
+                'amount' => '2000.00',
+                'note' => 'June salary',
+                'transaction_date' => '2026-06-05',
+            ])
+            ->assertCreated();
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/transactions/expense', [
+                'account_id' => $cashAccountId,
+                'category_id' => $foodCategoryId,
+                'amount' => '400.00',
+                'note' => 'June food',
+                'transaction_date' => '2026-06-10',
+            ])
+            ->assertCreated();
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/recurring-expenses', [
+                'account_id' => $cashAccountId,
+                'category_id' => $foodCategoryId,
+                'title' => 'Streaming Bundle',
+                'amount' => '150.00',
+                'frequency' => 'MONTHLY',
+                'start_date' => '2026-06-12',
+                'next_run_date' => '2026-06-12',
+                'note' => 'Monthly subscription',
+            ])
+            ->assertCreated();
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/recurring-expenses/run-due', [
+                'through_date' => '2026-06-12',
+            ])
+            ->assertOk();
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/transactions/income', [
+                'account_id' => $cashAccountId,
+                'amount' => '2300.00',
+                'note' => 'July salary',
+                'transaction_date' => '2026-07-05',
+            ])
+            ->assertCreated();
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/transactions/expense', [
+                'account_id' => $cashAccountId,
+                'category_id' => $foodCategoryId,
+                'amount' => '500.00',
+                'note' => 'July food',
+                'transaction_date' => '2026-07-10',
+            ])
+            ->assertCreated();
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/recurring-expenses/run-due', [
+                'through_date' => '2026-07-12',
+            ])
+            ->assertOk();
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/reports/current-vs-previous-month-analysis')
+            ->assertOk();
+
+        $data = $response->json('data');
+        $table = collect($data['table'])->keyBy('period_key');
+
+        $this->assertSame('June 2026', $data['months']['previous_month']['label']);
+        $this->assertSame('July 2026', $data['months']['current_month']['label']);
+        $this->assertSame(['June 2026', 'July 2026'], $data['graph']['labels']);
+        $this->assertCount(3, $data['graph']['datasets']);
+
+        $this->assertSame('2000.00', $table['previous_month']['income']);
+        $this->assertSame('400.00', $table['previous_month']['expense']);
+        $this->assertSame('150.00', $table['previous_month']['recurring']);
+        $this->assertSame('550.00', $table['previous_month']['total_outflow']);
+        $this->assertSame('1450.00', $table['previous_month']['net']);
+
+        $this->assertSame('2300.00', $table['current_month']['income']);
+        $this->assertSame('500.00', $table['current_month']['expense']);
+        $this->assertSame('150.00', $table['current_month']['recurring']);
+        $this->assertSame('650.00', $table['current_month']['total_outflow']);
+        $this->assertSame('1650.00', $table['current_month']['net']);
+
+        $incomeDataset = collect($data['graph']['datasets'])->firstWhere('label', 'Income');
+        $expenseDataset = collect($data['graph']['datasets'])->firstWhere('label', 'Expense');
+        $recurringDataset = collect($data['graph']['datasets'])->firstWhere('label', 'Recurring');
+
+        $this->assertSame([2000.0, 2300.0], $incomeDataset['data']);
+        $this->assertSame([400.0, 500.0], $expenseDataset['data']);
+        $this->assertSame([150.0, 150.0], $recurringDataset['data']);
+
+        Carbon::setTestNow();
+    }
+
+    public function test_category_usage_analysis_returns_category_counts_amounts_and_chart_data(): void
+    {
+        $registerResponse = $this->postJson('/api/auth/register', [
+            'name' => 'Category Usage Example',
+            'email' => 'category-usage@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $token = $registerResponse->json('data.token');
+
+        $cashAccountResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/accounts', [
+                'name' => 'Usage Cash',
+                'type' => 'CASH',
+                'opening_balance' => '3000.00',
+                'opening_balance_date' => '2026-07-01',
+            ])
+            ->assertCreated();
+
+        $cashAccountId = $cashAccountResponse->json('data.id');
+
+        $categoriesResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/categories')
+            ->assertOk();
+
+        $foodCategoryId = collect($categoriesResponse->json('data'))
+            ->firstWhere('name', 'Food')['id'];
+        $transportCategoryId = collect($categoriesResponse->json('data'))
+            ->firstWhere('name', 'Transportation')['id'];
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/transactions/expense', [
+                'account_id' => $cashAccountId,
+                'category_id' => $foodCategoryId,
+                'amount' => '100.00',
+                'note' => 'Breakfast',
+            ])
+            ->assertCreated();
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/transactions/expense', [
+                'account_id' => $cashAccountId,
+                'category_id' => $foodCategoryId,
+                'amount' => '50.00',
+                'note' => 'Dinner',
+            ])
+            ->assertCreated();
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/transactions/expense', [
+                'account_id' => $cashAccountId,
+                'category_id' => $transportCategoryId,
+                'amount' => '80.00',
+                'note' => 'Taxi fare',
+            ])
+            ->assertCreated();
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/recurring-expenses', [
+                'account_id' => $cashAccountId,
+                'category_id' => $foodCategoryId,
+                'title' => 'Monthly Meal Plan',
+                'amount' => '30.00',
+                'frequency' => 'MONTHLY',
+                'start_date' => '2026-07-01',
+                'next_run_date' => '2026-07-01',
+                'note' => 'Should not count in expense-only usage report',
+            ])
+            ->assertCreated();
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/recurring-expenses/run-due', [
+                'through_date' => '2026-07-01',
+            ])
+            ->assertOk();
+
+        $otherUserToken = $this->postJson('/api/auth/register', [
+            'name' => 'Another User',
+            'email' => 'another-category-usage@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->json('data.token');
+
+        $otherAccountId = $this->withHeader('Authorization', 'Bearer '.$otherUserToken)
+            ->postJson('/api/accounts', [
+                'name' => 'Other Cash',
+                'type' => 'CASH',
+                'opening_balance' => '1000.00',
+                'opening_balance_date' => '2026-07-01',
+            ])
+            ->json('data.id');
+
+        $otherCategoriesResponse = $this->withHeader('Authorization', 'Bearer '.$otherUserToken)
+            ->getJson('/api/categories')
+            ->assertOk();
+
+        $otherFoodCategoryId = collect($otherCategoriesResponse->json('data'))
+            ->firstWhere('name', 'Food')['id'];
+
+        $this->withHeader('Authorization', 'Bearer '.$otherUserToken)
+            ->postJson('/api/transactions/expense', [
+                'account_id' => $otherAccountId,
+                'category_id' => $otherFoodCategoryId,
+                'amount' => '999.00',
+                'note' => 'Other user expense',
+            ])
+            ->assertCreated();
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/reports/category-usage-analysis')
+            ->assertOk();
+
+        $data = $response->json('data');
+        $table = collect($data['table'])->keyBy('category_name');
+
+        $this->assertSame(2, $data['summary']['total_categories']);
+        $this->assertSame(3, $data['summary']['total_usage_count']);
+        $this->assertSame('230.00', $data['summary']['total_amount']);
+        $this->assertSame('Food', $data['summary']['top_category']);
+
+        $this->assertSame(2, $table['Food']['usage_count']);
+        $this->assertSame('150.00', $table['Food']['total_amount']);
+        $this->assertSame('65.2', $table['Food']['share']);
+
+        $this->assertSame(1, $table['Transportation']['usage_count']);
+        $this->assertSame('80.00', $table['Transportation']['total_amount']);
+        $this->assertSame('34.8', $table['Transportation']['share']);
+
+        $usageDataset = collect($data['graph']['datasets'])->firstWhere('label', 'Usage Count');
+        $amountDataset = collect($data['graph']['datasets'])->firstWhere('label', 'Total Amount');
+
+        $this->assertSame(['Food', 'Transportation'], $data['graph']['labels']);
+        $this->assertSame([2, 1], $usageDataset['data']);
+        $this->assertSame([150.0, 80.0], $amountDataset['data']);
+    }
 }

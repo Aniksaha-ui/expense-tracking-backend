@@ -1,4 +1,4 @@
-import { ArrowRight, BarChart3, CalendarDays, PieChart, TrendingUp, Wallet } from 'lucide-react'
+import { ArrowRight, BarChart3, CalendarDays, GitCompareArrows, PieChart, Tags, TrendingUp, Wallet } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { APP_ROUTES } from '../../../constants/routes'
 import { REPORTS_PAGE_COPY } from '../constants/reports.constants'
@@ -21,6 +21,18 @@ const reportDirectoryItems = [
     icon: PieChart,
     path: APP_ROUTES.reportCategoryBreakdown,
     title: 'Category Breakdown',
+  },
+  {
+    description: 'See which expense categories are used most often and how much total amount each one has accumulated.',
+    icon: Tags,
+    path: APP_ROUTES.reportCategoryUsageAnalysis,
+    title: 'Category Usage Analysis',
+  },
+  {
+    description: 'Put the current month beside the previous one so you can quickly read income, outflow, and net change.',
+    icon: GitCompareArrows,
+    path: APP_ROUTES.reportCurrentVsPreviousMonthAnalysis,
+    title: 'Current vs Previous Month Analysis',
   },
   {
     description: 'Review each day alongside the categories that generated expense spend during that reporting window.',

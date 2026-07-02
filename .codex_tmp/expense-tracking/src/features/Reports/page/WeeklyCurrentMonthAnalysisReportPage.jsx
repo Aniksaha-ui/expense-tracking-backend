@@ -10,7 +10,7 @@ const weeklyCurrentMonthAnalysisColumns = [
     accessor: 'serial',
     id: 'serial',
     label: 'SL',
-    width: '76px',
+    width: '6%',
   },
   {
     id: 'week',
@@ -21,7 +21,7 @@ const weeklyCurrentMonthAnalysisColumns = [
         <p className="text-xs text-[#7d8ca5]">{item.calendarWeekLabel}</p>
       </div>
     ),
-    width: '18%',
+    width: '17%',
   },
   {
     id: 'range',
@@ -34,14 +34,14 @@ const weeklyCurrentMonthAnalysisColumns = [
         </p>
       </div>
     ),
-    width: '24%',
+    width: '25%',
   },
   {
     align: 'right',
     id: 'transaction_count',
     label: 'Transactions',
     render: (item) => <span className="text-sm text-[#dbe7fb]">{item.transactionCountLabel}</span>,
-    width: '14%',
+    width: '12%',
   },
   {
     align: 'right',
@@ -55,14 +55,14 @@ const weeklyCurrentMonthAnalysisColumns = [
     id: 'average_expense',
     label: 'Average Expense',
     render: (item) => <span className="text-sm text-[#dbe7fb]">{item.averageExpenseLabel}</span>,
-    width: '16%',
+    width: '14%',
   },
   {
     align: 'right',
     id: 'share',
     label: 'Share',
     render: (item) => <span className="text-sm text-[#dbe7fb]">{item.shareLabel}</span>,
-    width: '12%',
+    width: '10%',
   },
 ]
 
@@ -99,11 +99,11 @@ export default function WeeklyCurrentMonthAnalysisReportPage() {
 
         <section className="mb-5 rounded-xl border border-[#332d30] bg-[#171314] p-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <article className="rounded-xl border border-[#2a2426] bg-[#120f10] p-4">
+            <article className="flex min-h-[84px] flex-col justify-center rounded-xl border border-[#2a2426] bg-[#120f10] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7ea1ff]">Reporting Month</p>
               <p className="mt-2 text-lg font-semibold text-white">{apiState.report.monthLabel}</p>
             </article>
-            <article className="rounded-xl border border-[#2a2426] bg-[#120f10] p-4">
+            <article className="flex min-h-[84px] flex-col justify-center rounded-xl border border-[#2a2426] bg-[#120f10] p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7ea1ff]">Covered Range</p>
               <p className="mt-2 text-lg font-semibold text-white">{apiState.report.dateRangeLabel}</p>
             </article>

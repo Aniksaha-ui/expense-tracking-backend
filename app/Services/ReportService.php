@@ -109,6 +109,73 @@ class ReportService extends BaseFinanceService
         ]);
     }
 
+    public function categoryUsageAnalysis(int $userId): array
+    {
+        $rows = DB::table('transactions')
+            ->join('categories', 'categories.id', '=', 'transactions.category_id')
+            ->select([
+                'transactions.category_id',
+                'categories.name as category_name',
+                DB::raw('COUNT(transactions.id) as usage_count'),
+                DB::raw('SUM(transactions.amount) as total_amount'),
+            ])
+            ->where('transactions.user_id', $userId)
+            ->where('transactions.type', TransactionType::EXPENSE->value)
+            ->groupBy('transactions.category_id', 'categories.name')
+            ->orderByDesc('usage_count')
+            ->orderByDesc('total_amount')
+            ->get();
+
+        $totalAmount = $rows->reduce(
+            fn (string $carry, object $row): string => $this->addAggregate($carry, $row->total_amount ?? '0'),
+            '0.00'
+        );
+        $totalUsageCount = $rows->sum(fn (object $row): int => (int) ($row->usage_count ?? 0));
+
+        $table = $rows->map(function (object $row) use ($totalAmount): array {
+            $categoryTotalAmount = $this->formatAggregate($row->total_amount ?? '0');
+            $share = BigDecimal::of($totalAmount)->isZero()
+                ? '0.0'
+                : (string) BigDecimal::of($categoryTotalAmount)
+                    ->dividedBy($totalAmount, 4, RoundingMode::HALF_UP)
+                    ->multipliedBy('100')
+                    ->toScale(1, RoundingMode::HALF_UP);
+
+            return [
+                'category_id' => (int) $row->category_id,
+                'category_name' => $row->category_name,
+                'usage_count' => (int) ($row->usage_count ?? 0),
+                'total_amount' => $categoryTotalAmount,
+                'share' => $share,
+            ];
+        })->values()->all();
+
+        return [
+            'summary' => [
+                'top_category' => $table[0]['category_name'] ?? 'No data',
+                'total_amount' => $totalAmount,
+                'total_categories' => count($table),
+                'total_usage_count' => $totalUsageCount,
+            ],
+            'graph' => [
+                'labels' => array_map(static fn (array $row): string => $row['category_name'], $table),
+                'datasets' => [
+                    [
+                        'label' => 'Usage Count',
+                        'color' => '#4f83ff',
+                        'data' => array_map(static fn (array $row): int => $row['usage_count'], $table),
+                    ],
+                    [
+                        'label' => 'Total Amount',
+                        'color' => '#f5a623',
+                        'data' => array_map(static fn (array $row): float => (float) $row['total_amount'], $table),
+                    ],
+                ],
+            ],
+            'table' => $table,
+        ];
+    }
+
     public function cashFlow(int $userId, array $filters): \Illuminate\Support\Collection
     {
         $query = DB::table('transactions')
@@ -224,6 +291,83 @@ class ReportService extends BaseFinanceService
         ];
     }
 
+    public function currentVsPreviousMonthAnalysis(int $userId): array
+    {
+        $currentMonthDate = now();
+        $currentMonthStart = $currentMonthDate->copy()->startOfMonth();
+        $currentMonthEnd = $currentMonthDate->copy()->endOfMonth();
+        $previousMonthDate = $currentMonthDate->copy()->subMonthNoOverflow();
+        $previousMonthStart = $previousMonthDate->copy()->startOfMonth();
+        $previousMonthEnd = $previousMonthDate->copy()->endOfMonth();
+
+        $reportRows = DB::table('transactions')
+            ->selectRaw(
+                "CASE
+                    WHEN transaction_date >= ? THEN 'current_month'
+                    ELSE 'previous_month'
+                END AS period",
+                [$currentMonthStart->toDateString()]
+            )
+            ->selectRaw(
+                "SUM(CASE WHEN type = ? THEN amount ELSE 0 END) AS income",
+                [TransactionType::INCOME->value]
+            )
+            ->selectRaw(
+                "SUM(CASE WHEN type = ? THEN amount ELSE 0 END) AS expense",
+                [TransactionType::EXPENSE->value]
+            )
+            ->selectRaw(
+                "SUM(CASE WHEN type = ? THEN amount ELSE 0 END) AS recurring",
+                [TransactionType::RECURRING->value]
+            )
+            ->where('user_id', $userId)
+            ->whereDate('transaction_date', '>=', $previousMonthStart->toDateString())
+            ->groupBy('period')
+            ->get()
+            ->keyBy('period');
+
+        $table = [
+            $this->buildMonthlyComparisonRow(
+                'previous_month',
+                $previousMonthDate,
+                $previousMonthStart,
+                $previousMonthEnd,
+                $reportRows->get('previous_month')
+            ),
+            $this->buildMonthlyComparisonRow(
+                'current_month',
+                $currentMonthDate,
+                $currentMonthStart,
+                $currentMonthEnd,
+                $reportRows->get('current_month')
+            ),
+        ];
+
+        return [
+            'months' => [
+                'current_month' => [
+                    'label' => $currentMonthDate->format('F Y'),
+                    'from_date' => $currentMonthStart->toDateString(),
+                    'to_date' => $currentMonthEnd->toDateString(),
+                ],
+                'previous_month' => [
+                    'label' => $previousMonthDate->format('F Y'),
+                    'from_date' => $previousMonthStart->toDateString(),
+                    'to_date' => $previousMonthEnd->toDateString(),
+                ],
+            ],
+            'graph' => [
+                'labels' => array_column($table, 'period_label'),
+                'datasets' => [
+                    $this->buildMonthlyComparisonDataset('Income', '#0f766e', $table, 'income'),
+                    $this->buildMonthlyComparisonDataset('Expense', '#c2410c', $table, 'expense'),
+                    $this->buildMonthlyComparisonDataset('Recurring', '#7c3aed', $table, 'recurring'),
+                ],
+            ],
+            'table' => $table,
+        ];
+    }
+
     public function dueRecurringExpenses(int $userId, ?string $throughDate = null): \Illuminate\Support\Collection
     {
         $date = $throughDate ?? now()->toDateString();
@@ -266,6 +410,50 @@ class ReportService extends BaseFinanceService
         return (string) BigDecimal::of((string) ($left ?? '0'))
             ->plus((string) ($right ?? '0'))
             ->toScale(2);
+    }
+
+    private function subtractAggregate(mixed $left, mixed $right): string
+    {
+        return (string) BigDecimal::of((string) ($left ?? '0'))
+            ->minus((string) ($right ?? '0'))
+            ->toScale(2);
+    }
+
+    private function buildMonthlyComparisonRow(
+        string $periodKey,
+        Carbon $periodDate,
+        Carbon $periodStart,
+        Carbon $periodEnd,
+        ?object $row
+    ): array {
+        $income = $this->formatAggregate($row->income ?? '0');
+        $expense = $this->formatAggregate($row->expense ?? '0');
+        $recurring = $this->formatAggregate($row->recurring ?? '0');
+        $totalOutflow = $this->addAggregate($expense, $recurring);
+
+        return [
+            'period_key' => $periodKey,
+            'period_label' => $periodDate->format('F Y'),
+            'from_date' => $periodStart->toDateString(),
+            'to_date' => $periodEnd->toDateString(),
+            'income' => $income,
+            'expense' => $expense,
+            'recurring' => $recurring,
+            'total_outflow' => $totalOutflow,
+            'net' => $this->subtractAggregate($income, $totalOutflow),
+        ];
+    }
+
+    private function buildMonthlyComparisonDataset(string $label, string $color, array $table, string $field): array
+    {
+        return [
+            'label' => $label,
+            'color' => $color,
+            'data' => array_map(
+                static fn (array $row): float => (float) $row[$field],
+                $table
+            ),
+        ];
     }
 
     private function makeWeeklyExpenseRowKey(int $year, int $month, int $week): string

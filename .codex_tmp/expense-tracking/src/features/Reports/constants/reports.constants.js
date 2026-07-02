@@ -23,6 +23,16 @@ export const REPORTS_PAGE_COPY = {
     subtitle: 'See which categories drive the most expense volume across the selected date range.',
     title: 'Category Breakdown Report',
   },
+  categoryUsageAnalysis: {
+    searchPlaceholder: 'Search by category, usage count, amount, or share',
+    subtitle: 'Measure how often each expense category is used and how much money each one has consumed.',
+    title: 'Category Usage Analysis',
+  },
+  currentVsPreviousMonthAnalysis: {
+    searchPlaceholder: 'Search by month label, range, income, expense, recurring, or net',
+    subtitle: 'Compare the current month against the previous month across income, expense, recurring bills, and net movement.',
+    title: 'Current vs Previous Month Analysis',
+  },
   daywiseExpenses: {
     searchPlaceholder: 'Search by day, category, type, amount, or transaction count',
     subtitle: 'Track expense totals day by day and see which categories contributed to each reporting date.',

@@ -4,6 +4,8 @@ import {
   buildAccountBalanceMetrics,
   buildCategoryBreakdownMetrics,
   buildDaywiseExpenseMetrics,
+  emptyCategoryUsageAnalysisReport,
+  emptyCurrentVsPreviousMonthAnalysisReport,
   emptyAccountBalanceMetrics,
   emptyCategoryBreakdownMetrics,
   emptyDaywiseExpenseMetrics,
@@ -11,11 +13,15 @@ import {
   emptyWeeklyCurrentMonthAnalysisReport,
   fetchAccountBalancesReport,
   fetchCategoryBreakdownReport,
+  fetchCategoryUsageAnalysisReport,
+  fetchCurrentVsPreviousMonthAnalysisReport,
   fetchDaywiseExpensesReport,
   fetchSummaryReport,
   fetchWeeklyCurrentMonthAnalysisReport,
   filterAccountBalanceRows,
   filterCategoryBreakdownRows,
+  filterCategoryUsageAnalysisRows,
+  filterCurrentVsPreviousMonthAnalysisRows,
   filterDaywiseExpenseRows,
   filterWeeklyCurrentMonthAnalysisRows,
   paginateReportRows,
@@ -318,6 +324,108 @@ export function useWeeklyCurrentMonthAnalysisReport() {
     isLoading,
     items: paginatedState.rows,
     pagination: report.weeks.length ? paginatedState.pagination : reportEmptyPagination,
+    refresh: loadReport,
+    report,
+    search,
+    setPage,
+    setSearch,
+  }
+}
+
+export function useCurrentVsPreviousMonthAnalysisReport() {
+  const toast = useToast()
+  const [report, setReport] = useState(emptyCurrentVsPreviousMonthAnalysisReport)
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const loadReport = useCallback(async () => {
+    setIsLoading(true)
+    setError('')
+
+    try {
+      setReport(await fetchCurrentVsPreviousMonthAnalysisReport())
+    } catch (loadError) {
+      const message = loadError.message || 'Unable to load current vs previous month analysis.'
+      setReport(emptyCurrentVsPreviousMonthAnalysisReport)
+      setError(message)
+      toast.error(message)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [toast])
+
+  useEffect(() => loadWithDelay(loadReport), [loadReport])
+
+  const filteredItems = useMemo(
+    () => filterCurrentVsPreviousMonthAnalysisRows(report.rows, { search }),
+    [report.rows, search],
+  )
+  const paginatedState = useMemo(() => paginateReportRows(filteredItems, page), [filteredItems, page])
+
+  useEffect(() => {
+    if (page > paginatedState.pagination.lastPage) {
+      setPage(paginatedState.pagination.lastPage)
+    }
+  }, [page, paginatedState.pagination.lastPage])
+
+  return {
+    error,
+    isLoading,
+    items: paginatedState.rows,
+    pagination: report.rows.length ? paginatedState.pagination : reportEmptyPagination,
+    refresh: loadReport,
+    report,
+    search,
+    setPage,
+    setSearch,
+  }
+}
+
+export function useCategoryUsageAnalysisReport() {
+  const toast = useToast()
+  const [report, setReport] = useState(emptyCategoryUsageAnalysisReport)
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const loadReport = useCallback(async () => {
+    setIsLoading(true)
+    setError('')
+
+    try {
+      setReport(await fetchCategoryUsageAnalysisReport())
+    } catch (loadError) {
+      const message = loadError.message || 'Unable to load category usage analysis.'
+      setReport(emptyCategoryUsageAnalysisReport)
+      setError(message)
+      toast.error(message)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [toast])
+
+  useEffect(() => loadWithDelay(loadReport), [loadReport])
+
+  const filteredItems = useMemo(
+    () => filterCategoryUsageAnalysisRows(report.rows, { search }),
+    [report.rows, search],
+  )
+  const paginatedState = useMemo(() => paginateReportRows(filteredItems, page), [filteredItems, page])
+
+  useEffect(() => {
+    if (page > paginatedState.pagination.lastPage) {
+      setPage(paginatedState.pagination.lastPage)
+    }
+  }, [page, paginatedState.pagination.lastPage])
+
+  return {
+    error,
+    isLoading,
+    items: paginatedState.rows,
+    pagination: report.rows.length ? paginatedState.pagination : reportEmptyPagination,
     refresh: loadReport,
     report,
     search,

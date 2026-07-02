@@ -53,6 +53,8 @@ export const API_URLS = {
     accountBalanceHistory: (type) => `/admin/accountHistory/${encodeURIComponent(type)}`,
     accountHistorySearch: "/admin/account-history",
     categoryBreakdown: "/reports/category-breakdown",
+    categoryUsageAnalysis: "/reports/category-usage-analysis",
+    currentVsPreviousMonthAnalysis: "/reports/current-vs-previous-month-analysis",
     daywiseExpenses: "/reports/daywise-expenses",
     weeklyCurrentMonthAnalysis: "/reports/weekly-current-month-analysis",
     customerValue: "/admin/customerValue",

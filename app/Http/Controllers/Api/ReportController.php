@@ -55,6 +55,15 @@ class ReportController extends Controller
         }
     }
 
+    public function categoryUsageAnalysis(): JsonResponse
+    {
+        try {
+            return $this->successResponse($this->reportService->categoryUsageAnalysis(auth()->id()));
+        } catch (\Exception $exception) {
+            return $this->errorResponse($exception->getMessage(), status: 500);
+        }
+    }
+
     public function cashFlow(ReportFilterRequest $request): JsonResponse
     {
         try {
@@ -68,6 +77,15 @@ class ReportController extends Controller
     {
         try {
             return $this->successResponse($this->reportService->currentMonthWeeklyExpenseAnalysis(auth()->id()));
+        } catch (\Exception $exception) {
+            return $this->errorResponse($exception->getMessage(), status: 500);
+        }
+    }
+
+    public function currentVsPreviousMonthAnalysis(): JsonResponse
+    {
+        try {
+            return $this->successResponse($this->reportService->currentVsPreviousMonthAnalysis(auth()->id()));
         } catch (\Exception $exception) {
             return $this->errorResponse($exception->getMessage(), status: 500);
         }

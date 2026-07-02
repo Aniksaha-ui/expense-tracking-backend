@@ -60,9 +60,11 @@ Route::middleware('auth:api')->group(function () {
         Route::get('summary', [ReportController::class, 'summary']);
         Route::get('account-balances', [ReportController::class, 'accountBalances']);
         Route::get('category-breakdown', [ReportController::class, 'categoryBreakdown']);
+        Route::get('category-usage-analysis', [ReportController::class, 'categoryUsageAnalysis']);
         Route::get('daywise-expenses', [ReportController::class, 'daywiseExpenses']);
         Route::get('cash-flow', [ReportController::class, 'cashFlow']);
         Route::get('weekly-current-month-analysis', [ReportController::class, 'currentMonthWeeklyExpenseAnalysis']);
+        Route::get('current-vs-previous-month-analysis', [ReportController::class, 'currentVsPreviousMonthAnalysis']);
         Route::get('due-recurring', [ReportController::class, 'dueRecurring']);
     });
 });

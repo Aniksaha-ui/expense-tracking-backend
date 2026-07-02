@@ -276,6 +276,35 @@ export const emptyWeeklyCurrentMonthAnalysisReport = {
   weeksInMonthLabel: '0',
 }
 
+export const emptyCurrentVsPreviousMonthAnalysisReport = {
+  currentMonthLabel: 'Current Month',
+  currentNetLabel: 'BDT 0.00',
+  graph: {
+    datasets: [],
+    labels: [],
+    maxValue: 0,
+  },
+  incomeChangeLabel: 'BDT 0.00',
+  monthRangeLabel: 'No reporting window',
+  previousMonthLabel: 'Previous Month',
+  previousNetLabel: 'BDT 0.00',
+  rows: [],
+  totalOutflowChangeLabel: 'BDT 0.00',
+}
+
+export const emptyCategoryUsageAnalysisReport = {
+  graph: {
+    datasets: [],
+    labels: [],
+    maxValue: 0,
+  },
+  rows: [],
+  topCategoryLabel: 'No data',
+  totalAmountLabel: 'BDT 0.00',
+  totalCategoriesLabel: '0',
+  totalUsageCountLabel: '0',
+}
+
 export const reportEmptyPagination = {
   currentPage: 1,
   from: 0,
@@ -381,6 +410,163 @@ export const fetchWeeklyCurrentMonthAnalysisReport = async () => {
   }
 }
 
+export const fetchCurrentVsPreviousMonthAnalysisReport = async () => {
+  const data = unwrapResponseData(
+    await apiRequest(API_URLS.reports.currentVsPreviousMonthAnalysis),
+    'Unable to load current vs previous month analysis.',
+  )
+
+  const tableRows = Array.isArray(data?.table) ? data.table : []
+  const graph = data?.graph ?? {}
+  const months = data?.months ?? {}
+  const normalizedRows = tableRows.map((item) => {
+    const income = toNumber(item.income)
+    const expense = toNumber(item.expense)
+    const recurring = toNumber(item.recurring)
+    const totalOutflow = toNumber(item.total_outflow)
+    const net = toNumber(item.net)
+
+    return {
+      expenseLabel: formatCurrencyLabel(expense),
+      expenseValue: expense,
+      fromDateLabel: formatDateLabel(item.from_date),
+      incomeLabel: formatCurrencyLabel(income),
+      incomeValue: income,
+      netLabel: formatCurrencyLabel(net),
+      netValue: net,
+      periodKey: item.period_key ?? '',
+      periodLabel: item.period_label ?? 'Unknown Period',
+      rangeLabel: `${formatDateLabel(item.from_date)} - ${formatDateLabel(item.to_date)}`,
+      recurringLabel: formatCurrencyLabel(recurring),
+      recurringValue: recurring,
+      searchText: [
+        item.period_key,
+        item.period_label,
+        item.from_date,
+        item.to_date,
+        item.income,
+        item.expense,
+        item.recurring,
+        item.total_outflow,
+        item.net,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase(),
+      toDateLabel: formatDateLabel(item.to_date),
+      totalOutflowLabel: formatCurrencyLabel(totalOutflow),
+      totalOutflowValue: totalOutflow,
+    }
+  })
+
+  const previousMonthRow =
+    normalizedRows.find((item) => item.periodKey === 'previous_month') ?? normalizedRows[0] ?? null
+  const currentMonthRow =
+    normalizedRows.find((item) => item.periodKey === 'current_month') ?? normalizedRows[1] ?? null
+
+  const graphDatasets = Array.isArray(graph.datasets)
+    ? graph.datasets.map((dataset) => ({
+        color: dataset.color ?? '#4f83ff',
+        data: Array.isArray(dataset.data) ? dataset.data.map((value) => toNumber(value)) : [],
+        label: dataset.label ?? 'Metric',
+      }))
+    : []
+
+  const graphMaxValue = graphDatasets.reduce(
+    (maxValue, dataset) => Math.max(maxValue, ...dataset.data, 0),
+    0,
+  )
+
+  return {
+    currentMonthLabel:
+      currentMonthRow?.periodLabel ?? months.current_month?.label ?? 'Current Month',
+    currentNetLabel: currentMonthRow?.netLabel ?? 'BDT 0.00',
+    graph: {
+      datasets: graphDatasets,
+      labels: Array.isArray(graph.labels) ? graph.labels : normalizedRows.map((item) => item.periodLabel),
+      maxValue: graphMaxValue,
+    },
+    incomeChangeLabel: formatCurrencyLabel(
+      (currentMonthRow?.incomeValue ?? 0) - (previousMonthRow?.incomeValue ?? 0),
+    ),
+    monthRangeLabel:
+      previousMonthRow && currentMonthRow
+        ? `${previousMonthRow.rangeLabel} to ${currentMonthRow.rangeLabel}`
+        : 'No reporting window',
+    previousMonthLabel:
+      previousMonthRow?.periodLabel ?? months.previous_month?.label ?? 'Previous Month',
+    previousNetLabel: previousMonthRow?.netLabel ?? 'BDT 0.00',
+    rows: normalizedRows,
+    totalOutflowChangeLabel: formatCurrencyLabel(
+      (currentMonthRow?.totalOutflowValue ?? 0) - (previousMonthRow?.totalOutflowValue ?? 0),
+    ),
+  }
+}
+
+export const fetchCategoryUsageAnalysisReport = async () => {
+  const data = unwrapResponseData(
+    await apiRequest(API_URLS.reports.categoryUsageAnalysis),
+    'Unable to load category usage analysis.',
+  )
+
+  const tableRows = Array.isArray(data?.table) ? data.table : []
+  const summary = data?.summary ?? {}
+  const graph = data?.graph ?? {}
+  const normalizedRows = tableRows.map((item, index) => {
+    const usageCount = toNumber(item.usage_count)
+    const totalAmount = toNumber(item.total_amount)
+    const share = toNumber(item.share)
+
+    return {
+      categoryIdLabel: item.category_id ?? 'N/A',
+      categoryName: item.category_name ?? 'Unknown category',
+      rankLabel: `Rank #${index + 1}`,
+      searchText: [
+        item.category_id,
+        item.category_name,
+        item.usage_count,
+        item.total_amount,
+        item.share,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase(),
+      shareLabel: `${percentFormatter.format(share)}%`,
+      totalAmountLabel: formatCurrencyLabel(totalAmount),
+      totalAmountValue: totalAmount,
+      usageCount,
+      usageCountLabel: countFormatter.format(usageCount),
+      usageHintLabel: usageCount >= 5 ? 'Frequently used' : usageCount >= 2 ? 'Used multiple times' : 'Used once',
+    }
+  })
+
+  const graphDatasets = Array.isArray(graph.datasets)
+    ? graph.datasets.map((dataset) => ({
+        color: dataset.color ?? '#4f83ff',
+        data: Array.isArray(dataset.data) ? dataset.data.map((value) => toNumber(value)) : [],
+        label: dataset.label ?? 'Metric',
+      }))
+    : []
+
+  const graphMaxValue = graphDatasets.reduce(
+    (maxValue, dataset) => Math.max(maxValue, ...dataset.data, 0),
+    0,
+  )
+
+  return {
+    graph: {
+      datasets: graphDatasets,
+      labels: Array.isArray(graph.labels) ? graph.labels : normalizedRows.map((item) => item.categoryName),
+      maxValue: graphMaxValue,
+    },
+    rows: normalizedRows,
+    topCategoryLabel: summary.top_category ?? 'No data',
+    totalAmountLabel: formatCurrencyLabel(summary.total_amount),
+    totalCategoriesLabel: countFormatter.format(toNumber(summary.total_categories)),
+    totalUsageCountLabel: countFormatter.format(toNumber(summary.total_usage_count)),
+  }
+}
+
 export const filterAccountBalanceRows = (items = [], { search = '', typeFilter = 'all' } = {}) => {
   const normalizedSearch = String(search ?? '').trim().toLowerCase()
 
@@ -410,6 +596,18 @@ export const filterDaywiseExpenseRows = (items = [], { search = '' } = {}) => {
 }
 
 export const filterWeeklyCurrentMonthAnalysisRows = (items = [], { search = '' } = {}) => {
+  const normalizedSearch = String(search ?? '').trim().toLowerCase()
+
+  return items.filter((item) => !normalizedSearch || item.searchText.includes(normalizedSearch))
+}
+
+export const filterCurrentVsPreviousMonthAnalysisRows = (items = [], { search = '' } = {}) => {
+  const normalizedSearch = String(search ?? '').trim().toLowerCase()
+
+  return items.filter((item) => !normalizedSearch || item.searchText.includes(normalizedSearch))
+}
+
+export const filterCategoryUsageAnalysisRows = (items = [], { search = '' } = {}) => {
   const normalizedSearch = String(search ?? '').trim().toLowerCase()
 
   return items.filter((item) => !normalizedSearch || item.searchText.includes(normalizedSearch))

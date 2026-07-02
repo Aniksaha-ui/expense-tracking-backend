@@ -12,6 +12,12 @@ const AccountsPage = lazy(() => import('./features/Accounts/page/AccountsPage'))
 const AccountBalancesReportPage = lazy(() => import('./features/Reports/page/AccountBalancesReportPage'))
 const CategoriesPage = lazy(() => import('./features/Categories/page/CategoriesPage'))
 const CategoryBreakdownReportPage = lazy(() => import('./features/Reports/page/CategoryBreakdownReportPage'))
+const CategoryUsageAnalysisReportPage = lazy(
+  () => import('./features/Reports/page/CategoryUsageAnalysisReportPage'),
+)
+const CurrentVsPreviousMonthAnalysisReportPage = lazy(
+  () => import('./features/Reports/page/CurrentVsPreviousMonthAnalysisReportPage'),
+)
 const DaywiseExpenseReportPage = lazy(() => import('./features/Reports/page/DaywiseExpenseReportPage'))
 const WeeklyCurrentMonthAnalysisReportPage = lazy(
   () => import('./features/Reports/page/WeeklyCurrentMonthAnalysisReportPage'),
@@ -144,6 +150,22 @@ function AppRoutes() {
           element={
             <Suspense fallback={<FullPageLoader message="Loading category breakdown report..." />}>
               <CategoryBreakdownReportPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path={APP_ROUTES.reportCategoryUsageAnalysis}
+          element={
+            <Suspense fallback={<FullPageLoader message="Loading category usage analysis..." />}>
+              <CategoryUsageAnalysisReportPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path={APP_ROUTES.reportCurrentVsPreviousMonthAnalysis}
+          element={
+            <Suspense fallback={<FullPageLoader message="Loading current vs previous month analysis..." />}>
+              <CurrentVsPreviousMonthAnalysisReportPage />
             </Suspense>
           }
         />
