@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Tests\TestCase;
@@ -428,5 +429,99 @@ class ExpenseFlowTest extends TestCase
         $this->assertSame('400.00', $destinationTransferTransaction['balance_after']);
         $this->assertSame('400.00', $expenseTransaction['balance_before']);
         $this->assertSame('350.00', $expenseTransaction['balance_after']);
+    }
+
+    public function test_current_month_weekly_expense_analysis_groups_expenses_by_week_for_the_signed_in_user(): void
+    {
+        Carbon::setTestNow('2026-07-15 10:00:00');
+
+        $registerResponse = $this->postJson('/api/auth/register', [
+            'name' => 'Weekly Report Example',
+            'email' => 'weekly-report@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $token = $registerResponse->json('data.token');
+
+        $cashAccountResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/accounts', [
+                'name' => 'Weekly Cash',
+                'type' => 'CASH',
+                'opening_balance' => '3000.00',
+                'opening_balance_date' => '2026-07-01',
+            ])
+            ->assertCreated();
+
+        $cashAccountId = $cashAccountResponse->json('data.id');
+
+        $categoriesResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/categories')
+            ->assertOk();
+
+        $foodCategoryId = collect($categoriesResponse->json('data'))
+            ->firstWhere('name', 'Food')['id'];
+
+        $datesAndAmounts = [
+            ['2026-07-02', '100.00'],
+            ['2026-07-05', '50.00'],
+            ['2026-07-08', '75.00'],
+            ['2026-07-14', '125.00'],
+        ];
+
+        foreach ($datesAndAmounts as [$transactionDate, $amount]) {
+            $this->withHeader('Authorization', 'Bearer '.$token)
+                ->postJson('/api/transactions/expense', [
+                    'account_id' => $cashAccountId,
+                    'category_id' => $foodCategoryId,
+                    'amount' => $amount,
+                    'note' => 'Weekly expense',
+                    'transaction_date' => $transactionDate,
+                ])
+                ->assertCreated();
+        }
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/reports/weekly-current-month-analysis')
+            ->assertOk();
+
+        $data = $response->json('data');
+        $weeks = collect($data['weeks']);
+
+        $this->assertSame('July', $data['month']['month_name']);
+        $this->assertSame('2026-07-01', $data['month']['from_date']);
+        $this->assertSame('2026-07-31', $data['month']['to_date']);
+        $this->assertSame(5, $data['summary']['weeks_in_month']);
+        $this->assertSame(3, $data['summary']['active_weeks']);
+        $this->assertSame(4, $data['summary']['total_transactions']);
+        $this->assertSame('350.00', $data['summary']['total_expense']);
+
+        $firstWeek = $weeks->firstWhere('week_sequence', 1);
+        $secondWeek = $weeks->firstWhere('week_sequence', 2);
+        $thirdWeek = $weeks->firstWhere('week_sequence', 3);
+        $fifthWeek = $weeks->firstWhere('week_sequence', 5);
+
+        $this->assertSame('2026-07-01', $firstWeek['week_start']);
+        $this->assertSame('2026-07-05', $firstWeek['week_end']);
+        $this->assertSame(2, $firstWeek['transaction_count']);
+        $this->assertSame('150.00', $firstWeek['total_expense']);
+        $this->assertSame('75.00', $firstWeek['average_expense']);
+
+        $this->assertSame('2026-07-06', $secondWeek['week_start']);
+        $this->assertSame('2026-07-12', $secondWeek['week_end']);
+        $this->assertSame(1, $secondWeek['transaction_count']);
+        $this->assertSame('75.00', $secondWeek['total_expense']);
+
+        $this->assertSame('2026-07-13', $thirdWeek['week_start']);
+        $this->assertSame('2026-07-19', $thirdWeek['week_end']);
+        $this->assertSame(1, $thirdWeek['transaction_count']);
+        $this->assertSame('125.00', $thirdWeek['total_expense']);
+
+        $this->assertSame('2026-07-27', $fifthWeek['week_start']);
+        $this->assertSame('2026-07-31', $fifthWeek['week_end']);
+        $this->assertSame(0, $fifthWeek['transaction_count']);
+        $this->assertSame('0.00', $fifthWeek['total_expense']);
+
+        Carbon::setTestNow();
     }
 }

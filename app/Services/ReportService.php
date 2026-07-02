@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Enums\TransactionType;
 use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ReportService extends BaseFinanceService
@@ -133,6 +135,94 @@ class ReportService extends BaseFinanceService
         });
     }
 
+    public function currentMonthWeeklyExpenseAnalysis(int $userId): array
+    {
+        $monthStart = now()->startOfMonth();
+        $monthEnd = now()->endOfMonth();
+
+        $weeklyExpenseRows = DB::table('transactions')
+            ->select([
+                DB::raw('YEAR(transaction_date) as year'),
+                DB::raw('MONTH(transaction_date) as month'),
+                DB::raw('WEEK(transaction_date, 1) as week'),
+                DB::raw('SUM(amount) as total_expense'),
+                DB::raw('COUNT(*) as transaction_count'),
+            ])
+            ->where('user_id', $userId)
+            ->where('type', TransactionType::EXPENSE->value)
+            ->whereDate('transaction_date', '>=', $monthStart->toDateString())
+            ->whereDate('transaction_date', '<=', $monthEnd->toDateString())
+            ->groupBy(
+                DB::raw('YEAR(transaction_date)'),
+                DB::raw('MONTH(transaction_date)'),
+                DB::raw('WEEK(transaction_date, 1)')
+            )
+            ->orderBy(DB::raw('YEAR(transaction_date)'))
+            ->orderBy(DB::raw('MONTH(transaction_date)'))
+            ->orderBy(DB::raw('WEEK(transaction_date, 1)'))
+            ->get()
+            ->keyBy(fn (object $row): string => $this->makeWeeklyExpenseRowKey((int) $row->year, (int) $row->month, (int) $row->week));
+
+        $weeks = [];
+        $cursor = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
+        $sequence = 1;
+
+        while ($cursor->lessThanOrEqualTo($monthEnd)) {
+            $calendarWeekStart = $cursor->copy();
+            $calendarWeekEnd = $cursor->copy()->endOfWeek(Carbon::SUNDAY);
+            $weekStart = $calendarWeekStart->greaterThan($monthStart) ? $calendarWeekStart : $monthStart->copy();
+            $weekEnd = $calendarWeekEnd->lessThan($monthEnd) ? $calendarWeekEnd : $monthEnd->copy();
+            $year = (int) $weekStart->format('Y');
+            $month = (int) $weekStart->format('n');
+            $week = (int) $weekStart->format('W');
+            $row = $weeklyExpenseRows->get($this->makeWeeklyExpenseRowKey($year, $month, $week));
+            $totalExpense = $this->formatAggregate($row->total_expense ?? '0');
+            $transactionCount = (int) ($row->transaction_count ?? 0);
+
+            $weeks[] = [
+                'week_sequence' => $sequence,
+                'year' => $year,
+                'month' => $month,
+                'week' => $week,
+                'week_label' => 'Week '.$sequence,
+                'calendar_week_label' => 'Week '.$week,
+                'week_start' => $weekStart->toDateString(),
+                'week_end' => $weekEnd->toDateString(),
+                'range_label' => $weekStart->format('d M').' - '.$weekEnd->format('d M'),
+                'total_expense' => $totalExpense,
+                'transaction_count' => $transactionCount,
+                'average_expense' => $transactionCount > 0
+                    ? (string) BigDecimal::of($totalExpense)->dividedBy((string) $transactionCount, 2, RoundingMode::HALF_UP)
+                    : '0.00',
+            ];
+
+            $cursor->addWeek();
+            $sequence++;
+        }
+
+        $totalExpense = collect($weeks)->reduce(
+            fn (string $carry, array $week): string => $this->addAggregate($carry, $week['total_expense']),
+            '0.00'
+        );
+
+        return [
+            'month' => [
+                'month' => (int) $monthStart->format('n'),
+                'month_name' => $monthStart->format('F'),
+                'year' => (int) $monthStart->format('Y'),
+                'from_date' => $monthStart->toDateString(),
+                'to_date' => $monthEnd->toDateString(),
+            ],
+            'summary' => [
+                'active_weeks' => collect($weeks)->where('transaction_count', '>', 0)->count(),
+                'total_expense' => $totalExpense,
+                'total_transactions' => collect($weeks)->sum('transaction_count'),
+                'weeks_in_month' => count($weeks),
+            ],
+            'weeks' => $weeks,
+        ];
+    }
+
     public function dueRecurringExpenses(int $userId, ?string $throughDate = null): \Illuminate\Support\Collection
     {
         $date = $throughDate ?? now()->toDateString();
@@ -168,5 +258,17 @@ class ReportService extends BaseFinanceService
     private function formatAggregate(mixed $value): string
     {
         return (string) BigDecimal::of((string) ($value ?? '0'))->toScale(2);
+    }
+
+    private function addAggregate(mixed $left, mixed $right): string
+    {
+        return (string) BigDecimal::of((string) ($left ?? '0'))
+            ->plus((string) ($right ?? '0'))
+            ->toScale(2);
+    }
+
+    private function makeWeeklyExpenseRowKey(int $year, int $month, int $week): string
+    {
+        return $year.'-'.$month.'-'.$week;
     }
 }

@@ -62,6 +62,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('category-breakdown', [ReportController::class, 'categoryBreakdown']);
         Route::get('daywise-expenses', [ReportController::class, 'daywiseExpenses']);
         Route::get('cash-flow', [ReportController::class, 'cashFlow']);
+        Route::get('weekly-current-month-analysis', [ReportController::class, 'currentMonthWeeklyExpenseAnalysis']);
         Route::get('due-recurring', [ReportController::class, 'dueRecurring']);
     });
 });

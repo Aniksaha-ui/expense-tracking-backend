@@ -64,6 +64,15 @@ class ReportController extends Controller
         }
     }
 
+    public function currentMonthWeeklyExpenseAnalysis(): JsonResponse
+    {
+        try {
+            return $this->successResponse($this->reportService->currentMonthWeeklyExpenseAnalysis(auth()->id()));
+        } catch (\Exception $exception) {
+            return $this->errorResponse($exception->getMessage(), status: 500);
+        }
+    }
+
     public function dueRecurring(ReportFilterRequest $request): JsonResponse
     {
         try {
