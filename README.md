@@ -7,6 +7,45 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Scheduled category-wise expense email
+
+The application sends PDF summaries of each user's current-month expenses to
+`sahaanik1045@gmail.com`. Reports are grouped by category, run every day at
+`08:00` in `Asia/Dhaka`, and skip users who had no expenses.
+
+Configure the schedule in `.env`:
+
+```env
+EXPENSE_REPORT_ENABLED=true
+EXPENSE_REPORT_SEND_TIME=08:00
+EXPENSE_REPORT_TIMEZONE=Asia/Dhaka
+EXPENSE_REPORT_SKIP_EMPTY=true
+```
+
+Run a report manually:
+
+```shell
+php artisan expense-reports:email --from=2026-06-01 --to=2026-06-30
+```
+
+Laravel's scheduler must be triggered once per minute in production.
+
+Linux cron:
+
+```cron
+* * * * * cd /path/to/expense-tracking-backend && php artisan schedule:run >> /dev/null 2>&1
+```
+
+For local Windows/XAMPP development, run:
+
+```powershell
+php artisan schedule:work
+```
+
+For a persistent Windows deployment, create a Task Scheduler task that runs
+`D:\xampp\php\php.exe artisan schedule:run` every minute with this project
+directory as its "Start in" directory.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
