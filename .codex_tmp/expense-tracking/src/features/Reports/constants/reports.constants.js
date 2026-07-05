@@ -18,6 +18,11 @@ export const REPORTS_PAGE_COPY = {
     subtitle: 'Review current balances across cash, bank, card, and mobile banking accounts in one place.',
     title: 'Account Balances Report',
   },
+  burnRateAnalysis: {
+    searchPlaceholder: 'Search by month, expense, active days, or burn rate',
+    subtitle: 'Track monthly expense burn and compare the average amount spent per active expense day.',
+    title: 'Burn Rate Analysis',
+  },
   categoryBreakdown: {
     searchPlaceholder: 'Search by category name, type, or amount',
     subtitle: 'See which categories drive the most expense volume across the selected date range.',

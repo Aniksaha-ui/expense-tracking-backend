@@ -4,6 +4,7 @@ import {
   buildAccountBalanceMetrics,
   buildCategoryBreakdownMetrics,
   buildDaywiseExpenseMetrics,
+  emptyBurnRateAnalysisReport,
   emptyCategoryUsageAnalysisReport,
   emptyCurrentVsPreviousMonthAnalysisReport,
   emptyAccountBalanceMetrics,
@@ -12,6 +13,7 @@ import {
   emptySummaryReport,
   emptyWeeklyCurrentMonthAnalysisReport,
   fetchAccountBalancesReport,
+  fetchBurnRateAnalysisReport,
   fetchCategoryBreakdownReport,
   fetchCategoryUsageAnalysisReport,
   fetchCurrentVsPreviousMonthAnalysisReport,
@@ -19,6 +21,7 @@ import {
   fetchSummaryReport,
   fetchWeeklyCurrentMonthAnalysisReport,
   filterAccountBalanceRows,
+  filterBurnRateAnalysisRows,
   filterCategoryBreakdownRows,
   filterCategoryUsageAnalysisRows,
   filterCurrentVsPreviousMonthAnalysisRows,
@@ -149,6 +152,57 @@ export function useAccountBalancesReport() {
     setSearch,
     setTypeFilter,
     typeFilter,
+  }
+}
+
+export function useBurnRateAnalysisReport() {
+  const toast = useToast()
+  const [report, setReport] = useState(emptyBurnRateAnalysisReport)
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const loadReport = useCallback(async () => {
+    setIsLoading(true)
+    setError('')
+
+    try {
+      setReport(await fetchBurnRateAnalysisReport())
+    } catch (loadError) {
+      const message = loadError.message || 'Unable to load burn rate analysis.'
+      setReport(emptyBurnRateAnalysisReport)
+      setError(message)
+      toast.error(message)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [toast])
+
+  useEffect(() => loadWithDelay(loadReport), [loadReport])
+
+  const filteredItems = useMemo(
+    () => filterBurnRateAnalysisRows(report.rows, { search }),
+    [report.rows, search],
+  )
+  const paginatedState = useMemo(() => paginateReportRows(filteredItems, page), [filteredItems, page])
+
+  useEffect(() => {
+    if (page > paginatedState.pagination.lastPage) {
+      setPage(paginatedState.pagination.lastPage)
+    }
+  }, [page, paginatedState.pagination.lastPage])
+
+  return {
+    error,
+    isLoading,
+    items: paginatedState.rows,
+    pagination: report.rows.length ? paginatedState.pagination : reportEmptyPagination,
+    refresh: loadReport,
+    report,
+    search,
+    setPage,
+    setSearch,
   }
 }
 

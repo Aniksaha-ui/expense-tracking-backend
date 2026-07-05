@@ -23,6 +23,7 @@ export const APP_ROUTES = {
   reports: "/reports",
   reportSummary: "/reports/summary",
   reportAccountBalances: "/reports/account-balances",
+  reportBurnRateAnalysis: "/reports/burn-rate-analysis",
   reportCategoryBreakdown: "/reports/category-breakdown",
   reportCategoryUsageAnalysis: "/reports/category-usage-analysis",
   reportCurrentVsPreviousMonthAnalysis: "/reports/current-vs-previous-month-analysis",

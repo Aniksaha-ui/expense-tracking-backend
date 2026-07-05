@@ -252,6 +252,19 @@ export const emptyAccountBalanceMetrics = {
   totalCountLabel: '0',
 }
 
+export const emptyBurnRateAnalysisReport = {
+  averageBurnRateLabel: 'BDT 0.00',
+  graph: {
+    datasets: [],
+    labels: [],
+    maxValue: 0,
+  },
+  monthsTrackedLabel: '0',
+  peakMonthLabel: 'No data',
+  rows: [],
+  totalExpenseLabel: 'BDT 0.00',
+}
+
 export const emptyCategoryBreakdownMetrics = {
   topCategoryLabel: 'No data',
   topShareLabel: '0.0%',
@@ -329,6 +342,64 @@ export const fetchAccountBalancesReport = async () => {
   const items = Array.isArray(data) ? data : []
 
   return sortAccountBalances(items.map(normalizeAccountBalance))
+}
+
+export const fetchBurnRateAnalysisReport = async () => {
+  const data = unwrapResponseData(
+    await apiRequest(API_URLS.reports.burnRateAnalysis),
+    'Unable to load burn rate analysis.',
+  )
+
+  const tableRows = Array.isArray(data?.table) ? data.table : []
+  const summary = data?.summary ?? {}
+  const graph = data?.graph ?? {}
+  const normalizedRows = tableRows.map((item, index) => {
+    const totalExpense = toNumber(item.total_expense)
+    const avgDailyBurnRate = toNumber(item.avg_daily_burn_rate)
+    const activeDays = toNumber(item.active_days)
+
+    return {
+      activeDays,
+      activeDaysLabel: countFormatter.format(activeDays),
+      avgDailyBurnRateLabel: formatCurrencyLabel(avgDailyBurnRate),
+      avgDailyBurnRateValue: avgDailyBurnRate,
+      month: item.month ?? '',
+      monthLabel: item.month_label ?? item.month ?? 'Unknown Month',
+      rankLabel: `Month #${index + 1}`,
+      searchText: [item.month, item.month_label, item.total_expense, item.avg_daily_burn_rate, item.active_days]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase(),
+      totalExpenseLabel: formatCurrencyLabel(totalExpense),
+      totalExpenseValue: totalExpense,
+    }
+  })
+
+  const graphDatasets = Array.isArray(graph.datasets)
+    ? graph.datasets.map((dataset) => ({
+        color: dataset.color ?? '#4f83ff',
+        data: Array.isArray(dataset.data) ? dataset.data.map((value) => toNumber(value)) : [],
+        label: dataset.label ?? 'Metric',
+      }))
+    : []
+
+  const graphMaxValue = graphDatasets.reduce(
+    (maxValue, dataset) => Math.max(maxValue, ...dataset.data, 0),
+    0,
+  )
+
+  return {
+    averageBurnRateLabel: formatCurrencyLabel(summary.average_burn_rate),
+    graph: {
+      datasets: graphDatasets,
+      labels: Array.isArray(graph.labels) ? graph.labels : normalizedRows.map((item) => item.monthLabel),
+      maxValue: graphMaxValue,
+    },
+    monthsTrackedLabel: countFormatter.format(toNumber(summary.months_tracked)),
+    peakMonthLabel: summary.peak_month ?? 'No data',
+    rows: normalizedRows,
+    totalExpenseLabel: formatCurrencyLabel(summary.total_expense),
+  }
 }
 
 export const fetchCategoryBreakdownReport = async (filters = {}) => {
@@ -576,6 +647,12 @@ export const filterAccountBalanceRows = (items = [], { search = '', typeFilter =
 
     return matchesType && matchesSearch
   })
+}
+
+export const filterBurnRateAnalysisRows = (items = [], { search = '' } = {}) => {
+  const normalizedSearch = String(search ?? '').trim().toLowerCase()
+
+  return items.filter((item) => !normalizedSearch || item.searchText.includes(normalizedSearch))
 }
 
 export const filterCategoryBreakdownRows = (items = [], { search = '', typeFilter = 'all' } = {}) => {

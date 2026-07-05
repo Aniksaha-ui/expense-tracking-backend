@@ -1,4 +1,4 @@
-import { ArrowRight, BarChart3, CalendarDays, GitCompareArrows, PieChart, Tags, TrendingUp, Wallet } from 'lucide-react'
+import { ArrowRight, BarChart3, CalendarDays, Flame, GitCompareArrows, PieChart, Tags, TrendingUp, Wallet } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { APP_ROUTES } from '../../../constants/routes'
 import { REPORTS_PAGE_COPY } from '../constants/reports.constants'
@@ -15,6 +15,12 @@ const reportDirectoryItems = [
     icon: Wallet,
     path: APP_ROUTES.reportAccountBalances,
     title: 'Account Balances',
+  },
+  {
+    description: 'Track each month’s total expense and the average daily burn based on active expense days.',
+    icon: Flame,
+    path: APP_ROUTES.reportBurnRateAnalysis,
+    title: 'Burn Rate Analysis',
   },
   {
     description: 'Compare which categories are driving the most expense volume and how much each one contributes.',

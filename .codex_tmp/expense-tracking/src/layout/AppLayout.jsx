@@ -32,6 +32,7 @@ const pageTitles = {
   '/recurring-expenses': 'Recurring Expense Management',
   '/reports': 'Reports Center',
   '/reports/account-balances': 'Account Balances Report',
+  '/reports/burn-rate-analysis': 'Burn Rate Analysis',
   '/reports/category-breakdown': 'Category Breakdown Report',
   '/reports/category-usage-analysis': 'Category Usage Analysis',
   '/reports/current-vs-previous-month-analysis': 'Current vs Previous Month Analysis',

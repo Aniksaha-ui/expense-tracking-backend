@@ -64,6 +64,15 @@ class ReportController extends Controller
         }
     }
 
+    public function burnRateAnalysis(): JsonResponse
+    {
+        try {
+            return $this->successResponse($this->reportService->burnRateAnalysis(auth()->id()));
+        } catch (\Exception $exception) {
+            return $this->errorResponse($exception->getMessage(), status: 500);
+        }
+    }
+
     public function cashFlow(ReportFilterRequest $request): JsonResponse
     {
         try {

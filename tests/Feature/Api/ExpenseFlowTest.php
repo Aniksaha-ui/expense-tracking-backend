@@ -790,4 +790,121 @@ class ExpenseFlowTest extends TestCase
         $this->assertSame([2, 1], $usageDataset['data']);
         $this->assertSame([150.0, 80.0], $amountDataset['data']);
     }
+
+    public function test_burn_rate_analysis_returns_monthly_expense_totals_and_average_daily_burn(): void
+    {
+        $registerResponse = $this->postJson('/api/auth/register', [
+            'name' => 'Burn Rate Example',
+            'email' => 'burn-rate@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $token = $registerResponse->json('data.token');
+
+        $cashAccountResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/accounts', [
+                'name' => 'Burn Cash',
+                'type' => 'CASH',
+                'opening_balance' => '5000.00',
+                'opening_balance_date' => '2026-06-01',
+            ])
+            ->assertCreated();
+
+        $cashAccountId = $cashAccountResponse->json('data.id');
+
+        $categoriesResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/categories')
+            ->assertOk();
+
+        $foodCategoryId = collect($categoriesResponse->json('data'))
+            ->firstWhere('name', 'Food')['id'];
+
+        foreach ([
+            ['2026-06-01', '100.00'],
+            ['2026-06-02', '50.00'],
+            ['2026-06-02', '50.00'],
+            ['2026-07-03', '90.00'],
+            ['2026-07-05', '30.00'],
+        ] as [$transactionDate, $amount]) {
+            $this->withHeader('Authorization', 'Bearer '.$token)
+                ->postJson('/api/transactions/expense', [
+                    'account_id' => $cashAccountId,
+                    'category_id' => $foodCategoryId,
+                    'amount' => $amount,
+                    'note' => 'Burn rate expense',
+                    'transaction_date' => $transactionDate,
+                ])
+                ->assertCreated();
+        }
+
+        $this->withHeader('Authorization', 'Bearer '.$token)
+            ->postJson('/api/transactions/income', [
+                'account_id' => $cashAccountId,
+                'amount' => '999.00',
+                'note' => 'Should not count',
+                'transaction_date' => '2026-07-07',
+            ])
+            ->assertCreated();
+
+        $otherToken = $this->postJson('/api/auth/register', [
+            'name' => 'Burn Other',
+            'email' => 'burn-rate-other@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->json('data.token');
+
+        $otherAccountId = $this->withHeader('Authorization', 'Bearer '.$otherToken)
+            ->postJson('/api/accounts', [
+                'name' => 'Other Burn Cash',
+                'type' => 'CASH',
+                'opening_balance' => '1000.00',
+                'opening_balance_date' => '2026-06-01',
+            ])
+            ->json('data.id');
+
+        $otherCategoriesResponse = $this->withHeader('Authorization', 'Bearer '.$otherToken)
+            ->getJson('/api/categories')
+            ->assertOk();
+
+        $otherFoodCategoryId = collect($otherCategoriesResponse->json('data'))
+            ->firstWhere('name', 'Food')['id'];
+
+        $this->withHeader('Authorization', 'Bearer '.$otherToken)
+            ->postJson('/api/transactions/expense', [
+                'account_id' => $otherAccountId,
+                'category_id' => $otherFoodCategoryId,
+                'amount' => '1000.00',
+                'note' => 'Other user burn',
+                'transaction_date' => '2026-06-01',
+            ])
+            ->assertCreated();
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
+            ->getJson('/api/reports/burn-rate-analysis')
+            ->assertOk();
+
+        $data = $response->json('data');
+        $table = collect($data['table'])->keyBy('month');
+
+        $this->assertSame(2, $data['summary']['months_tracked']);
+        $this->assertSame('320.00', $data['summary']['total_expense']);
+        $this->assertSame('80.00', $data['summary']['average_burn_rate']);
+        $this->assertSame('June 2026', $data['summary']['peak_month']);
+
+        $this->assertSame('200.00', $table['2026-06']['total_expense']);
+        $this->assertSame(2, $table['2026-06']['active_days']);
+        $this->assertSame('100.00', $table['2026-06']['avg_daily_burn_rate']);
+
+        $this->assertSame('120.00', $table['2026-07']['total_expense']);
+        $this->assertSame(2, $table['2026-07']['active_days']);
+        $this->assertSame('60.00', $table['2026-07']['avg_daily_burn_rate']);
+
+        $expenseDataset = collect($data['graph']['datasets'])->firstWhere('label', 'Total Expense');
+        $burnDataset = collect($data['graph']['datasets'])->firstWhere('label', 'Avg Daily Burn Rate');
+
+        $this->assertSame(['June 2026', 'July 2026'], $data['graph']['labels']);
+        $this->assertSame([200.0, 120.0], $expenseDataset['data']);
+        $this->assertSame([100.0, 60.0], $burnDataset['data']);
+    }
 }

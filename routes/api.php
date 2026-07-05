@@ -59,6 +59,7 @@ Route::middleware('auth:api')->group(function () {
     Route::prefix('reports')->group(function () {
         Route::get('summary', [ReportController::class, 'summary']);
         Route::get('account-balances', [ReportController::class, 'accountBalances']);
+        Route::get('burn-rate-analysis', [ReportController::class, 'burnRateAnalysis']);
         Route::get('category-breakdown', [ReportController::class, 'categoryBreakdown']);
         Route::get('category-usage-analysis', [ReportController::class, 'categoryUsageAnalysis']);
         Route::get('daywise-expenses', [ReportController::class, 'daywiseExpenses']);

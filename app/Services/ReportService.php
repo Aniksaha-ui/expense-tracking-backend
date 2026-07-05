@@ -176,6 +176,80 @@ class ReportService extends BaseFinanceService
         ];
     }
 
+    public function burnRateAnalysis(int $userId): array
+    {
+        $rows = DB::table('transactions')
+            ->select([
+                DB::raw("DATE_FORMAT(transaction_date, '%Y-%m') as month"),
+                DB::raw('SUM(amount) as total_expense'),
+                DB::raw('COUNT(DISTINCT DATE(transaction_date)) as active_days'),
+            ])
+            ->where('user_id', $userId)
+            ->where('type', TransactionType::EXPENSE->value)
+            ->groupBy(DB::raw("DATE_FORMAT(transaction_date, '%Y-%m')"))
+            ->orderBy('month')
+            ->get();
+
+        $table = $rows->map(function (object $row): array {
+            $totalExpense = $this->formatAggregate($row->total_expense ?? '0');
+            $activeDays = max((int) ($row->active_days ?? 0), 0);
+            $avgDailyBurnRate = $activeDays > 0
+                ? (string) BigDecimal::of($totalExpense)->dividedBy((string) $activeDays, 2, RoundingMode::HALF_UP)
+                : '0.00';
+
+            return [
+                'month' => $row->month,
+                'month_label' => $this->formatMonthLabel($row->month),
+                'total_expense' => $totalExpense,
+                'active_days' => $activeDays,
+                'avg_daily_burn_rate' => $avgDailyBurnRate,
+            ];
+        })->values()->all();
+
+        $totalExpense = array_reduce(
+            $table,
+            fn (string $carry, array $row): string => $this->addAggregate($carry, $row['total_expense']),
+            '0.00'
+        );
+
+        $averageBurnRate = count($table) > 0
+            ? (string) BigDecimal::of(
+                array_reduce(
+                    $table,
+                    fn (string $carry, array $row): string => $this->addAggregate($carry, $row['avg_daily_burn_rate']),
+                    '0.00'
+                )
+            )->dividedBy((string) count($table), 2, RoundingMode::HALF_UP)
+            : '0.00';
+
+        $peakMonth = collect($table)->sortByDesc('total_expense')->first();
+
+        return [
+            'summary' => [
+                'months_tracked' => count($table),
+                'total_expense' => $totalExpense,
+                'average_burn_rate' => $averageBurnRate,
+                'peak_month' => $peakMonth['month_label'] ?? 'No data',
+            ],
+            'graph' => [
+                'labels' => array_map(static fn (array $row): string => $row['month_label'], $table),
+                'datasets' => [
+                    [
+                        'label' => 'Total Expense',
+                        'color' => '#f59e0b',
+                        'data' => array_map(static fn (array $row): float => (float) $row['total_expense'], $table),
+                    ],
+                    [
+                        'label' => 'Avg Daily Burn Rate',
+                        'color' => '#4f83ff',
+                        'data' => array_map(static fn (array $row): float => (float) $row['avg_daily_burn_rate'], $table),
+                    ],
+                ],
+            ],
+            'table' => $table,
+        ];
+    }
+
     public function cashFlow(int $userId, array $filters): \Illuminate\Support\Collection
     {
         $query = DB::table('transactions')
@@ -459,5 +533,18 @@ class ReportService extends BaseFinanceService
     private function makeWeeklyExpenseRowKey(int $year, int $month, int $week): string
     {
         return $year.'-'.$month.'-'.$week;
+    }
+
+    private function formatMonthLabel(?string $monthKey): string
+    {
+        if (! $monthKey) {
+            return 'Unknown Month';
+        }
+
+        try {
+            return Carbon::createFromFormat('Y-m', $monthKey)->format('F Y');
+        } catch (\Throwable) {
+            return $monthKey;
+        }
     }
 }

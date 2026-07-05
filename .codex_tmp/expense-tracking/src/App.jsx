@@ -10,6 +10,7 @@ import { AppLayout } from './layout/AppLayout'
 const Dashboard = lazy(() => import('./features/Dashboard/page/DashboardPage'))
 const AccountsPage = lazy(() => import('./features/Accounts/page/AccountsPage'))
 const AccountBalancesReportPage = lazy(() => import('./features/Reports/page/AccountBalancesReportPage'))
+const BurnRateAnalysisReportPage = lazy(() => import('./features/Reports/page/BurnRateAnalysisReportPage'))
 const CategoriesPage = lazy(() => import('./features/Categories/page/CategoriesPage'))
 const CategoryBreakdownReportPage = lazy(() => import('./features/Reports/page/CategoryBreakdownReportPage'))
 const CategoryUsageAnalysisReportPage = lazy(
@@ -142,6 +143,14 @@ function AppRoutes() {
           element={
             <Suspense fallback={<FullPageLoader message="Loading account balances report..." />}>
               <AccountBalancesReportPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path={APP_ROUTES.reportBurnRateAnalysis}
+          element={
+            <Suspense fallback={<FullPageLoader message="Loading burn rate analysis..." />}>
+              <BurnRateAnalysisReportPage />
             </Suspense>
           }
         />
