@@ -2,13 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Mail\CategoryExpenseReportMail;
 use App\Models\User;
 use App\Services\CategoryExpenseReportService;
+use App\Services\NotificationService;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 class EmailCategoryExpenseReports extends Command
@@ -21,7 +20,7 @@ class EmailCategoryExpenseReports extends Command
 
     protected $description = 'Email category-wise expense PDF reports to users';
 
-    public function handle(CategoryExpenseReportService $reportService): int
+    public function handle(CategoryExpenseReportService $reportService, NotificationService $notificationService): int
     {
         try {
             [$fromDate, $toDate] = $this->resolveDateRange();
@@ -35,13 +34,15 @@ class EmailCategoryExpenseReports extends Command
         $skipped = 0;
         $failed = 0;
         $recipient = config('expense_reports.recipient');
+        $cc = config('expense_reports.cc');
+        $bcc = config('expense_reports.bcc');
         $query = User::query()->select(['id', 'name', 'email'])->orderBy('id');
 
         if ($this->option('user')) {
             $query->whereKey((int) $this->option('user'));
         }
 
-        $query->chunkById(100, function ($users) use ($reportService, $fromDate, $toDate, $recipient, &$sent, &$skipped, &$failed): void {
+        $query->chunkById(100, function ($users) use ($reportService, $notificationService, $fromDate, $toDate, $recipient, $cc, $bcc, &$sent, &$skipped, &$failed): void {
             foreach ($users as $user) {
                 try {
                     $summary = $reportService->summary($user, $fromDate, $toDate);
@@ -57,15 +58,31 @@ class EmailCategoryExpenseReports extends Command
 
                     $report = $reportService->generate($user, $fromDate, $toDate, $summary);
 
-                    Mail::to($recipient ?: $user->email)->send(new CategoryExpenseReportMail(
-                        user: $user,
-                        fromDate: $fromDate,
-                        toDate: $toDate,
-                        rows: $report['rows'],
-                        total: $report['total'],
-                        pdf: $report['pdf'],
-                        filename: $report['filename'],
-                    ));
+                    $notificationService->sendEmail(
+                        to: $recipient ?: $user->email,
+                        subject: sprintf(
+                            'Category-wise expense report: %s to %s',
+                            $fromDate->toDateString(),
+                            $toDate->toDateString()
+                        ),
+                        view: 'mail.category-expense-report',
+                        data: [
+                            'user' => $user,
+                            'fromDate' => $fromDate,
+                            'toDate' => $toDate,
+                            'rows' => $report['rows'],
+                            'total' => $report['total'],
+                        ],
+                        cc: $cc,
+                        bcc: $bcc,
+                        attachments: [
+                            [
+                                'data' => $report['pdf'],
+                                'name' => $report['filename'],
+                                'mime' => 'application/pdf',
+                            ],
+                        ],
+                    );
 
                     $sent++;
                 } catch (Throwable $exception) {
