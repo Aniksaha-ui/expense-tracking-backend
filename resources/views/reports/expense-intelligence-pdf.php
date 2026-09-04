@@ -269,27 +269,6 @@
             <?php endif; ?>
         <?php endif; ?>
 
-        <?php if (! empty($report['account_balance_rows']) && $report['account_balance_rows']->isNotEmpty()): ?>
-            <div class="section-title">Daily account opening and closing balance graph</div>
-            <div class="section-note">Opening balance is the first transaction balance_before for the account on that day. Closing balance is the last transaction balance_after for the same account and day.</div>
-            <div class="chart-box">
-                <img class="svg-chart" src="<?= e($svgGroupedBarChart($report['account_balance_rows'], 'opening_balance', 'closing_balance', 'label', 'Every account opening vs closing balance', 'Opening', 'Closing')) ?>" alt="Daily account opening and closing balance graph">
-            </div>
-            <table class="data-table">
-                <tr><th class="left">Date / Account</th><th>Type</th><th>Opening</th><th>Closing</th><th>Movement</th><th>Transactions</th></tr>
-                <?php foreach ($report['account_balance_rows'] as $row): ?>
-                    <tr>
-                        <td class="left"><?= e($row['label']) ?></td>
-                        <td><?= e($row['account_type']) ?></td>
-                        <td><?= e($row['opening_balance']) ?></td>
-                        <td><?= e($row['closing_balance']) ?></td>
-                        <td><?= e($row['movement']) ?></td>
-                        <td><?= e($row['transaction_count']) ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </table>
-        <?php endif; ?>
-
         <?php if (! empty($report['comparison'])): ?>
             <div class="section-title">Period comparison</div>
             <table class="data-table">
@@ -300,6 +279,36 @@
                     <td><?= e($report['comparison']['difference']) ?></td>
                     <td><?= e($report['comparison']['growth_percentage'] ?? 'N/A') ?><?= $report['comparison']['growth_percentage'] === null ? '' : '%' ?></td>
                 </tr>
+            </table>
+        <?php endif; ?>
+
+        <?php if (! empty($report['next_week_risk_report']) && $report['next_week_risk_report']['rows']->isNotEmpty()): ?>
+            <div class="section-title">Next week risk report</div>
+            <div class="section-note"><?= e($report['next_week_risk_report']['basis']) ?> Baseline month: <?= e($report['next_week_risk_report']['baseline_month']) ?>.</div>
+            <table class="data-table">
+                <tr><th>Current Total</th><th>Previous Month Baseline</th><th>Difference</th><th>Growth</th></tr>
+                <tr>
+                    <td><?= e($report['next_week_risk_report']['current_total']) ?></td>
+                    <td><?= e($report['next_week_risk_report']['baseline_total']) ?></td>
+                    <td><?= e($report['next_week_risk_report']['difference_total']) ?></td>
+                    <td><?= e($report['next_week_risk_report']['growth_percentage'] ?? 'N/A') ?><?= $report['next_week_risk_report']['growth_percentage'] === null ? '' : '%' ?></td>
+                </tr>
+            </table>
+            <table class="data-table">
+                <tr><th class="name">Category</th><th>Current</th><th>Prev Month Total</th><th><?= e($report['next_week_risk_report']['period_days']) ?>-Day Baseline</th><th>Difference</th><th>Growth</th><th>Txns</th><th>Score</th><th>Risk</th></tr>
+                <?php foreach ($report['next_week_risk_report']['rows'] as $row): ?>
+                    <tr>
+                        <td class="name"><?= e($row['category_name']) ?></td>
+                        <td><?= e($row['current_expense']) ?></td>
+                        <td><?= e($row['previous_month_total']) ?></td>
+                        <td><?= e($row['previous_month_period_baseline']) ?></td>
+                        <td><?= e($row['difference']) ?></td>
+                        <td><?= e($row['growth_percentage'] ?? 'N/A') ?><?= $row['growth_percentage'] === null ? '' : '%' ?></td>
+                        <td><?= e($row['transaction_count']) ?></td>
+                        <td class="score"><?= e($row['opportunity_score']) ?>/100</td>
+                        <td><?= e($row['risk_level']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
             </table>
         <?php endif; ?>
 
@@ -334,6 +343,20 @@
                         <td class="score"><?= e($row['opportunity_score']) ?></td>
                     </tr>
                 <?php endforeach; ?>
+                <?php if (! empty($report['totals']['category'])): ?>
+                    <tr>
+                        <th class="name">Total costing</th>
+                        <th><?= e($report['totals']['category']['current_expense']) ?></th>
+                        <th><?= e($report['totals']['category']['previous_expense']) ?></th>
+                        <th><?= e($report['totals']['category']['historical_average']) ?></th>
+                        <th><?= e($report['totals']['category']['difference']) ?></th>
+                        <th>N/A</th>
+                        <th>100%</th>
+                        <th><?= e($report['totals']['category']['transaction_count']) ?></th>
+                        <th><?= e($report['totals']['category']['average_transaction']) ?></th>
+                        <th>N/A</th>
+                    </tr>
+                <?php endif; ?>
             </tbody>
         </table>
 
@@ -351,6 +374,13 @@
                         <td><?= e($row['potential_saving']) ?></td>
                     </tr>
                 <?php endforeach; ?>
+                <?php if (! empty($report['totals']['opportunity'])): ?>
+                    <tr>
+                        <th class="name">Total estimated saving</th>
+                        <th colspan="4"><?= e($report['totals']['opportunity']['category_count']) ?> ranked categories</th>
+                        <th><?= e($report['totals']['opportunity']['estimated_saving']) ?></th>
+                    </tr>
+                <?php endif; ?>
             </table>
         <?php endif; ?>
 
@@ -367,6 +397,15 @@
                         <td><?= e($row['average_expense']) ?></td>
                     </tr>
                 <?php endforeach; ?>
+                <?php if (! empty($report['totals']['account'])): ?>
+                    <tr>
+                        <th class="name">Total</th>
+                        <th>All accounts</th>
+                        <th><?= e($report['totals']['account']['transaction_count']) ?></th>
+                        <th><?= e($report['totals']['account']['total_expense']) ?></th>
+                        <th><?= e($report['totals']['account']['average_expense']) ?></th>
+                    </tr>
+                <?php endif; ?>
             </table>
         <?php endif; ?>
 

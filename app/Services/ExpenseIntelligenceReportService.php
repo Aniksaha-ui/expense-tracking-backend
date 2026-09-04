@@ -81,6 +81,7 @@ class ExpenseIntelligenceReportService
         $anomalies = $this->anomalies($userId, $fromDate, $toDate);
         $categoryRows = $this->categoryAnalysis($userId, $fromDate, $toDate);
         $dailyTrend = $this->dailyTrend($userId, $fromDate, $toDate);
+        $accountRows = $this->accountBreakdown($userId, $fromDate, $toDate);
 
         return [
             'summary' => [
@@ -95,8 +96,8 @@ class ExpenseIntelligenceReportService
             'anomalies' => $anomalies,
             'trend_rows' => $this->dailyHoursTrend($userId, $fromDate, $toDate),
             'efficiency_report' => $this->efficiencyReport($summary, $categoryRows, $dailyTrend, $leakage, $anomalies),
-            'account_balance_rows' => $this->accountDailyBalances($userId, $fromDate, $toDate),
-            'account_rows' => $this->accountBreakdown($userId, $fromDate, $toDate),
+            'account_rows' => $accountRows,
+            'totals' => $this->reportTotals($categoryRows, collect(), $accountRows),
             'definitions' => $this->reportDefinitions('daily'),
             'section_guides' => $this->sectionGuides('daily'),
             'calculation_hints' => $this->calculationHints('daily'),
@@ -113,6 +114,8 @@ class ExpenseIntelligenceReportService
         $leakage = $this->smallExpenseLeakage($userId, $fromDate, $toDate);
         $anomalies = $this->anomalies($userId, $fromDate, $toDate);
         $weekAverage = $this->recentPeriodAverage($userId, $fromDate, 'week', 4);
+        $opportunities = $categoryRows->sortByDesc('opportunity_score')->take(5)->values();
+        $accountRows = $this->accountBreakdown($userId, $fromDate, $toDate);
         $targetLow = BigDecimal::of($weekAverage)->multipliedBy('0.95')->toScale(2, RoundingMode::HALF_UP);
         $targetHigh = BigDecimal::of($weekAverage)->multipliedBy('1.05')->toScale(2, RoundingMode::HALF_UP);
         $periodDays = max(1, $fromDate->diffInDays($toDate) + 1);
@@ -128,16 +131,17 @@ class ExpenseIntelligenceReportService
             'trend_rows' => $dailyTrend,
             'category_rows' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['difference'])->values(),
             'efficiency_report' => $this->efficiencyReport($summary, $categoryRows, $dailyTrend, $leakage, $anomalies),
-            'account_balance_rows' => $this->accountDailyBalances($userId, $fromDate, $toDate),
             'leakage' => [
                 ...$leakage,
                 'repeated_similar_expenses' => $this->repeatedSimilarExpenses($userId, $fromDate, $toDate),
             ],
-            'account_rows' => $this->accountBreakdown($userId, $fromDate, $toDate),
+            'account_rows' => $accountRows,
+            'totals' => $this->reportTotals($categoryRows, $opportunities, $accountRows),
+            'next_week_risk_report' => $this->nextWeekRiskReport($userId, $fromDate, $toDate, $categoryRows),
             'comparison' => $this->periodComparison($summary['total_expense'], $this->sumAmounts($categoryRows, 'previous_expense')),
             'anomalies' => $anomalies,
             'alerts' => $this->weeklyAlerts($summary, $categoryRows),
-            'opportunities' => $categoryRows->sortByDesc('opportunity_score')->take(5)->values(),
+            'opportunities' => $opportunities,
             'plan' => [
                 'last_4_week_average' => $this->money($weekAverage),
                 'current_week' => $summary['total_expense'],
@@ -159,6 +163,8 @@ class ExpenseIntelligenceReportService
         $leakage = $this->smallExpenseLeakage($userId, $fromDate, $toDate);
         $anomalies = $this->anomalies($userId, $fromDate, $toDate);
         $biWeeklyAverage = $this->recentPeriodAverage($userId, $fromDate, 'bi-week', 3);
+        $opportunities = $categoryRows->sortByDesc('opportunity_score')->take(8)->values();
+        $accountRows = $this->accountBreakdown($userId, $fromDate, $toDate);
         $targetLow = BigDecimal::of($biWeeklyAverage)->multipliedBy('0.95')->toScale(2, RoundingMode::HALF_UP);
         $targetHigh = BigDecimal::of($biWeeklyAverage)->multipliedBy('1.05')->toScale(2, RoundingMode::HALF_UP);
         $periodDays = max(1, $fromDate->diffInDays($toDate) + 1);
@@ -174,16 +180,17 @@ class ExpenseIntelligenceReportService
             'trend_rows' => $dailyTrend,
             'category_rows' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['difference'])->values(),
             'efficiency_report' => $this->efficiencyReport($summary, $categoryRows, $dailyTrend, $leakage, $anomalies),
-            'account_balance_rows' => $this->accountDailyBalances($userId, $fromDate, $toDate),
             'leakage' => [
                 ...$leakage,
                 'repeated_similar_expenses' => $this->repeatedSimilarExpenses($userId, $fromDate, $toDate),
             ],
-            'account_rows' => $this->accountBreakdown($userId, $fromDate, $toDate),
+            'account_rows' => $accountRows,
+            'totals' => $this->reportTotals($categoryRows, $opportunities, $accountRows),
+            'next_week_risk_report' => $this->nextWeekRiskReport($userId, $fromDate, $toDate, $categoryRows),
             'comparison' => $this->periodComparison($summary['total_expense'], $this->sumAmounts($categoryRows, 'previous_expense')),
             'anomalies' => $anomalies,
             'alerts' => $this->weeklyAlerts($summary, $categoryRows),
-            'opportunities' => $categoryRows->sortByDesc('opportunity_score')->take(8)->values(),
+            'opportunities' => $opportunities,
             'plan' => [
                 'last_3_bi_week_average' => $this->money($biWeeklyAverage),
                 'current_bi_week' => $summary['total_expense'],
@@ -207,6 +214,8 @@ class ExpenseIntelligenceReportService
         $dailyTrend = $this->dailyTrend($userId, $fromDate, $toDate);
         $forecast = $this->nextMonthForecast($userId, $toDate, $monthlyTrend);
         $recurring = $this->recurringAnalysis($userId, $summary['total_income']);
+        $opportunities = $categoryRows->sortByDesc('opportunity_score')->take(10)->values();
+        $accountRows = $this->accountBreakdown($userId, $fromDate, $toDate);
 
         return [
             'summary' => [
@@ -220,7 +229,6 @@ class ExpenseIntelligenceReportService
             ],
             'trend_rows' => $monthlyTrend,
             'efficiency_report' => $this->efficiencyReport($summary, $categoryRows, $dailyTrend, $leakage, $anomalies, $recurring),
-            'account_balance_rows' => $this->accountDailyBalances($userId, $fromDate, $toDate),
             'category_rows' => $categoryRows,
             'category_trends' => $this->categoryTrends($userId, $toDate, (int) config('expense_intelligence_reports.lookback_months')),
             'recurring' => $recurring,
@@ -230,10 +238,11 @@ class ExpenseIntelligenceReportService
                 'repeated_similar_expenses' => $this->repeatedSimilarExpenses($userId, $fromDate, $toDate),
             ],
             'behavior' => $this->behaviorAnalysis($userId, $fromDate, $toDate),
-            'account_rows' => $this->accountBreakdown($userId, $fromDate, $toDate),
+            'account_rows' => $accountRows,
+            'totals' => $this->reportTotals($categoryRows, $opportunities, $accountRows),
             'comparison' => $this->periodComparison($summary['total_expense'], $this->sumAmounts($categoryRows, 'previous_expense')),
             'anomalies' => $anomalies,
-            'opportunities' => $categoryRows->sortByDesc('opportunity_score')->take(10)->values(),
+            'opportunities' => $opportunities,
             'potential_savings' => $this->potentialSavingsRange($categoryRows),
             'forecast' => $forecast,
             'budget' => $this->nextMonthBudget($forecast, $summary['total_income'], $recurring['monthly_commitment']),
@@ -825,47 +834,101 @@ class ExpenseIntelligenceReportService
             ]);
     }
 
-    private function accountDailyBalances(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): Collection
+    private function reportTotals(Collection $categoryRows, Collection $opportunityRows, Collection $accountRows): array
     {
-        return DB::table('transactions')
-            ->join('accounts', 'accounts.id', '=', 'transactions.account_id')
-            ->select([
-                'transactions.account_id',
-                'accounts.name as account_name',
-                'accounts.type as account_type',
-                'transactions.balance_before',
-                'transactions.balance_after',
-                'transactions.transaction_date',
-                DB::raw('DATE(transactions.transaction_date) as balance_date'),
-            ])
-            ->where('transactions.user_id', $userId)
-            ->whereDate('transactions.transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transactions.transaction_date', '<=', $toDate->toDateString())
-            ->orderBy('transactions.transaction_date')
-            ->orderBy('transactions.id')
-            ->get()
-            ->groupBy(fn (object $row): string => $row->balance_date.'-'.$row->account_id)
-            ->map(function (Collection $rows): array {
-                $first = $rows->first();
-                $last = $rows->last();
+        $categoryTransactionCount = (int) $categoryRows->sum('transaction_count');
+        $accountTransactionCount = (int) $accountRows->sum('transaction_count');
+        $categoryCurrentTotal = $this->sumAmounts($categoryRows, 'current_expense');
+        $accountExpenseTotal = $this->sumAmounts($accountRows, 'total_expense');
+
+        return [
+            'category' => [
+                'current_expense' => $categoryCurrentTotal,
+                'previous_expense' => $this->sumAmounts($categoryRows, 'previous_expense'),
+                'historical_average' => $this->sumAmounts($categoryRows, 'historical_average'),
+                'difference' => $this->sumAmounts($categoryRows, 'difference'),
+                'transaction_count' => $categoryTransactionCount,
+                'average_transaction' => $categoryTransactionCount === 0
+                    ? '0.00'
+                    : $this->money(BigDecimal::of($categoryCurrentTotal)->dividedBy((string) $categoryTransactionCount, 2, RoundingMode::HALF_UP)),
+            ],
+            'opportunity' => [
+                'estimated_saving' => $this->sumAmounts($opportunityRows, 'potential_saving'),
+                'category_count' => $opportunityRows->count(),
+            ],
+            'account' => [
+                'transaction_count' => $accountTransactionCount,
+                'total_expense' => $accountExpenseTotal,
+                'average_expense' => $accountTransactionCount === 0
+                    ? '0.00'
+                    : $this->money(BigDecimal::of($accountExpenseTotal)->dividedBy((string) $accountTransactionCount, 2, RoundingMode::HALF_UP)),
+            ],
+        ];
+    }
+
+    private function nextWeekRiskReport(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate, Collection $categoryRows): array
+    {
+        $periodDays = max(1, $fromDate->diffInDays($toDate) + 1);
+        $previousMonthStart = $fromDate->subMonthNoOverflow()->startOfMonth();
+        $previousMonthEnd = $fromDate->subMonthNoOverflow()->endOfMonth();
+        $previousMonthDays = max(1, $previousMonthStart->diffInDays($previousMonthEnd) + 1);
+        $previousMonthTotals = $this->categoryTotals($userId, $previousMonthStart, $previousMonthEnd);
+        $significantChange = BigDecimal::of((string) config('expense_intelligence_reports.significant_change_percentage', '20'));
+
+        $rows = $categoryRows
+            ->map(function (array $row) use ($previousMonthTotals, $previousMonthDays, $periodDays, $significantChange): array {
+                $previousMonthRow = $previousMonthTotals->get($row['category_id']);
+                $previousMonthExpense = $this->money($previousMonthRow->total_expense ?? '0');
+                $baseline = $this->money(
+                    BigDecimal::of($previousMonthExpense)
+                        ->dividedBy((string) $previousMonthDays, 6, RoundingMode::HALF_UP)
+                        ->multipliedBy((string) $periodDays)
+                );
+                $difference = $this->money(BigDecimal::of($row['current_expense'])->minus($baseline));
+                $growthPercentage = BigDecimal::of($baseline)->isZero() ? null : $this->percentage($difference, $baseline);
+                $riskLevel = 'Low';
+
+                if (BigDecimal::of($row['current_expense'])->isGreaterThan('0') && BigDecimal::of($baseline)->isZero()) {
+                    $riskLevel = 'New spend';
+                } elseif ($growthPercentage !== null && BigDecimal::of($growthPercentage)->isGreaterThanOrEqualTo($significantChange)) {
+                    $riskLevel = 'High';
+                } elseif (BigDecimal::of($difference)->isGreaterThan('0')) {
+                    $riskLevel = 'Moderate';
+                } elseif (BigDecimal::of($difference)->isLessThan('0')) {
+                    $riskLevel = 'Lower than baseline';
+                }
 
                 return [
-                    'date' => $first->balance_date,
-                    'label' => CarbonImmutable::parse($first->balance_date)->format('d M').' - '.$first->account_name,
-                    'account_id' => (int) $first->account_id,
-                    'account_name' => $first->account_name,
-                    'account_type' => $first->account_type,
-                    'opening_balance' => $this->money($first->balance_before),
-                    'closing_balance' => $this->money($last->balance_after),
-                    'movement' => $this->money(BigDecimal::of($last->balance_after)->minus($first->balance_before)),
-                    'transaction_count' => $rows->count(),
+                    'category_name' => $row['category_name'],
+                    'current_expense' => $row['current_expense'],
+                    'previous_month_total' => $previousMonthExpense,
+                    'previous_month_period_baseline' => $baseline,
+                    'difference' => $difference,
+                    'growth_percentage' => $growthPercentage,
+                    'transaction_count' => $row['transaction_count'],
+                    'opportunity_score' => $row['opportunity_score'],
+                    'risk_level' => $riskLevel,
                 ];
             })
-            ->sortBy([
-                ['date', 'asc'],
-                ['account_name', 'asc'],
-            ])
+            ->filter(fn (array $row): bool => BigDecimal::of($row['current_expense'])->isGreaterThan('0') || BigDecimal::of($row['previous_month_period_baseline'])->isGreaterThan('0'))
+            ->sortByDesc(fn (array $row): float => (float) $row['difference'])
+            ->take(8)
             ->values();
+
+        $currentTotal = $this->sumAmounts($rows, 'current_expense');
+        $baselineTotal = $this->sumAmounts($rows, 'previous_month_period_baseline');
+        $differenceTotal = $this->money(BigDecimal::of($currentTotal)->minus($baselineTotal));
+
+        return [
+            'baseline_month' => $previousMonthStart->format('M Y'),
+            'period_days' => $periodDays,
+            'basis' => "Previous month totals are converted into a {$periodDays}-day baseline before comparing with this report period.",
+            'current_total' => $currentTotal,
+            'baseline_total' => $baselineTotal,
+            'difference_total' => $differenceTotal,
+            'growth_percentage' => BigDecimal::of($baselineTotal)->isZero() ? null : $this->percentage($differenceTotal, $baselineTotal),
+            'rows' => $rows,
+        ];
     }
 
     private function efficiencyReport(
@@ -988,10 +1051,12 @@ class ExpenseIntelligenceReportService
             'weekly' => [
                 ...$common,
                 'Next week target is calculated from the previous 4 completed weekly expense totals, plus/minus 5%.',
+                'Next week risk compares this week with the previous calendar month converted into a 7-day baseline.',
             ],
             'bi-weekly' => [
                 ...$common,
                 'Next bi-weekly target is calculated from the previous 3 completed 14-day expense totals, plus/minus 5%.',
+                'Next week risk compares this period with the previous calendar month converted into the same number of days.',
             ],
             'monthly' => [
                 ...$common,
@@ -1073,8 +1138,8 @@ class ExpenseIntelligenceReportService
                 'definition' => 'Combines expense-to-income ratio, category concentration, leakage share, recurring share, largest transaction share, and active spending days into action-focused guidance.',
             ],
             [
-                'name' => 'Account balance graph',
-                'definition' => 'For each account and day, opening balance is the first transaction balance_before and closing balance is the last transaction balance_after.',
+                'name' => 'Next week risk',
+                'definition' => 'For weekly and bi-weekly reports, previous calendar month category totals are divided by month days and multiplied by the selected period days, then compared with current category spending.',
             ],
         ];
     }
@@ -1099,10 +1164,6 @@ class ExpenseIntelligenceReportService
                 'definition' => 'Summarizes the period into practical controls: biggest cost driver, leakage impact, spending concentration, high/low expense days, and data-backed actions.',
             ],
             [
-                'section' => 'Account balance chart',
-                'definition' => 'Shows each account opening balance and closing balance for every day where that account had transactions.',
-            ],
-            [
                 'section' => 'Category analysis',
                 'definition' => 'Compares every database expense category against the previous equal-length period and historical category average.',
             ],
@@ -1113,6 +1174,10 @@ class ExpenseIntelligenceReportService
             [
                 'section' => 'Money leakage',
                 'definition' => 'Adds up small repeated expenses under the configured threshold to reveal hidden cumulative spending.',
+            ],
+            [
+                'section' => 'Next week risk report',
+                'definition' => 'Highlights categories likely to create pressure next week by comparing current spending against a previous-month same-length baseline.',
             ],
             [
                 'section' => 'Anomaly detection',
