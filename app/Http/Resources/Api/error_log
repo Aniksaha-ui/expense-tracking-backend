@@ -1,0 +1,96 @@
+[19-Jun-2026 17:22:17 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/RecurringExpenseResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/RecurringExpenseResource.php on line 8
+[19-Jun-2026 23:01:32 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/RecurringExpenseResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/RecurringExpenseResource.php on line 8
+[20-Jun-2026 08:45:09 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/UserResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/UserResource.php on line 8
+[20-Jun-2026 12:10:03 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransactionResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransactionResource.php on line 8
+[20-Jun-2026 13:05:46 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/AccountResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/AccountResource.php on line 8
+[20-Jun-2026 14:32:18 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/UserResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/UserResource.php on line 8
+[20-Jun-2026 18:06:51 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransactionResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransactionResource.php on line 8
+[20-Jun-2026 19:02:06 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/AccountResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/AccountResource.php on line 8
+[20-Jun-2026 19:04:23 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransferResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransferResource.php on line 8
+[20-Jun-2026 19:06:30 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/CategoryResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/CategoryResource.php on line 8
+[21-Jun-2026 01:03:09 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransferResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransferResource.php on line 8
+[21-Jun-2026 01:04:06 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/CategoryResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/CategoryResource.php on line 8
+[23-Jun-2026 22:25:12 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/RecurringExpenseResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/RecurringExpenseResource.php on line 8
+[23-Jun-2026 22:27:18 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/UserResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/UserResource.php on line 8
+[23-Jun-2026 22:28:19 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransactionResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransactionResource.php on line 8
+[23-Jun-2026 22:29:24 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/AccountResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/AccountResource.php on line 8
+[23-Jun-2026 22:30:24 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransferResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransferResource.php on line 8
+[23-Jun-2026 22:31:26 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/CategoryResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/CategoryResource.php on line 8
+[24-Jun-2026 03:41:43 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/RecurringExpenseResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/RecurringExpenseResource.php on line 8
+[24-Jun-2026 03:42:48 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/UserResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/UserResource.php on line 8
+[24-Jun-2026 03:44:50 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransactionResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransactionResource.php on line 8
+[24-Jun-2026 03:45:54 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/AccountResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/AccountResource.php on line 8
+[24-Jun-2026 03:46:55 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/CategoryResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/CategoryResource.php on line 8
+[24-Jun-2026 03:47:58 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransferResource.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/TransferResource.php on line 8

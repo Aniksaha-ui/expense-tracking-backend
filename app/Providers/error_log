@@ -1,0 +1,16 @@
+[19-Jun-2026 09:31:47 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Support\ServiceProvider" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Providers/AppServiceProvider.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Providers/AppServiceProvider.php on line 11
+[19-Jun-2026 15:12:45 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Support\ServiceProvider" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Providers/AppServiceProvider.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Providers/AppServiceProvider.php on line 11
+[31-Aug-2026 01:14:45 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Support\ServiceProvider" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Providers/AppServiceProvider.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Providers/AppServiceProvider.php on line 11
+[04-Sep-2026 04:20:52 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Support\ServiceProvider" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Providers/AppServiceProvider.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Providers/AppServiceProvider.php on line 11

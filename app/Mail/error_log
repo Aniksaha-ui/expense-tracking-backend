@@ -1,0 +1,20 @@
+[30-Jun-2026 10:31:08 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Mail\Mailable" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Mail/CategoryExpenseReportMail.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Mail/CategoryExpenseReportMail.php on line 15
+[11-Jul-2026 20:06:32 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Mail\Mailable" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Mail/CategoryExpenseReportMail.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Mail/CategoryExpenseReportMail.php on line 15
+[31-Aug-2026 01:14:45 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Mail\Mailable" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Mail/CategoryExpenseReportMail.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Mail/CategoryExpenseReportMail.php on line 15
+[01-Sep-2026 06:25:58 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Mail\Mailable" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Mail/CategoryExpenseReportMail.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Mail/CategoryExpenseReportMail.php on line 15
+[04-Sep-2026 04:20:52 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Mail\Mailable" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Mail/CategoryExpenseReportMail.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Mail/CategoryExpenseReportMail.php on line 15

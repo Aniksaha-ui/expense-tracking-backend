@@ -1,0 +1,8 @@
+[21-Jun-2026 02:06:55 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Admin/Menu/MenuController.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Admin/Menu/MenuController.php on line 12
+[21-Jun-2026 08:48:22 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Admin/Menu/MenuController.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Admin/Menu/MenuController.php on line 12

@@ -1,0 +1,16 @@
+[21-Jun-2026 07:49:08 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Auth/RegisterRequest.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Auth/RegisterRequest.php on line 8
+[21-Jun-2026 12:31:36 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Auth/LoginRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Auth/LoginRequest.php on line 7
+[21-Jun-2026 14:26:34 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Auth/RegisterRequest.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Auth/RegisterRequest.php on line 8
+[21-Jun-2026 19:18:04 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Auth/LoginRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Auth/LoginRequest.php on line 7

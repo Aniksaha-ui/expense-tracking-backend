@@ -1,0 +1,64 @@
+[20-Jun-2026 16:14:05 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/TransactionFilterRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/TransactionFilterRequest.php on line 9
+[20-Jun-2026 16:20:08 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/UpdateTransactionRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/UpdateTransactionRequest.php on line 7
+[20-Jun-2026 22:10:32 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/TransactionFilterRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/TransactionFilterRequest.php on line 9
+[20-Jun-2026 22:15:23 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/UpdateTransactionRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/UpdateTransactionRequest.php on line 7
+[21-Jun-2026 00:06:57 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/TransactionFilterRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/TransactionFilterRequest.php on line 9
+[21-Jun-2026 00:07:46 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/UpdateTransactionRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/UpdateTransactionRequest.php on line 7
+[21-Jun-2026 00:20:20 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/StoreDepositRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/StoreDepositRequest.php on line 7
+[21-Jun-2026 01:23:44 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/StoreExpenseRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/StoreExpenseRequest.php on line 7
+[21-Jun-2026 01:24:17 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/StoreIncomeRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/StoreIncomeRequest.php on line 7
+[21-Jun-2026 06:37:10 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/TransactionFilterRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/TransactionFilterRequest.php on line 9
+[21-Jun-2026 06:38:15 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/UpdateTransactionRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/UpdateTransactionRequest.php on line 7
+[21-Jun-2026 06:50:42 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/StoreDepositRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/StoreDepositRequest.php on line 7
+[21-Jun-2026 08:02:15 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/StoreIncomeRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/StoreIncomeRequest.php on line 7
+[21-Jun-2026 08:02:48 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/StoreExpenseRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/StoreExpenseRequest.php on line 7
+[01-Sep-2026 08:19:17 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/UpdateTransactionRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/UpdateTransactionRequest.php on line 7
+[01-Sep-2026 08:19:36 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/TransactionFilterRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transactions/TransactionFilterRequest.php on line 9

@@ -1,0 +1,8 @@
+[20-Jun-2026 04:43:52 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Reports/ReportFilterRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Reports/ReportFilterRequest.php on line 7
+[21-Jun-2026 11:50:40 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Reports/ReportFilterRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Reports/ReportFilterRequest.php on line 7
