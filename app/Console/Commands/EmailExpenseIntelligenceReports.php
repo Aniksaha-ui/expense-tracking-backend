@@ -15,7 +15,7 @@ use Throwable;
 class EmailExpenseIntelligenceReports extends Command
 {
     protected $signature = 'expense-intelligence-reports:email
-        {frequency : daily, weekly, or monthly}
+        {frequency : daily, weekly, biweekly, bi-weekly, or monthly}
         {--from= : Report start date in YYYY-MM-DD format}
         {--to= : Report end date in YYYY-MM-DD format}
         {--user= : Send only to this user ID}
@@ -25,10 +25,11 @@ class EmailExpenseIntelligenceReports extends Command
 
     public function handle(ExpenseIntelligenceReportService $reportService, NotificationService $notificationService): int
     {
-        $frequency = strtolower((string) $this->argument('frequency'));
+        $frequency = str_replace('_', '-', strtolower((string) $this->argument('frequency')));
+        $frequency = $frequency === 'biweekly' ? 'bi-weekly' : $frequency;
 
-        if (! in_array($frequency, ['daily', 'weekly', 'monthly'], true)) {
-            $this->error('Frequency must be daily, weekly, or monthly.');
+        if (! in_array($frequency, ['daily', 'weekly', 'bi-weekly', 'monthly'], true)) {
+            $this->error('Frequency must be daily, weekly, bi-weekly, or monthly.');
 
             return self::FAILURE;
         }
@@ -119,6 +120,7 @@ class EmailExpenseIntelligenceReports extends Command
             [$fromDate, $toDate] = match ($frequency) {
                 'daily' => [$today->startOfDay(), $today->endOfDay()],
                 'weekly' => [$today->startOfWeek(), $today->endOfWeek()],
+                'bi-weekly' => [$today->startOfWeek()->subWeek(), $today->endOfWeek()],
                 'monthly' => [$today->startOfMonth(), $today->endOfMonth()],
             };
         }

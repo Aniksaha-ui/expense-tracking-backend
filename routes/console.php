@@ -52,6 +52,13 @@ if (config('expense_intelligence_reports.enabled', true)) {
         ->withoutOverlapping()
         ->onOneServer();
 
+    Schedule::command('expense-intelligence-reports:email bi-weekly')
+        ->weeklyOn(weeklyScheduleDay(config('expense_intelligence_reports.bi_weekly_send_day', 'sunday')), config('expense_intelligence_reports.bi_weekly_send_time', '21:45'))
+        ->timezone(config('expense_intelligence_reports.timezone', config('app.timezone')))
+        ->when(fn (): bool => now(config('expense_intelligence_reports.timezone', config('app.timezone')))->weekOfYear % 2 === 0)
+        ->withoutOverlapping()
+        ->onOneServer();
+
     Schedule::command('expense-intelligence-reports:email monthly')
         ->monthlyOn(config('expense_intelligence_reports.monthly_send_day', 1), config('expense_intelligence_reports.monthly_send_time', '22:00'))
         ->timezone(config('expense_intelligence_reports.timezone', config('app.timezone')))

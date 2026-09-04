@@ -51,6 +51,7 @@ class ExpenseIntelligenceReportService
         return match ($frequency) {
             'daily' => $this->daily($user->id, $fromDate, $toDate),
             'weekly' => $this->weekly($user->id, $fromDate, $toDate),
+            'bi-weekly' => $this->biWeekly($user->id, $fromDate, $toDate),
             'monthly' => $this->monthly($user->id, $fromDate, $toDate),
             default => throw new InvalidArgumentException('Invalid report frequency.'),
         };
@@ -61,6 +62,7 @@ class ExpenseIntelligenceReportService
         return match ($frequency) {
             'daily' => 'Daily Expense Intelligence Report',
             'weekly' => 'Weekly Expense Intelligence Report',
+            'bi-weekly' => 'Bi-weekly Expense Intelligence Report',
             'monthly' => 'Monthly Expense Intelligence Report',
             default => 'Expense Intelligence Report',
         };
@@ -92,6 +94,8 @@ class ExpenseIntelligenceReportService
             'anomalies' => $anomalies,
             'trend_rows' => $this->dailyHoursTrend($userId, $fromDate, $toDate),
             'chart_rows' => $this->chartRows($categoryRows, 'current_expense', (int) config('expense_intelligence_reports.top_categories')),
+            'account_rows' => $this->accountBreakdown($userId, $fromDate, $toDate),
+            'calculation_hints' => $this->calculationHints('daily'),
             'insights' => $this->dailyInsights($summary, $historicalDailyAverage, $increasePercentage, $largestExpenses, $leakage),
             'recommendations' => $this->dailyRecommendations($summary, $historicalDailyAverage, $increasePercentage, $leakage, $anomalies),
         ];
@@ -107,11 +111,12 @@ class ExpenseIntelligenceReportService
         $weekAverage = $this->recentPeriodAverage($userId, $fromDate, 'week', 4);
         $targetLow = BigDecimal::of($weekAverage)->multipliedBy('0.95')->toScale(2, RoundingMode::HALF_UP);
         $targetHigh = BigDecimal::of($weekAverage)->multipliedBy('1.05')->toScale(2, RoundingMode::HALF_UP);
+        $periodDays = max(1, $fromDate->diffInDays($toDate) + 1);
 
         return [
             'summary' => [
                 ...$summary,
-                'average_daily_expense' => $this->money(BigDecimal::of($summary['total_expense'])->dividedBy('7', 2, RoundingMode::HALF_UP)),
+                'average_daily_expense' => $this->money(BigDecimal::of($summary['total_expense'])->dividedBy((string) $periodDays, 2, RoundingMode::HALF_UP)),
                 'highest_spending_day' => $dailyTrend->sortByDesc(fn (array $row): float => (float) $row['expense'])->first(),
                 'lowest_spending_day' => $dailyTrend->sortBy(fn (array $row): float => (float) $row['expense'])->first(),
                 'recurring_expense' => $this->recurringExpenseTotal($userId, $fromDate, $toDate),
@@ -124,6 +129,8 @@ class ExpenseIntelligenceReportService
                 ...$leakage,
                 'repeated_similar_expenses' => $this->repeatedSimilarExpenses($userId, $fromDate, $toDate),
             ],
+            'account_rows' => $this->accountBreakdown($userId, $fromDate, $toDate),
+            'comparison' => $this->periodComparison($summary['total_expense'], $this->sumAmounts($categoryRows, 'previous_expense')),
             'anomalies' => $anomalies,
             'alerts' => $this->weeklyAlerts($summary, $categoryRows),
             'opportunities' => $categoryRows->sortByDesc('opportunity_score')->take(5)->values(),
@@ -133,6 +140,51 @@ class ExpenseIntelligenceReportService
                 'target_low' => (string) $targetLow,
                 'target_high' => (string) $targetHigh,
             ],
+            'calculation_hints' => $this->calculationHints('weekly'),
+            'recommendations' => $this->weeklyRecommendations($categoryRows, $leakage, $anomalies, (string) $targetHigh),
+        ];
+    }
+
+    private function biWeekly(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): array
+    {
+        $summary = $this->summary($userId, $fromDate, $toDate);
+        $dailyTrend = $this->dailyTrend($userId, $fromDate, $toDate);
+        $categoryRows = $this->categoryAnalysis($userId, $fromDate, $toDate);
+        $leakage = $this->smallExpenseLeakage($userId, $fromDate, $toDate);
+        $anomalies = $this->anomalies($userId, $fromDate, $toDate);
+        $biWeeklyAverage = $this->recentPeriodAverage($userId, $fromDate, 'bi-week', 3);
+        $targetLow = BigDecimal::of($biWeeklyAverage)->multipliedBy('0.95')->toScale(2, RoundingMode::HALF_UP);
+        $targetHigh = BigDecimal::of($biWeeklyAverage)->multipliedBy('1.05')->toScale(2, RoundingMode::HALF_UP);
+        $periodDays = max(1, $fromDate->diffInDays($toDate) + 1);
+
+        return [
+            'summary' => [
+                ...$summary,
+                'average_daily_expense' => $this->money(BigDecimal::of($summary['total_expense'])->dividedBy((string) $periodDays, 2, RoundingMode::HALF_UP)),
+                'highest_spending_day' => $dailyTrend->sortByDesc(fn (array $row): float => (float) $row['expense'])->first(),
+                'lowest_spending_day' => $dailyTrend->sortBy(fn (array $row): float => (float) $row['expense'])->first(),
+                'recurring_expense' => $this->recurringExpenseTotal($userId, $fromDate, $toDate),
+            ],
+            'trend_rows' => $dailyTrend,
+            'category_rows' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['difference'])->values(),
+            'chart_rows' => $dailyTrend,
+            'top_categories' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['current_expense'])->take(8)->values(),
+            'leakage' => [
+                ...$leakage,
+                'repeated_similar_expenses' => $this->repeatedSimilarExpenses($userId, $fromDate, $toDate),
+            ],
+            'account_rows' => $this->accountBreakdown($userId, $fromDate, $toDate),
+            'comparison' => $this->periodComparison($summary['total_expense'], $this->sumAmounts($categoryRows, 'previous_expense')),
+            'anomalies' => $anomalies,
+            'alerts' => $this->weeklyAlerts($summary, $categoryRows),
+            'opportunities' => $categoryRows->sortByDesc('opportunity_score')->take(8)->values(),
+            'plan' => [
+                'last_3_bi_week_average' => $this->money($biWeeklyAverage),
+                'current_bi_week' => $summary['total_expense'],
+                'target_low' => (string) $targetLow,
+                'target_high' => (string) $targetHigh,
+            ],
+            'calculation_hints' => $this->calculationHints('bi-weekly'),
             'recommendations' => $this->weeklyRecommendations($categoryRows, $leakage, $anomalies, (string) $targetHigh),
         ];
     }
@@ -167,12 +219,15 @@ class ExpenseIntelligenceReportService
                 'repeated_similar_expenses' => $this->repeatedSimilarExpenses($userId, $fromDate, $toDate),
             ],
             'behavior' => $this->behaviorAnalysis($userId, $fromDate, $toDate),
+            'account_rows' => $this->accountBreakdown($userId, $fromDate, $toDate),
+            'comparison' => $this->periodComparison($summary['total_expense'], $this->sumAmounts($categoryRows, 'previous_expense')),
             'anomalies' => $anomalies,
             'opportunities' => $categoryRows->sortByDesc('opportunity_score')->take(10)->values(),
             'potential_savings' => $this->potentialSavingsRange($categoryRows),
             'forecast' => $forecast,
             'budget' => $this->nextMonthBudget($forecast, $summary['total_income'], $recurring['monthly_commitment']),
             'risks' => $this->nextMonthRisks($categoryRows, $recurring, $leakage),
+            'calculation_hints' => $this->calculationHints('monthly'),
             'recommendations' => $this->monthlyRecommendations($categoryRows, $recurring, $leakage, $forecast),
         ];
     }
@@ -702,6 +757,104 @@ class ExpenseIntelligenceReportService
             ->whereDate('transaction_date', '>=', $fromDate->toDateString())
             ->whereDate('transaction_date', '<=', $toDate->toDateString())
             ->sum('amount'));
+    }
+
+    private function recentPeriodAverage(int $userId, CarbonImmutable $beforeDate, string $period, int $periodCount): string
+    {
+        $totals = collect();
+        $periodDays = $period === 'bi-week' ? 14 : 7;
+
+        for ($index = 1; $index <= $periodCount; $index++) {
+            $periodTo = $beforeDate->subDays(($index - 1) * $periodDays + 1)->endOfDay();
+            $periodFrom = $periodTo->subDays($periodDays - 1)->startOfDay();
+            $totals->push($this->transactionSum($userId, $periodFrom, $periodTo, [
+                TransactionType::EXPENSE->value,
+                TransactionType::RECURRING->value,
+            ]));
+        }
+
+        if ($totals->isEmpty()) {
+            return '0.00';
+        }
+
+        return $this->money($totals->reduce(
+            fn (BigDecimal $sum, string $total): BigDecimal => $sum->plus($total),
+            BigDecimal::zero()
+        )->dividedBy((string) $totals->count(), 2, RoundingMode::HALF_UP));
+    }
+
+    private function accountBreakdown(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): Collection
+    {
+        return DB::table('transactions')
+            ->join('accounts', 'accounts.id', '=', 'transactions.account_id')
+            ->select([
+                'transactions.account_id',
+                'accounts.name as account_name',
+                'accounts.type as account_type',
+                DB::raw('COUNT(transactions.id) as transaction_count'),
+                DB::raw('SUM(transactions.amount) as total_expense'),
+                DB::raw('AVG(transactions.amount) as average_expense'),
+            ])
+            ->where('transactions.user_id', $userId)
+            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
+            ->whereDate('transactions.transaction_date', '>=', $fromDate->toDateString())
+            ->whereDate('transactions.transaction_date', '<=', $toDate->toDateString())
+            ->groupBy('transactions.account_id', 'accounts.name', 'accounts.type')
+            ->orderByDesc('total_expense')
+            ->get()
+            ->map(fn (object $row): array => [
+                'account_id' => (int) $row->account_id,
+                'account_name' => $row->account_name,
+                'account_type' => $row->account_type,
+                'transaction_count' => (int) $row->transaction_count,
+                'total_expense' => $this->money($row->total_expense),
+                'average_expense' => $this->money($row->average_expense),
+            ]);
+    }
+
+    private function periodComparison(string $currentExpense, string $previousExpense): array
+    {
+        $difference = BigDecimal::of($currentExpense)->minus($previousExpense)->toScale(2, RoundingMode::HALF_UP);
+
+        return [
+            'current_expense' => $this->money($currentExpense),
+            'previous_expense' => $this->money($previousExpense),
+            'difference' => (string) $difference,
+            'growth_percentage' => BigDecimal::of($previousExpense)->isZero()
+                ? null
+                : $this->percentage($difference, $previousExpense),
+        ];
+    }
+
+    private function calculationHints(string $frequency): array
+    {
+        $common = [
+            'All category names, account names, transaction counts, and amounts are read from the database for the selected user and date range.',
+            'Opportunity score = expense share score + positive growth score + relative frequency score + positive historical deviation score, capped at 100.',
+            'Potential saving is an estimate: current category spending multiplied by a score-weighted configurable savings rate.',
+            'Small expense leakage uses EXPENSE_INTELLIGENCE_SMALL_TRANSACTION_THRESHOLD from configuration.',
+            'Anomalies require enough historical samples and compare transactions against category-level historical averages.',
+        ];
+
+        return match ($frequency) {
+            'weekly' => [
+                ...$common,
+                'Next week target is calculated from the previous 4 completed weekly expense totals, plus/minus 5%.',
+            ],
+            'bi-weekly' => [
+                ...$common,
+                'Next bi-weekly target is calculated from the previous 3 completed 14-day expense totals, plus/minus 5%.',
+            ],
+            'monthly' => [
+                ...$common,
+                'Monthly graph uses EXPENSE_INTELLIGENCE_LOOKBACK_MONTHS; default is 12 months.',
+                'Next month forecast = last 3-month average + half of latest month-over-month trend, floored by active recurring commitments.',
+            ],
+            default => [
+                ...$common,
+                'Daily comparison uses the average of historical daily expense totals before the report date.',
+            ],
+        };
     }
 
     private function dailyInsights(array $summary, string $historicalAverage, ?string $increasePercentage, Collection $largestExpenses, array $leakage): array

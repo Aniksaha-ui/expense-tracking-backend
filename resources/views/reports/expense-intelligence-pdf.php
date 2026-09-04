@@ -116,10 +116,10 @@
             </table>
         <?php endif; ?>
 
-        <div class="section-title"><?= $frequency === 'monthly' ? 'Monthly trend graph' : ($frequency === 'weekly' ? 'Daily spending trend graph' : 'Category spending graph') ?></div>
+        <div class="section-title"><?= $frequency === 'monthly' ? 'Monthly trend graph' : (in_array($frequency, ['weekly', 'bi-weekly'], true) ? 'Daily spending trend graph' : 'Category spending graph') ?></div>
         <?php
-            $graphRows = $frequency === 'monthly' ? $report['trend_rows'] : ($frequency === 'weekly' ? $report['chart_rows'] : $report['chart_rows']);
-            $graphKey = $frequency === 'monthly' || $frequency === 'weekly' ? 'expense' : 'current_expense';
+            $graphRows = $frequency === 'monthly' ? $report['trend_rows'] : (in_array($frequency, ['weekly', 'bi-weekly'], true) ? $report['chart_rows'] : $report['chart_rows']);
+            $graphKey = $frequency === 'monthly' || in_array($frequency, ['weekly', 'bi-weekly'], true) ? 'expense' : 'current_expense';
             $maxGraphValue = $maxChartValue($graphRows, $graphKey);
         ?>
         <table class="bar-table">
@@ -131,6 +131,33 @@
                 </tr>
             <?php endforeach; ?>
         </table>
+
+        <?php if (! empty($report['top_categories']) && $report['top_categories']->isNotEmpty()): ?>
+            <div class="section-title">Top spending category graph</div>
+            <?php $topCategoryMax = $maxChartValue($report['top_categories'], 'current_expense'); ?>
+            <table class="bar-table">
+                <?php foreach ($report['top_categories'] as $row): ?>
+                    <tr>
+                        <td class="bar-label"><?= e($row['category_name']) ?></td>
+                        <td><div class="bar-track"><div class="bar-fill" style="width: <?= e($barWidth($row['current_expense'], $topCategoryMax)) ?>%;"></div></div></td>
+                        <td class="bar-value"><?= e($row['current_expense']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+        <?php endif; ?>
+
+        <?php if (! empty($report['comparison'])): ?>
+            <div class="section-title">Period comparison</div>
+            <table class="data-table">
+                <tr><th>Current</th><th>Previous</th><th>Difference</th><th>Growth</th></tr>
+                <tr>
+                    <td><?= e($report['comparison']['current_expense']) ?></td>
+                    <td><?= e($report['comparison']['previous_expense']) ?></td>
+                    <td><?= e($report['comparison']['difference']) ?></td>
+                    <td><?= e($report['comparison']['growth_percentage'] ?? 'N/A') ?><?= $report['comparison']['growth_percentage'] === null ? '' : '%' ?></td>
+                </tr>
+            </table>
+        <?php endif; ?>
 
         <div class="section-title">Category analysis</div>
         <table class="data-table">
@@ -166,6 +193,39 @@
             </tbody>
         </table>
 
+        <?php if (! empty($report['opportunities']) && $report['opportunities']->isNotEmpty()): ?>
+            <div class="section-title">Cost reduction opportunity ranking</div>
+            <table class="data-table">
+                <tr><th class="name">Category</th><th>Current</th><th>Growth</th><th>Frequency</th><th>Score</th><th>Estimated Saving</th></tr>
+                <?php foreach ($report['opportunities'] as $row): ?>
+                    <tr>
+                        <td class="name"><?= e($row['category_name']) ?></td>
+                        <td><?= e($row['current_expense']) ?></td>
+                        <td><?= e($row['growth_percentage'] ?? 'N/A') ?><?= $row['growth_percentage'] === null ? '' : '%' ?></td>
+                        <td><?= e($row['transaction_count']) ?></td>
+                        <td class="score"><?= e($row['opportunity_score']) ?>/100</td>
+                        <td><?= e($row['potential_saving']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+        <?php endif; ?>
+
+        <?php if (! empty($report['account_rows']) && $report['account_rows']->isNotEmpty()): ?>
+            <div class="section-title">Account-based spending section</div>
+            <table class="data-table">
+                <tr><th class="name">Account</th><th>Type</th><th>Transactions</th><th>Total Expense</th><th>Average</th></tr>
+                <?php foreach ($report['account_rows'] as $row): ?>
+                    <tr>
+                        <td class="name"><?= e($row['account_name']) ?></td>
+                        <td><?= e($row['account_type']) ?></td>
+                        <td><?= e($row['transaction_count']) ?></td>
+                        <td><?= e($row['total_expense']) ?></td>
+                        <td><?= e($row['average_expense']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+        <?php endif; ?>
+
         <?php if (! empty($report['largest_expenses']) && $report['largest_expenses']->isNotEmpty()): ?>
             <div class="section-title">Largest expenses</div>
             <table class="data-table">
@@ -194,7 +254,81 @@
             </tr>
         </table>
 
+        <?php if (! empty($report['leakage']['repeated_similar_expenses']) && $report['leakage']['repeated_similar_expenses']->isNotEmpty()): ?>
+            <div class="section-title">Repeated similar expenses</div>
+            <table class="data-table">
+                <tr><th class="name">Category</th><th>Note Pattern</th><th>Count</th><th>Total</th><th>Average</th></tr>
+                <?php foreach ($report['leakage']['repeated_similar_expenses'] as $row): ?>
+                    <tr>
+                        <td class="name"><?= e($row['category_name'] ?? 'Uncategorized') ?></td>
+                        <td class="left"><?= e($row['note_pattern'] ?: 'No note') ?></td>
+                        <td><?= e($row['transaction_count']) ?></td>
+                        <td><?= e($row['total_amount']) ?></td>
+                        <td><?= e($row['average_amount']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+        <?php endif; ?>
+
+        <?php if (! empty($report['anomalies']) && $report['anomalies']->isNotEmpty()): ?>
+            <div class="section-title">Expense anomaly detection</div>
+            <table class="data-table">
+                <tr><th>Date</th><th class="name">Category</th><th>Transaction</th><th>Category Avg</th><th>Deviation</th><th>Note</th></tr>
+                <?php foreach ($report['anomalies']->take(8) as $row): ?>
+                    <tr>
+                        <td class="left"><?= e($row['transaction_date']) ?></td>
+                        <td class="name"><?= e($row['category_name']) ?></td>
+                        <td><?= e($row['amount']) ?></td>
+                        <td><?= e($row['category_average']) ?></td>
+                        <td><?= e($row['deviation_percentage']) ?>%</td>
+                        <td class="left"><?= e($row['note'] ?? '') ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+        <?php endif; ?>
+
+        <?php if (! empty($report['plan'])): ?>
+            <div class="section-title"><?= $frequency === 'bi-weekly' ? 'Next bi-week spending plan' : 'Next week spending plan' ?></div>
+            <table class="data-table">
+                <tr><th>Historical Period Avg</th><th>Current Period</th><th>Target Low</th><th>Target High</th></tr>
+                <tr>
+                    <td><?= e($report['plan']['last_4_week_average'] ?? $report['plan']['last_3_bi_week_average'] ?? '0.00') ?></td>
+                    <td><?= e($report['plan']['current_week'] ?? $report['plan']['current_bi_week'] ?? '0.00') ?></td>
+                    <td><?= e($report['plan']['target_low']) ?></td>
+                    <td><?= e($report['plan']['target_high']) ?></td>
+                </tr>
+            </table>
+        <?php endif; ?>
+
         <?php if ($frequency === 'monthly'): ?>
+            <?php if (! empty($report['recurring'])): ?>
+                <div class="section-title">Recurring expense analysis</div>
+                <table class="data-table">
+                    <tr><th>Active Recurring</th><th>Monthly Commitment</th><th>Income Commitment</th><th>Largest Recurring</th><th>Largest Amount</th></tr>
+                    <tr>
+                        <td><?= e($report['recurring']['active_count']) ?></td>
+                        <td><?= e($report['recurring']['monthly_commitment']) ?></td>
+                        <td><?= e($report['recurring']['income_commitment_percentage']) ?>%</td>
+                        <td><?= e($report['recurring']['largest']['title'] ?? 'N/A') ?></td>
+                        <td><?= e($report['recurring']['largest']['amount'] ?? '0.00') ?></td>
+                    </tr>
+                </table>
+            <?php endif; ?>
+
+            <?php if (! empty($report['behavior'])): ?>
+                <div class="section-title">Spending behavior analysis</div>
+                <table class="data-table">
+                    <tr><th>Highest Spending Day</th><th>Day Avg</th><th>High Spending Period</th><th>Period Total</th><th>Period Txns</th></tr>
+                    <tr>
+                        <td><?= e($report['behavior']['highest_spending_day']['label'] ?? 'N/A') ?></td>
+                        <td><?= e($report['behavior']['highest_spending_day']['average_expense'] ?? '0.00') ?></td>
+                        <td><?= e($report['behavior']['highest_spending_period']['label'] ?? 'N/A') ?></td>
+                        <td><?= e($report['behavior']['highest_spending_period']['total_expense'] ?? '0.00') ?></td>
+                        <td><?= e($report['behavior']['highest_spending_period']['transaction_count'] ?? 0) ?></td>
+                    </tr>
+                </table>
+            <?php endif; ?>
+
             <div class="section-title">Next month forecast and budget</div>
             <div class="section-note"><?= e($report['forecast']['basis']) ?></div>
             <table class="data-table">
@@ -218,6 +352,15 @@
                     <td><?= e($report['potential_savings']['annual_high']) ?></td>
                 </tr>
             </table>
+        <?php endif; ?>
+
+        <?php if (! empty($report['calculation_hints'])): ?>
+            <div class="section-title">Calculation hints</div>
+            <ul class="list">
+                <?php foreach ($report['calculation_hints'] as $hint): ?>
+                    <li><?= e($hint) ?></li>
+                <?php endforeach; ?>
+            </ul>
         <?php endif; ?>
 
         <?php foreach (['insights' => 'Insights', 'alerts' => 'Alerts', 'risks' => 'Next month risk areas', 'recommendations' => 'Recommendations / Action plan'] as $key => $label): ?>
