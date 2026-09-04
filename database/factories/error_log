@@ -1,0 +1,20 @@
+[20-Jun-2026 04:35:07 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Factories\Factory" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/factories/UserFactory.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/factories/UserFactory.php on line 13
+[20-Jun-2026 10:20:47 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Factories\Factory" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/factories/UserFactory.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/factories/UserFactory.php on line 13
+[31-Aug-2026 01:14:45 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Factories\Factory" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/factories/UserFactory.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/factories/UserFactory.php on line 13
+[01-Sep-2026 07:51:17 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Factories\Factory" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/factories/UserFactory.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/factories/UserFactory.php on line 13
+[04-Sep-2026 04:20:52 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Eloquent\Factories\Factory" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/factories/UserFactory.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/factories/UserFactory.php on line 13

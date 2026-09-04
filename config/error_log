@@ -1,0 +1,668 @@
+[28-May-2026 09:44:05 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[28-May-2026 09:44:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[28-May-2026 09:44:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[28-May-2026 09:44:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[28-May-2026 09:44:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[28-May-2026 09:44:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[28-May-2026 09:44:07 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[13-Jun-2026 20:24:32 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[19-Jun-2026 02:28:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[19-Jun-2026 02:28:36 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[19-Jun-2026 02:29:11 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[19-Jun-2026 02:29:32 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[19-Jun-2026 02:32:36 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21
+[19-Jun-2026 02:39:33 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[19-Jun-2026 02:48:32 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[19-Jun-2026 02:55:09 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[19-Jun-2026 02:55:11 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[19-Jun-2026 03:29:06 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[19-Jun-2026 07:47:55 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[19-Jun-2026 07:47:56 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[19-Jun-2026 07:48:30 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[19-Jun-2026 07:48:53 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[19-Jun-2026 07:54:04 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21
+[19-Jun-2026 07:59:55 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[19-Jun-2026 08:09:00 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[19-Jun-2026 08:14:52 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[19-Jun-2026 08:14:54 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[19-Jun-2026 08:45:56 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php on line 4
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php on line 4
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[23-Jun-2026 01:05:34 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[23-Jun-2026 01:05:34 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[23-Jun-2026 01:05:34 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[23-Jun-2026 01:05:34 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[23-Jun-2026 01:05:34 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php on line 4
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php on line 4
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php on line 4
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php on line 4
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php on line 4
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php on line 4
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php on line 4
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php on line 4
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21
+[29-Jun-2026 17:16:22 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[29-Jun-2026 17:16:24 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[29-Jun-2026 17:16:24 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[29-Jun-2026 17:16:24 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[30-Jun-2026 10:11:09 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[30-Jun-2026 10:11:10 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[30-Jun-2026 10:11:11 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php on line 4
+[30-Jun-2026 10:13:13 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[30-Jun-2026 10:14:08 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[30-Jun-2026 10:15:14 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21
+[30-Jun-2026 10:17:20 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php on line 4
+[30-Jun-2026 10:18:21 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[30-Jun-2026 10:20:24 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[30-Jun-2026 10:21:20 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[30-Jun-2026 10:22:20 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[30-Jun-2026 10:27:44 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[30-Jun-2026 12:13:37 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[30-Jun-2026 12:13:38 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[30-Jun-2026 12:13:38 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[30-Jun-2026 12:13:38 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[11-Jul-2026 19:47:32 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[11-Jul-2026 19:47:34 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[11-Jul-2026 19:47:40 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php on line 4
+[11-Jul-2026 19:47:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[11-Jul-2026 19:47:55 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[11-Jul-2026 19:49:32 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21
+[11-Jul-2026 19:50:33 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php on line 4
+[11-Jul-2026 19:51:36 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[11-Jul-2026 19:53:44 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[11-Jul-2026 19:55:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[11-Jul-2026 19:56:48 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[11-Jul-2026 20:03:13 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[12-Jul-2026 04:53:40 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[12-Jul-2026 04:53:44 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[12-Jul-2026 04:53:45 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php on line 4
+[12-Jul-2026 04:54:30 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[12-Jul-2026 04:55:32 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[12-Jul-2026 04:56:34 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21
+[12-Jul-2026 04:58:42 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php on line 4
+[12-Jul-2026 04:59:45 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[12-Jul-2026 05:00:45 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[12-Jul-2026 05:01:46 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[12-Jul-2026 05:02:49 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[12-Jul-2026 05:05:48 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[20-Jul-2026 04:45:00 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[20-Jul-2026 04:45:01 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[20-Jul-2026 04:45:01 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php on line 4
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php on line 4
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21
+[01-Sep-2026 05:40:00 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[01-Sep-2026 05:44:11 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[01-Sep-2026 05:44:46 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[01-Sep-2026 05:45:43 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21
+[01-Sep-2026 05:46:19 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php on line 4
+[01-Sep-2026 05:48:27 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[01-Sep-2026 06:01:34 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[01-Sep-2026 06:01:54 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[04-Sep-2026 04:20:50 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/app.php on line 16
+[04-Sep-2026 04:20:51 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php:19
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/auth.php on line 19
+[04-Sep-2026 04:20:51 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/dompdf.php on line 4
+[04-Sep-2026 04:20:51 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/cache.php on line 18
+[04-Sep-2026 04:20:51 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php:4
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/expense_reports.php on line 4
+[04-Sep-2026 04:20:51 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/filesystems.php on line 16
+[04-Sep-2026 04:20:51 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/logging.php on line 21
+[04-Sep-2026 04:20:51 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/queue.php on line 16
+[04-Sep-2026 04:20:51 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php:17
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/mail.php on line 17
+[04-Sep-2026 04:20:51 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php:20
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/database.php on line 20
+[04-Sep-2026 04:20:51 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/services.php on line 18
+[04-Sep-2026 04:20:51 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/config/session.php on line 21

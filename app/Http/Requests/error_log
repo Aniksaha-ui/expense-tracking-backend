@@ -1,0 +1,28 @@
+[19-Jun-2026 12:54:16 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Http\FormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php on line 10
+[19-Jun-2026 18:37:33 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Http\FormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php on line 10
+[20-Jun-2026 06:11:08 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Http\FormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php on line 10
+[20-Jun-2026 12:02:59 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Http\FormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php on line 10
+[31-Aug-2026 01:14:49 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Http\FormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php on line 10
+[01-Sep-2026 07:59:31 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Http\FormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php on line 10
+[04-Sep-2026 04:20:56 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Http\FormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/ApiFormRequest.php on line 10

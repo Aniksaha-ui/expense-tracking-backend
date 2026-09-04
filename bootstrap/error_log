@@ -1,0 +1,64 @@
+[28-May-2026 09:44:05 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[02-Jun-2026 04:12:12 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[19-Jun-2026 02:30:31 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[19-Jun-2026 07:49:55 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[23-Jun-2026 01:02:42 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[23-Jun-2026 01:05:34 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[23-Jun-2026 01:05:34 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[23-Jun-2026 01:05:34 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[23-Jun-2026 01:05:35 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[29-Jun-2026 17:16:24 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[30-Jun-2026 12:13:38 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[11-Jul-2026 19:48:30 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[20-Jul-2026 04:45:01 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[31-Aug-2026 01:14:43 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[01-Sep-2026 05:45:03 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7
+[04-Sep-2026 04:20:51 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Foundation\Application" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/bootstrap/app.php on line 7

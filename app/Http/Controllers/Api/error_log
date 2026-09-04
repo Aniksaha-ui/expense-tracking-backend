@@ -1,0 +1,112 @@
+[19-Jun-2026 21:18:46 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/RecurringExpenseController.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/RecurringExpenseController.php on line 16
+[20-Jun-2026 02:57:34 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/RecurringExpenseController.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/RecurringExpenseController.php on line 16
+[20-Jun-2026 03:34:29 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransactionController.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransactionController.php on line 15
+[20-Jun-2026 04:28:42 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AccountController.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AccountController.php on line 12
+[20-Jun-2026 08:44:11 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/ReportController.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/ReportController.php on line 13
+[20-Jun-2026 09:17:25 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransactionController.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransactionController.php on line 15
+[20-Jun-2026 10:15:30 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AccountController.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AccountController.php on line 12
+[20-Jun-2026 14:31:53 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/ReportController.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/ReportController.php on line 13
+[20-Jun-2026 15:32:21 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/CategoryController.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/CategoryController.php on line 12
+[20-Jun-2026 19:18:15 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransferController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransferController.php on line 14
+[20-Jun-2026 21:29:05 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/CategoryController.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/CategoryController.php on line 12
+[21-Jun-2026 01:18:37 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransferController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransferController.php on line 14
+[21-Jun-2026 02:08:23 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AuthController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AuthController.php on line 14
+[21-Jun-2026 08:49:33 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AuthController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AuthController.php on line 14
+[23-Jun-2026 22:05:34 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/RecurringExpenseController.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/RecurringExpenseController.php on line 16
+[23-Jun-2026 22:05:42 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransactionController.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransactionController.php on line 15
+[23-Jun-2026 22:08:10 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AccountController.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AccountController.php on line 12
+[23-Jun-2026 22:09:12 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/ReportController.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/ReportController.php on line 13
+[23-Jun-2026 22:10:16 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/CategoryController.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/CategoryController.php on line 12
+[23-Jun-2026 22:12:20 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransferController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransferController.php on line 14
+[23-Jun-2026 22:13:22 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AuthController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AuthController.php on line 14
+[24-Jun-2026 03:22:09 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/RecurringExpenseController.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/RecurringExpenseController.php on line 16
+[24-Jun-2026 03:23:34 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransactionController.php:15
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransactionController.php on line 15
+[24-Jun-2026 03:24:38 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AccountController.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AccountController.php on line 12
+[24-Jun-2026 03:25:42 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/ReportController.php:13
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/ReportController.php on line 13
+[24-Jun-2026 03:26:43 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/CategoryController.php:12
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/CategoryController.php on line 12
+[24-Jun-2026 03:28:52 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransferController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/TransferController.php on line 14
+[24-Jun-2026 03:29:53 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Controllers\Controller" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AuthController.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Controllers/Api/AuthController.php on line 14

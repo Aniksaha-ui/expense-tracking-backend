@@ -1,0 +1,12 @@
+[31-Aug-2026 01:14:49 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function e() in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/mail/category-expense-report.php:1
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/mail/category-expense-report.php on line 1
+[01-Sep-2026 08:57:33 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function e() in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/mail/category-expense-report.php:1
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/mail/category-expense-report.php on line 1
+[04-Sep-2026 04:20:56 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function e() in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/mail/category-expense-report.php:1
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/mail/category-expense-report.php on line 1

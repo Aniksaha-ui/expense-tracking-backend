@@ -1,0 +1,88 @@
+[21-Jun-2026 18:58:23 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunRecurringExpenseRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunRecurringExpenseRequest.php on line 7
+[21-Jun-2026 20:07:15 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunDueRecurringExpensesRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunDueRecurringExpensesRequest.php on line 7
+[21-Jun-2026 21:05:20 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/StoreRecurringExpenseRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/StoreRecurringExpenseRequest.php on line 9
+[21-Jun-2026 21:05:44 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/UpdateRecurringExpenseRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/UpdateRecurringExpenseRequest.php on line 9
+[21-Jun-2026 21:06:48 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RecurringExpenseFilterRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RecurringExpenseFilterRequest.php on line 7
+[22-Jun-2026 01:57:00 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunRecurringExpenseRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunRecurringExpenseRequest.php on line 7
+[22-Jun-2026 02:51:50 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunDueRecurringExpensesRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunDueRecurringExpensesRequest.php on line 7
+[22-Jun-2026 03:51:31 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/UpdateRecurringExpenseRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/UpdateRecurringExpenseRequest.php on line 9
+[22-Jun-2026 03:51:58 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/StoreRecurringExpenseRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/StoreRecurringExpenseRequest.php on line 9
+[22-Jun-2026 03:53:01 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RecurringExpenseFilterRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RecurringExpenseFilterRequest.php on line 7
+[22-Jun-2026 07:19:40 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunRecurringExpenseRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunRecurringExpenseRequest.php on line 7
+[22-Jun-2026 07:20:41 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunDueRecurringExpensesRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunDueRecurringExpensesRequest.php on line 7
+[22-Jun-2026 07:21:44 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/StoreRecurringExpenseRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/StoreRecurringExpenseRequest.php on line 9
+[22-Jun-2026 07:22:46 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RecurringExpenseFilterRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RecurringExpenseFilterRequest.php on line 7
+[22-Jun-2026 07:23:46 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/UpdateRecurringExpenseRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/UpdateRecurringExpenseRequest.php on line 9
+[22-Jun-2026 13:54:18 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunRecurringExpenseRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunRecurringExpenseRequest.php on line 7
+[22-Jun-2026 13:54:24 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunDueRecurringExpensesRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RunDueRecurringExpensesRequest.php on line 7
+[22-Jun-2026 13:54:42 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RecurringExpenseFilterRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/RecurringExpenseFilterRequest.php on line 7
+[22-Jun-2026 13:55:36 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/StoreRecurringExpenseRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/StoreRecurringExpenseRequest.php on line 9
+[22-Jun-2026 13:56:41 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/UpdateRecurringExpenseRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/UpdateRecurringExpenseRequest.php on line 9
+[01-Sep-2026 08:55:05 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/StoreRecurringExpenseRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/StoreRecurringExpenseRequest.php on line 9
+[01-Sep-2026 08:55:25 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/UpdateRecurringExpenseRequest.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/RecurringExpenses/UpdateRecurringExpenseRequest.php on line 9

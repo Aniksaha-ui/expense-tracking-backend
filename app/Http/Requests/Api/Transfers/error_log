@@ -1,0 +1,72 @@
+[20-Jun-2026 15:01:20 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreTransferRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreTransferRequest.php on line 7
+[20-Jun-2026 15:01:37 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/UpdateTransferRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/UpdateTransferRequest.php on line 7
+[20-Jun-2026 15:02:26 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/TransferFilterRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/TransferFilterRequest.php on line 7
+[20-Jun-2026 20:59:09 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreTransferRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreTransferRequest.php on line 7
+[20-Jun-2026 21:05:38 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/UpdateTransferRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/UpdateTransferRequest.php on line 7
+[20-Jun-2026 21:06:07 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/TransferFilterRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/TransferFilterRequest.php on line 7
+[21-Jun-2026 04:46:01 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreWithdrawalRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreWithdrawalRequest.php on line 7
+[21-Jun-2026 06:17:04 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreTransferRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreTransferRequest.php on line 7
+[21-Jun-2026 06:17:21 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/UpdateTransferRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/UpdateTransferRequest.php on line 7
+[21-Jun-2026 06:21:15 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/TransferFilterRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/TransferFilterRequest.php on line 7
+[21-Jun-2026 11:40:41 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreWithdrawalRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreWithdrawalRequest.php on line 7
+[21-Jun-2026 12:58:29 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreTransferRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreTransferRequest.php on line 7
+[21-Jun-2026 12:58:30 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/UpdateTransferRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/UpdateTransferRequest.php on line 7
+[21-Jun-2026 13:00:22 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/TransferFilterRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/TransferFilterRequest.php on line 7
+[01-Sep-2026 08:17:05 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreTransferRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreTransferRequest.php on line 7
+[01-Sep-2026 08:17:08 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/TransferFilterRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/TransferFilterRequest.php on line 7
+[01-Sep-2026 08:17:14 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/UpdateTransferRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/UpdateTransferRequest.php on line 7
+[01-Sep-2026 08:41:57 UTC] PHP Fatal error:  Uncaught Error: Class "App\Http\Requests\ApiFormRequest" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreWithdrawalRequest.php:7
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Requests/Api/Transfers/StoreWithdrawalRequest.php on line 7

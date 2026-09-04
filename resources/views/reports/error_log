@@ -1,0 +1,15 @@
+[31-Aug-2026 01:14:49 UTC] PHP Warning:  Undefined variable $fromDate in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/reports/category-expenses-pdf.php on line 134
+[31-Aug-2026 01:14:49 UTC] PHP Fatal error:  Uncaught Error: Call to a member function diffInDays() on null in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/reports/category-expenses-pdf.php:134
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/reports/category-expenses-pdf.php on line 134
+[01-Sep-2026 08:57:27 UTC] PHP Warning:  Undefined variable $fromDate in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/reports/category-expenses-pdf.php on line 134
+[01-Sep-2026 08:57:27 UTC] PHP Fatal error:  Uncaught Error: Call to a member function diffInDays() on null in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/reports/category-expenses-pdf.php:134
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/reports/category-expenses-pdf.php on line 134
+[04-Sep-2026 04:20:56 UTC] PHP Warning:  Undefined variable $fromDate in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/reports/category-expenses-pdf.php on line 134
+[04-Sep-2026 04:20:56 UTC] PHP Fatal error:  Uncaught Error: Call to a member function diffInDays() on null in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/reports/category-expenses-pdf.php:134
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/resources/views/reports/category-expenses-pdf.php on line 134

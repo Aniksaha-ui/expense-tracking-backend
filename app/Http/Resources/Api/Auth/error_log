@@ -1,0 +1,8 @@
+[21-Jun-2026 04:15:18 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/Auth/AuthTokenResource.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/Auth/AuthTokenResource.php on line 9
+[21-Jun-2026 11:05:16 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Http\Resources\Json\JsonResource" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/Auth/AuthTokenResource.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/app/Http/Resources/Api/Auth/AuthTokenResource.php on line 9

@@ -1,0 +1,48 @@
+[19-Jun-2026 04:28:41 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Seeder" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DatabaseSeeder.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DatabaseSeeder.php on line 9
+[19-Jun-2026 08:05:19 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Seeder" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DefaultCategorySeeder.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DefaultCategorySeeder.php on line 9
+[19-Jun-2026 09:45:02 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Seeder" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DatabaseSeeder.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DatabaseSeeder.php on line 9
+[19-Jun-2026 13:47:37 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Seeder" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DefaultCategorySeeder.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DefaultCategorySeeder.php on line 9
+[19-Jun-2026 22:46:30 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Seeder" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DatabaseSeeder.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DatabaseSeeder.php on line 9
+[19-Jun-2026 22:48:31 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Seeder" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DefaultCategorySeeder.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DefaultCategorySeeder.php on line 9
+[20-Jun-2026 04:27:29 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Seeder" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DatabaseSeeder.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DatabaseSeeder.php on line 9
+[20-Jun-2026 04:28:13 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Seeder" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DefaultCategorySeeder.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DefaultCategorySeeder.php on line 9
+[31-Aug-2026 01:14:46 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Seeder" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DatabaseSeeder.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DatabaseSeeder.php on line 9
+[31-Aug-2026 01:14:46 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Seeder" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DefaultCategorySeeder.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DefaultCategorySeeder.php on line 9
+[04-Sep-2026 04:20:52 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Seeder" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DatabaseSeeder.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DatabaseSeeder.php on line 9
+[04-Sep-2026 04:20:52 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Seeder" not found in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DefaultCategorySeeder.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/infirtlu/expense-backend.infinitycodehubltd.com/database/seeders/DefaultCategorySeeder.php on line 9
