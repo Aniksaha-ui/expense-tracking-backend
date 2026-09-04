@@ -15,3 +15,11 @@ if (config('expense_reports.enabled', true)) {
         ->withoutOverlapping()
         ->onOneServer();
 }
+
+if (config('cost_reduction_reports.enabled', true)) {
+    Schedule::command('cost-reduction-reports:email')
+        ->dailyAt(config('cost_reduction_reports.send_time', '08:30'))
+        ->timezone(config('cost_reduction_reports.timezone', config('app.timezone')))
+        ->withoutOverlapping()
+        ->onOneServer();
+}
