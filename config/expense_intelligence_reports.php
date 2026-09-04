@@ -15,6 +15,7 @@ return [
     'cc' => array_filter(array_map('trim', explode(',', env('EXPENSE_INTELLIGENCE_CC', '')))),
     'bcc' => array_filter(array_map('trim', explode(',', env('EXPENSE_INTELLIGENCE_BCC', '')))),
     'lookback_months' => max(1, (int) env('EXPENSE_INTELLIGENCE_LOOKBACK_MONTHS', 12)),
+    'excluded_months' => array_values(array_filter(array_map('trim', explode(',', env('EXPENSE_INTELLIGENCE_EXCLUDED_MONTHS', ''))))),
     'top_categories' => max(1, (int) env('EXPENSE_INTELLIGENCE_TOP_CATEGORIES', 10)),
     'small_transaction_threshold' => env('EXPENSE_INTELLIGENCE_SMALL_TRANSACTION_THRESHOLD', '500.00'),
     'significant_change_percentage' => env('EXPENSE_INTELLIGENCE_SIGNIFICANT_CHANGE_PERCENTAGE', '20.0'),

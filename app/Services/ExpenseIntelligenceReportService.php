@@ -98,6 +98,7 @@ class ExpenseIntelligenceReportService
             'efficiency_report' => $this->efficiencyReport($summary, $categoryRows, $dailyTrend, $leakage, $anomalies),
             'account_rows' => $accountRows,
             'totals' => $this->reportTotals($categoryRows, collect(), $accountRows),
+            'excluded_months' => $this->excludedMonths(),
             'definitions' => $this->reportDefinitions('daily'),
             'section_guides' => $this->sectionGuides('daily'),
             'calculation_hints' => $this->calculationHints('daily'),
@@ -138,6 +139,7 @@ class ExpenseIntelligenceReportService
             'account_rows' => $accountRows,
             'totals' => $this->reportTotals($categoryRows, $opportunities, $accountRows),
             'next_week_risk_report' => $this->nextWeekRiskReport($userId, $fromDate, $toDate, $categoryRows),
+            'excluded_months' => $this->excludedMonths(),
             'comparison' => $this->periodComparison($summary['total_expense'], $this->sumAmounts($categoryRows, 'previous_expense')),
             'anomalies' => $anomalies,
             'alerts' => $this->weeklyAlerts($summary, $categoryRows),
@@ -187,6 +189,7 @@ class ExpenseIntelligenceReportService
             'account_rows' => $accountRows,
             'totals' => $this->reportTotals($categoryRows, $opportunities, $accountRows),
             'next_week_risk_report' => $this->nextWeekRiskReport($userId, $fromDate, $toDate, $categoryRows),
+            'excluded_months' => $this->excludedMonths(),
             'comparison' => $this->periodComparison($summary['total_expense'], $this->sumAmounts($categoryRows, 'previous_expense')),
             'anomalies' => $anomalies,
             'alerts' => $this->weeklyAlerts($summary, $categoryRows),
@@ -240,6 +243,7 @@ class ExpenseIntelligenceReportService
             'behavior' => $this->behaviorAnalysis($userId, $fromDate, $toDate),
             'account_rows' => $accountRows,
             'totals' => $this->reportTotals($categoryRows, $opportunities, $accountRows),
+            'excluded_months' => $this->excludedMonths(),
             'comparison' => $this->periodComparison($summary['total_expense'], $this->sumAmounts($categoryRows, 'previous_expense')),
             'anomalies' => $anomalies,
             'opportunities' => $opportunities,
@@ -262,9 +266,8 @@ class ExpenseIntelligenceReportService
             ->leftJoin('categories', 'categories.id', '=', 'transactions.category_id')
             ->leftJoin('accounts', 'accounts.id', '=', 'transactions.account_id')
             ->where('transactions.user_id', $userId)
-            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->whereDate('transactions.transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transactions.transaction_date', '<=', $toDate->toDateString());
+            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value]);
+        $this->applyTransactionDateRange($expenseTransactions, 'transactions.transaction_date', $fromDate, $toDate);
 
         $transactionCount = (int) (clone $expenseTransactions)->count();
         $largest = (clone $expenseTransactions)
@@ -350,13 +353,14 @@ class ExpenseIntelligenceReportService
 
     private function categoryTotals(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): Collection
     {
-        return DB::table('transactions')
+        $query = DB::table('transactions')
             ->select(['category_id', DB::raw('COUNT(id) as transaction_count'), DB::raw('SUM(amount) as total_expense')])
             ->where('user_id', $userId)
             ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->whereNotNull('category_id')
-            ->whereDate('transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transaction_date', '<=', $toDate->toDateString())
+            ->whereNotNull('category_id');
+        $this->applyTransactionDateRange($query, 'transaction_date', $fromDate, $toDate);
+
+        return $query
             ->groupBy('category_id')
             ->get()
             ->keyBy('category_id');
@@ -364,7 +368,7 @@ class ExpenseIntelligenceReportService
 
     private function largestExpenses(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate, int $limit): Collection
     {
-        return DB::table('transactions')
+        $query = DB::table('transactions')
             ->leftJoin('categories', 'categories.id', '=', 'transactions.category_id')
             ->leftJoin('accounts', 'accounts.id', '=', 'transactions.account_id')
             ->select([
@@ -375,9 +379,10 @@ class ExpenseIntelligenceReportService
                 'accounts.name as account_name',
             ])
             ->where('transactions.user_id', $userId)
-            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->whereDate('transactions.transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transactions.transaction_date', '<=', $toDate->toDateString())
+            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value]);
+        $this->applyTransactionDateRange($query, 'transactions.transaction_date', $fromDate, $toDate);
+
+        return $query
             ->orderByDesc('transactions.amount')
             ->limit($limit)
             ->get()
@@ -393,14 +398,13 @@ class ExpenseIntelligenceReportService
     private function smallExpenseLeakage(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): array
     {
         $threshold = (string) config('expense_intelligence_reports.small_transaction_threshold', '500.00');
-        $row = DB::table('transactions')
+        $query = DB::table('transactions')
             ->select([DB::raw('COUNT(id) as transaction_count'), DB::raw('SUM(amount) as total_amount'), DB::raw('AVG(amount) as average_amount')])
             ->where('user_id', $userId)
             ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->where('amount', '<', $threshold)
-            ->whereDate('transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transaction_date', '<=', $toDate->toDateString())
-            ->first();
+            ->where('amount', '<', $threshold);
+        $this->applyTransactionDateRange($query, 'transaction_date', $fromDate, $toDate);
+        $row = $query->first();
 
         return [
             'threshold' => $this->money($threshold),
@@ -418,20 +422,22 @@ class ExpenseIntelligenceReportService
             ->select(['category_id', DB::raw('AVG(amount) as average_amount'), DB::raw('COUNT(id) as sample_count')])
             ->where('user_id', $userId)
             ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->whereNotNull('category_id')
-            ->whereDate('transaction_date', '<', $fromDate->toDateString())
+            ->whereNotNull('category_id');
+        $this->applyTransactionBeforeDate($historical, 'transaction_date', $fromDate);
+        $historical = $historical
             ->groupBy('category_id')
             ->get()
             ->keyBy('category_id');
 
-        return DB::table('transactions')
+        $query = DB::table('transactions')
             ->leftJoin('categories', 'categories.id', '=', 'transactions.category_id')
             ->select(['transactions.category_id', 'transactions.amount', 'transactions.note', 'transactions.transaction_date', 'categories.name as category_name'])
             ->where('transactions.user_id', $userId)
             ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->whereNotNull('transactions.category_id')
-            ->whereDate('transactions.transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transactions.transaction_date', '<=', $toDate->toDateString())
+            ->whereNotNull('transactions.category_id');
+        $this->applyTransactionDateRange($query, 'transactions.transaction_date', $fromDate, $toDate);
+
+        return $query
             ->get()
             ->filter(function (object $transaction) use ($historical, $multiplier, $minimumSamples): bool {
                 $baseline = $historical->get($transaction->category_id);
@@ -457,12 +463,12 @@ class ExpenseIntelligenceReportService
 
     private function dailyTrend(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): Collection
     {
-        $rows = DB::table('transactions')
+        $query = DB::table('transactions')
             ->select([DB::raw('DATE(transaction_date) as day'), DB::raw('SUM(amount) as expense'), DB::raw('COUNT(id) as transaction_count')])
             ->where('user_id', $userId)
-            ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->whereDate('transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transaction_date', '<=', $toDate->toDateString())
+            ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value]);
+        $this->applyTransactionDateRange($query, 'transaction_date', $fromDate, $toDate);
+        $rows = $query
             ->groupBy(DB::raw('DATE(transaction_date)'))
             ->get()
             ->keyBy('day');
@@ -485,12 +491,13 @@ class ExpenseIntelligenceReportService
 
     private function dailyHoursTrend(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): Collection
     {
-        return DB::table('transactions')
+        $query = DB::table('transactions')
             ->select([DB::raw('HOUR(transaction_date) as hour'), DB::raw('SUM(amount) as expense'), DB::raw('COUNT(id) as transaction_count')])
             ->where('user_id', $userId)
-            ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->whereDate('transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transaction_date', '<=', $toDate->toDateString())
+            ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value]);
+        $this->applyTransactionDateRange($query, 'transaction_date', $fromDate, $toDate);
+
+        return $query
             ->groupBy(DB::raw('HOUR(transaction_date)'))
             ->orderBy('hour')
             ->get()
@@ -504,16 +511,16 @@ class ExpenseIntelligenceReportService
     private function monthlyTrend(int $userId, CarbonImmutable $toDate, int $months): Collection
     {
         $startDate = $toDate->startOfMonth()->subMonths($months - 1);
-        $rows = DB::table('transactions')
+        $query = DB::table('transactions')
             ->select([
                 DB::raw("DATE_FORMAT(transaction_date, '%Y-%m') as month_key"),
                 DB::raw("SUM(CASE WHEN type = '".TransactionType::INCOME->value."' THEN amount ELSE 0 END) as income"),
                 DB::raw("SUM(CASE WHEN type IN ('".TransactionType::EXPENSE->value."', '".TransactionType::RECURRING->value."') THEN amount ELSE 0 END) as expense"),
                 DB::raw('COUNT(id) as transaction_count'),
             ])
-            ->where('user_id', $userId)
-            ->whereDate('transaction_date', '>=', $startDate->toDateString())
-            ->whereDate('transaction_date', '<=', $toDate->toDateString())
+            ->where('user_id', $userId);
+        $this->applyTransactionDateRange($query, 'transaction_date', $startDate, $toDate);
+        $rows = $query
             ->groupBy(DB::raw("DATE_FORMAT(transaction_date, '%Y-%m')"))
             ->get()
             ->keyBy('month_key');
@@ -540,7 +547,7 @@ class ExpenseIntelligenceReportService
 
     private function categoryTrends(int $userId, CarbonImmutable $toDate, int $months): Collection
     {
-        return DB::table('transactions')
+        $query = DB::table('transactions')
             ->join('categories', 'categories.id', '=', 'transactions.category_id')
             ->select([
                 'transactions.category_id',
@@ -549,9 +556,10 @@ class ExpenseIntelligenceReportService
                 DB::raw('SUM(transactions.amount) as expense'),
             ])
             ->where('transactions.user_id', $userId)
-            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->whereDate('transactions.transaction_date', '>=', $toDate->startOfMonth()->subMonths($months - 1)->toDateString())
-            ->whereDate('transactions.transaction_date', '<=', $toDate->toDateString())
+            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value]);
+        $this->applyTransactionDateRange($query, 'transactions.transaction_date', $toDate->startOfMonth()->subMonths($months - 1), $toDate);
+
+        return $query
             ->groupBy('transactions.category_id', 'categories.name', DB::raw("DATE_FORMAT(transactions.transaction_date, '%Y-%m')"))
             ->orderBy('categories.name')
             ->get()
@@ -569,7 +577,7 @@ class ExpenseIntelligenceReportService
 
     private function repeatedSimilarExpenses(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): Collection
     {
-        return DB::table('transactions')
+        $query = DB::table('transactions')
             ->leftJoin('categories', 'categories.id', '=', 'transactions.category_id')
             ->select([
                 'transactions.category_id',
@@ -580,9 +588,10 @@ class ExpenseIntelligenceReportService
                 DB::raw('AVG(transactions.amount) as average_amount'),
             ])
             ->where('transactions.user_id', $userId)
-            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->whereDate('transactions.transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transactions.transaction_date', '<=', $toDate->toDateString())
+            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value]);
+        $this->applyTransactionDateRange($query, 'transactions.transaction_date', $fromDate, $toDate);
+
+        return $query
             ->groupBy('transactions.category_id', 'categories.name', DB::raw("LOWER(COALESCE(transactions.note, ''))"))
             ->havingRaw('COUNT(transactions.id) >= 2')
             ->orderByDesc('total_amount')
@@ -599,25 +608,25 @@ class ExpenseIntelligenceReportService
 
     private function behaviorAnalysis(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): array
     {
-        $weekdayRows = DB::table('transactions')
+        $weekdayQuery = DB::table('transactions')
             ->select([DB::raw('DAYNAME(transaction_date) as day_name'), DB::raw('AVG(amount) as average_expense'), DB::raw('SUM(amount) as total_expense')])
             ->where('user_id', $userId)
-            ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->whereDate('transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transaction_date', '<=', $toDate->toDateString())
+            ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value]);
+        $this->applyTransactionDateRange($weekdayQuery, 'transaction_date', $fromDate, $toDate);
+        $weekdayRows = $weekdayQuery
             ->groupBy(DB::raw('DAYNAME(transaction_date)'))
             ->orderByDesc('average_expense')
             ->get();
-        $periodRows = DB::table('transactions')
+        $periodQuery = DB::table('transactions')
             ->select([
                 DB::raw("CASE WHEN HOUR(transaction_date) BETWEEN 5 AND 11 THEN 'Morning' WHEN HOUR(transaction_date) BETWEEN 12 AND 16 THEN 'Afternoon' WHEN HOUR(transaction_date) BETWEEN 17 AND 21 THEN 'Evening' ELSE 'Night' END as period_label"),
                 DB::raw('SUM(amount) as total_expense'),
                 DB::raw('COUNT(id) as transaction_count'),
             ])
             ->where('user_id', $userId)
-            ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->whereDate('transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transaction_date', '<=', $toDate->toDateString())
+            ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value]);
+        $this->applyTransactionDateRange($periodQuery, 'transaction_date', $fromDate, $toDate);
+        $periodRows = $periodQuery
             ->groupBy('period_label')
             ->orderByDesc('total_expense')
             ->get();
@@ -707,22 +716,22 @@ class ExpenseIntelligenceReportService
 
     private function recurringExpenseTotal(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): string
     {
-        return $this->money(DB::table('transactions')
+        $query = DB::table('transactions')
             ->where('user_id', $userId)
-            ->where('type', TransactionType::RECURRING->value)
-            ->whereDate('transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transaction_date', '<=', $toDate->toDateString())
-            ->sum('amount'));
+            ->where('type', TransactionType::RECURRING->value);
+        $this->applyTransactionDateRange($query, 'transaction_date', $fromDate, $toDate);
+
+        return $this->money($query->sum('amount'));
     }
 
     private function withdrawalTotal(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): string
     {
-        return $this->money(DB::table('transactions')
+        $query = DB::table('transactions')
             ->where('user_id', $userId)
-            ->where('type', TransactionType::WITHDRAW->value)
-            ->whereDate('transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transaction_date', '<=', $toDate->toDateString())
-            ->sum('amount'));
+            ->where('type', TransactionType::WITHDRAW->value);
+        $this->applyTransactionDateRange($query, 'transaction_date', $fromDate, $toDate);
+
+        return $this->money($query->sum('amount'));
     }
 
     private function historicalDailyAverage(int $userId, CarbonImmutable $beforeDate): string
@@ -732,9 +741,9 @@ class ExpenseIntelligenceReportService
                 $query->from('transactions')
                     ->select([DB::raw('DATE(transaction_date) as expense_day'), DB::raw('SUM(amount) as daily_total')])
                     ->where('user_id', $userId)
-                    ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-                    ->whereDate('transaction_date', '<', $beforeDate->toDateString())
-                    ->groupBy(DB::raw('DATE(transaction_date)'));
+                    ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value]);
+                $this->applyTransactionBeforeDate($query, 'transaction_date', $beforeDate);
+                $query->groupBy(DB::raw('DATE(transaction_date)'));
             }, 'daily_expenses')
             ->select(DB::raw('AVG(daily_total) as daily_average'))
             ->first();
@@ -750,9 +759,9 @@ class ExpenseIntelligenceReportService
                     ->select(['category_id', DB::raw("DATE_FORMAT(transaction_date, '%Y-%m') as month_key"), DB::raw('SUM(amount) as monthly_total')])
                     ->where('user_id', $userId)
                     ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-                    ->whereNotNull('category_id')
-                    ->whereDate('transaction_date', '<', $fromDate->toDateString())
-                    ->groupBy('category_id', DB::raw("DATE_FORMAT(transaction_date, '%Y-%m')"));
+                    ->whereNotNull('category_id');
+                $this->applyTransactionBeforeDate($query, 'transaction_date', $fromDate);
+                $query->groupBy('category_id', DB::raw("DATE_FORMAT(transaction_date, '%Y-%m')"));
             }, 'category_monthly_totals')
             ->select(['category_id', DB::raw('AVG(monthly_total) as historical_average')])
             ->groupBy('category_id')
@@ -773,12 +782,12 @@ class ExpenseIntelligenceReportService
 
     private function transactionSum(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate, array $types): string
     {
-        return $this->money(DB::table('transactions')
+        $query = DB::table('transactions')
             ->where('user_id', $userId)
-            ->whereIn('type', $types)
-            ->whereDate('transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transaction_date', '<=', $toDate->toDateString())
-            ->sum('amount'));
+            ->whereIn('type', $types);
+        $this->applyTransactionDateRange($query, 'transaction_date', $fromDate, $toDate);
+
+        return $this->money($query->sum('amount'));
     }
 
     private function recentPeriodAverage(int $userId, CarbonImmutable $beforeDate, string $period, int $periodCount): string
@@ -807,7 +816,7 @@ class ExpenseIntelligenceReportService
 
     private function accountBreakdown(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): Collection
     {
-        return DB::table('transactions')
+        $query = DB::table('transactions')
             ->join('accounts', 'accounts.id', '=', 'transactions.account_id')
             ->select([
                 'transactions.account_id',
@@ -818,9 +827,10 @@ class ExpenseIntelligenceReportService
                 DB::raw('AVG(transactions.amount) as average_expense'),
             ])
             ->where('transactions.user_id', $userId)
-            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->whereDate('transactions.transaction_date', '>=', $fromDate->toDateString())
-            ->whereDate('transactions.transaction_date', '<=', $toDate->toDateString())
+            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value]);
+        $this->applyTransactionDateRange($query, 'transactions.transaction_date', $fromDate, $toDate);
+
+        return $query
             ->groupBy('transactions.account_id', 'accounts.name', 'accounts.type')
             ->orderByDesc('total_expense')
             ->get()
@@ -1041,6 +1051,7 @@ class ExpenseIntelligenceReportService
     {
         $common = [
             'All category names, account names, transaction counts, and amounts are read from the database for the selected user and date range.',
+            'Excluded months use EXPENSE_INTELLIGENCE_EXCLUDED_MONTHS. Add comma-separated YYYY-MM values such as 2026-08,2026-11 to ignore those transaction months in all calculations.',
             'Opportunity score = expense share score + positive growth score + relative frequency score + positive historical deviation score, capped at 100.',
             'Potential saving is an estimate: current category spending multiplied by a score-weighted configurable savings rate.',
             'Small expense leakage uses EXPENSE_INTELLIGENCE_SMALL_TRANSACTION_THRESHOLD from configuration.',
@@ -1088,6 +1099,10 @@ class ExpenseIntelligenceReportService
             [
                 'name' => 'Total expense',
                 'definition' => "Sum of EXPENSE and RECURRING transactions during the {$periodLabel}.",
+            ],
+            [
+                'name' => 'Excluded months',
+                'definition' => 'Configured YYYY-MM months that are ignored in transaction-based report calculations. Example: EXPENSE_INTELLIGENCE_EXCLUDED_MONTHS=2026-08,2026-11.',
             ],
             [
                 'name' => 'Net cash flow',
@@ -1431,6 +1446,43 @@ class ExpenseIntelligenceReportService
         }
 
         return true;
+    }
+
+    private function applyTransactionDateRange($query, string $column, CarbonImmutable $fromDate, CarbonImmutable $toDate): void
+    {
+        $query
+            ->whereDate($column, '>=', $fromDate->toDateString())
+            ->whereDate($column, '<=', $toDate->toDateString());
+
+        $this->applyExcludedMonths($query, $column);
+    }
+
+    private function applyTransactionBeforeDate($query, string $column, CarbonImmutable $beforeDate): void
+    {
+        $query->whereDate($column, '<', $beforeDate->toDateString());
+
+        $this->applyExcludedMonths($query, $column);
+    }
+
+    private function applyExcludedMonths($query, string $column): void
+    {
+        $months = $this->excludedMonths();
+
+        if ($months === []) {
+            return;
+        }
+
+        $query->whereNotIn(DB::raw("DATE_FORMAT({$column}, '%Y-%m')"), $months);
+    }
+
+    private function excludedMonths(): array
+    {
+        return collect(config('expense_intelligence_reports.excluded_months', []))
+            ->map(fn (string $month): string => trim($month))
+            ->filter(fn (string $month): bool => preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month) === 1)
+            ->unique()
+            ->values()
+            ->all();
     }
 
     private function sumAmounts(Collection $rows, string $key): string

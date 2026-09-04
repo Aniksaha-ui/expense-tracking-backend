@@ -173,6 +173,12 @@
         </tr>
     </table>
 
+    <?php if (! empty($report['excluded_months'])): ?>
+        <div class="section-note">
+            Excluded months: <?= e(implode(', ', $report['excluded_months'])) ?>. Transactions inside these months are not used in this report's calculations.
+        </div>
+    <?php endif; ?>
+
     <?php if (($summary['transaction_count'] ?? 0) === 0 && ($summary['total_expense'] ?? '0.00') === '0.00'): ?>
         <div class="empty">No expense data was found for this period.</div>
     <?php else: ?>
