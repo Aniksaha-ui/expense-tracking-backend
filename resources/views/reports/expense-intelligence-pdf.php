@@ -225,42 +225,48 @@
             </table>
         <?php endif; ?>
 
-        <?php if (! empty($report['daily_cost_rows']) && $report['daily_cost_rows']->isNotEmpty()): ?>
-            <div class="section-title">Daily costing graph</div>
-            <div class="section-note">Expense is grouped by transaction date for the selected report period.</div>
-            <div class="chart-box">
-                <?php $dailyCostMax = $maxChartValue($report['daily_cost_rows'], 'expense'); ?>
-                <img class="svg-chart" src="<?= e($svgBarChart($report['daily_cost_rows'], 'expense', 'label', 'Every day costing')) ?>" alt="Daily costing graph">
-                <table class="bar-table">
-                    <?php foreach ($report['daily_cost_rows'] as $row): ?>
-                        <?php [$filled, $empty] = $barCells($row['expense'], $dailyCostMax); ?>
-                        <tr>
-                            <td class="bar-label"><?= e($row['label']) ?></td>
-                            <td>
-                                <table>
-                                    <tr>
-                                        <td class="bar-fill-cell" bgcolor="#147d64" width="<?= e($filled) ?>%">&nbsp;</td>
-                                        <td class="bar-empty-cell" bgcolor="#e9eef4" width="<?= e($empty) ?>%">&nbsp;</td>
-                                    </tr>
-                                </table>
-                                <div class="bar-text"><?= e($textBar($row['expense'], $dailyCostMax)) ?></div>
-                            </td>
-                            <td class="bar-value"><?= e($row['expense']) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </table>
-            </div>
+        <?php if (! empty($report['efficiency_report'])): ?>
+            <div class="section-title">Efficiency report</div>
+            <div class="section-note">This section replaces the every-day costing table with the most useful decision metrics from the selected period.</div>
             <table class="data-table">
-                <tr><th class="left">Day</th><th>Expense</th><th>Transactions</th><th>Average</th></tr>
-                <?php foreach ($report['daily_cost_rows'] as $row): ?>
+                <tr><th class="left">Metric</th><th>Value</th><th class="left">How to use it</th></tr>
+                <?php foreach ($report['efficiency_report']['scorecard'] as $row): ?>
                     <tr>
-                        <td class="left"><?= e($row['label']) ?></td>
-                        <td><?= e($row['expense']) ?></td>
-                        <td><?= e($row['transaction_count']) ?></td>
-                        <td><?= e($row['average']) ?></td>
+                        <td class="left"><?= e($row['metric']) ?></td>
+                        <td><?= e($row['value']) ?></td>
+                        <td class="left"><?= e($row['meaning']) ?></td>
                     </tr>
                 <?php endforeach; ?>
             </table>
+            <table class="data-table">
+                <tr><th>Top Category</th><th>Top Category Amount</th><th>Top Category Share</th><th>Top 3 Amount</th><th>Top 3 Share</th><th>Largest Txn Share</th></tr>
+                <tr>
+                    <td><?= e($report['efficiency_report']['concentration']['top_category']) ?></td>
+                    <td><?= e($report['efficiency_report']['concentration']['top_category_amount']) ?></td>
+                    <td><?= e($report['efficiency_report']['concentration']['top_category_share']) ?>%</td>
+                    <td><?= e($report['efficiency_report']['concentration']['top_three_amount']) ?></td>
+                    <td><?= e($report['efficiency_report']['concentration']['top_three_share']) ?>%</td>
+                    <td><?= e($report['efficiency_report']['concentration']['largest_transaction_share']) ?>%</td>
+                </tr>
+            </table>
+            <table class="data-table">
+                <tr><th>Highest Spending Day</th><th>Highest Day Expense</th><th>Lowest Spending Day</th><th>Lowest Day Expense</th><th>Average Active Day Expense</th></tr>
+                <tr>
+                    <td><?= e($report['efficiency_report']['daily_extremes']['highest_day']['label'] ?? 'N/A') ?></td>
+                    <td><?= e($report['efficiency_report']['daily_extremes']['highest_day']['expense'] ?? '0.00') ?></td>
+                    <td><?= e($report['efficiency_report']['daily_extremes']['lowest_day']['label'] ?? 'N/A') ?></td>
+                    <td><?= e($report['efficiency_report']['daily_extremes']['lowest_day']['expense'] ?? '0.00') ?></td>
+                    <td><?= e($report['efficiency_report']['daily_extremes']['average_active_day_expense']) ?></td>
+                </tr>
+            </table>
+            <?php if (! empty($report['efficiency_report']['actions'])): ?>
+                <div class="section-note">Data-backed action hints</div>
+                <ul class="list">
+                    <?php foreach ($report['efficiency_report']['actions'] as $action): ?>
+                        <li><?= e($action) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
         <?php endif; ?>
 
         <?php if (! empty($report['account_balance_rows']) && $report['account_balance_rows']->isNotEmpty()): ?>

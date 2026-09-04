@@ -80,6 +80,7 @@ class ExpenseIntelligenceReportService
         $leakage = $this->smallExpenseLeakage($userId, $fromDate, $toDate);
         $anomalies = $this->anomalies($userId, $fromDate, $toDate);
         $categoryRows = $this->categoryAnalysis($userId, $fromDate, $toDate);
+        $dailyTrend = $this->dailyTrend($userId, $fromDate, $toDate);
 
         return [
             'summary' => [
@@ -93,7 +94,7 @@ class ExpenseIntelligenceReportService
             'leakage' => $leakage,
             'anomalies' => $anomalies,
             'trend_rows' => $this->dailyHoursTrend($userId, $fromDate, $toDate),
-            'daily_cost_rows' => $this->dailyTrend($userId, $fromDate, $toDate),
+            'efficiency_report' => $this->efficiencyReport($summary, $categoryRows, $dailyTrend, $leakage, $anomalies),
             'account_balance_rows' => $this->accountDailyBalances($userId, $fromDate, $toDate),
             'account_rows' => $this->accountBreakdown($userId, $fromDate, $toDate),
             'definitions' => $this->reportDefinitions('daily'),
@@ -126,7 +127,7 @@ class ExpenseIntelligenceReportService
             ],
             'trend_rows' => $dailyTrend,
             'category_rows' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['difference'])->values(),
-            'daily_cost_rows' => $dailyTrend,
+            'efficiency_report' => $this->efficiencyReport($summary, $categoryRows, $dailyTrend, $leakage, $anomalies),
             'account_balance_rows' => $this->accountDailyBalances($userId, $fromDate, $toDate),
             'leakage' => [
                 ...$leakage,
@@ -172,7 +173,7 @@ class ExpenseIntelligenceReportService
             ],
             'trend_rows' => $dailyTrend,
             'category_rows' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['difference'])->values(),
-            'daily_cost_rows' => $dailyTrend,
+            'efficiency_report' => $this->efficiencyReport($summary, $categoryRows, $dailyTrend, $leakage, $anomalies),
             'account_balance_rows' => $this->accountDailyBalances($userId, $fromDate, $toDate),
             'leakage' => [
                 ...$leakage,
@@ -203,6 +204,7 @@ class ExpenseIntelligenceReportService
         $monthlyTrend = $this->monthlyTrend($userId, $toDate, (int) config('expense_intelligence_reports.lookback_months'));
         $leakage = $this->smallExpenseLeakage($userId, $fromDate, $toDate);
         $anomalies = $this->anomalies($userId, $fromDate, $toDate);
+        $dailyTrend = $this->dailyTrend($userId, $fromDate, $toDate);
         $forecast = $this->nextMonthForecast($userId, $toDate, $monthlyTrend);
         $recurring = $this->recurringAnalysis($userId, $summary['total_income']);
 
@@ -217,7 +219,7 @@ class ExpenseIntelligenceReportService
                 'highest_expense_category' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['current_expense'])->first()['category_name'] ?? null,
             ],
             'trend_rows' => $monthlyTrend,
-            'daily_cost_rows' => $this->dailyTrend($userId, $fromDate, $toDate),
+            'efficiency_report' => $this->efficiencyReport($summary, $categoryRows, $dailyTrend, $leakage, $anomalies, $recurring),
             'account_balance_rows' => $this->accountDailyBalances($userId, $fromDate, $toDate),
             'category_rows' => $categoryRows,
             'category_trends' => $this->categoryTrends($userId, $toDate, (int) config('expense_intelligence_reports.lookback_months')),
@@ -866,6 +868,98 @@ class ExpenseIntelligenceReportService
             ->values();
     }
 
+    private function efficiencyReport(
+        array $summary,
+        Collection $categoryRows,
+        Collection $dailyRows,
+        array $leakage,
+        Collection $anomalies,
+        ?array $recurring = null
+    ): array {
+        $totalExpense = $summary['total_expense'] ?? '0.00';
+        $totalIncome = $summary['total_income'] ?? '0.00';
+        $largestTransaction = data_get($summary, 'largest_transaction.amount', '0.00');
+        $topCategories = $categoryRows->sortByDesc(fn (array $row): float => (float) $row['current_expense'])->values();
+        $topCategory = $topCategories->first();
+        $topThreeTotal = $this->sumAmounts($topCategories->take(3), 'current_expense');
+        $activeDays = $dailyRows->filter(fn (array $row): bool => BigDecimal::of($row['expense'])->isGreaterThan('0'))->values();
+        $highestDay = $activeDays->sortByDesc(fn (array $row): float => (float) $row['expense'])->first();
+        $lowestDay = $activeDays->sortBy(fn (array $row): float => (float) $row['expense'])->first();
+        $recurringAmount = $recurring['monthly_commitment'] ?? $summary['recurring_expense'] ?? '0.00';
+        $averageActiveDayExpense = $activeDays->isEmpty()
+            ? '0.00'
+            : $this->money(BigDecimal::of($totalExpense)->dividedBy((string) $activeDays->count(), 2, RoundingMode::HALF_UP));
+        $topCategoryShare = $topCategory ? $this->percentage($topCategory['current_expense'], $totalExpense) : '0.0';
+        $expenseToIncome = BigDecimal::of($totalIncome)->isZero() ? null : $this->percentage($totalExpense, $totalIncome);
+        $leakageShare = $this->percentage($leakage['total_amount'] ?? '0.00', $totalExpense);
+        $largestTransactionShare = $this->percentage($largestTransaction, $totalExpense);
+        $recurringShare = $this->percentage($recurringAmount, $totalExpense);
+
+        return [
+            'scorecard' => [
+                [
+                    'metric' => 'Expense to income',
+                    'value' => $expenseToIncome === null ? 'N/A' : $expenseToIncome.'%',
+                    'meaning' => $expenseToIncome === null
+                        ? 'No income was recorded in this period, so the ratio cannot be calculated.'
+                        : 'Total expense divided by total income for this report period.',
+                ],
+                [
+                    'metric' => 'Top category share',
+                    'value' => $topCategory ? $topCategoryShare.'%' : 'N/A',
+                    'meaning' => $topCategory
+                        ? "{$topCategory['category_name']} used {$topCategoryShare}% of the period expense."
+                        : 'No expense category was found in this period.',
+                ],
+                [
+                    'metric' => 'Top 3 category share',
+                    'value' => $this->percentage($topThreeTotal, $totalExpense).'%',
+                    'meaning' => 'Shows how concentrated spending is in the three highest expense categories.',
+                ],
+                [
+                    'metric' => 'Leakage share',
+                    'value' => $leakageShare.'%',
+                    'meaning' => "Small transactions below {$leakage['threshold']} divided by total expense.",
+                ],
+                [
+                    'metric' => 'Recurring share',
+                    'value' => $recurringShare.'%',
+                    'meaning' => 'Recurring expense commitment divided by total period expense.',
+                ],
+                [
+                    'metric' => 'Active spending days',
+                    'value' => (string) $activeDays->count(),
+                    'meaning' => 'Number of days in the period where expense or recurring transactions exist.',
+                ],
+            ],
+            'concentration' => [
+                'top_category' => $topCategory['category_name'] ?? 'N/A',
+                'top_category_amount' => $topCategory['current_expense'] ?? '0.00',
+                'top_category_share' => $topCategory ? $topCategoryShare : '0.0',
+                'top_category_score' => $topCategory['opportunity_score'] ?? 0,
+                'top_three_amount' => $topThreeTotal,
+                'top_three_share' => $this->percentage($topThreeTotal, $totalExpense),
+                'largest_transaction' => $this->money($largestTransaction),
+                'largest_transaction_share' => $largestTransactionShare,
+            ],
+            'daily_extremes' => [
+                'highest_day' => $highestDay,
+                'lowest_day' => $lowestDay,
+                'average_active_day_expense' => $averageActiveDayExpense,
+            ],
+            'actions' => $this->efficiencyActions(
+                $summary,
+                $topCategory,
+                $leakage,
+                $anomalies,
+                $expenseToIncome,
+                $leakageShare,
+                $largestTransactionShare,
+                $highestDay
+            ),
+        ];
+    }
+
     private function periodComparison(string $currentExpense, string $previousExpense): array
     {
         $difference = BigDecimal::of($currentExpense)->minus($previousExpense)->toScale(2, RoundingMode::HALF_UP);
@@ -975,8 +1069,8 @@ class ExpenseIntelligenceReportService
                 'definition' => 'A transaction is flagged only when its category has at least '.config('expense_intelligence_reports.minimum_anomaly_samples', 5).' historical samples and the amount is at least '.config('expense_intelligence_reports.anomaly_multiplier', '2.50').'x that category average.',
             ],
             [
-                'name' => 'Daily costing graph',
-                'definition' => 'Groups EXPENSE and RECURRING transaction totals by each transaction date in the selected report period.',
+                'name' => 'Efficiency report',
+                'definition' => 'Combines expense-to-income ratio, category concentration, leakage share, recurring share, largest transaction share, and active spending days into action-focused guidance.',
             ],
             [
                 'name' => 'Account balance graph',
@@ -1001,8 +1095,8 @@ class ExpenseIntelligenceReportService
                 'definition' => "Shows income, expense, net cash flow, transaction count, average transaction, and used categories for the selected {$period}.",
             ],
             [
-                'section' => 'Trend chart',
-                'definition' => 'Shows day-by-day expense totals grouped by transaction date for the selected report period.',
+                'section' => 'Efficiency report',
+                'definition' => 'Summarizes the period into practical controls: biggest cost driver, leakage impact, spending concentration, high/low expense days, and data-backed actions.',
             ],
             [
                 'section' => 'Account balance chart',
@@ -1137,6 +1231,48 @@ class ExpenseIntelligenceReportService
         }
 
         return array_slice($recommendations, 0, 5);
+    }
+
+    private function efficiencyActions(
+        array $summary,
+        ?array $topCategory,
+        array $leakage,
+        Collection $anomalies,
+        ?string $expenseToIncome,
+        string $leakageShare,
+        string $largestTransactionShare,
+        ?array $highestDay
+    ): array {
+        $actions = [];
+
+        if ($expenseToIncome !== null && BigDecimal::of($expenseToIncome)->isGreaterThan('100')) {
+            $actions[] = "Expense was {$expenseToIncome}% of income, so reduce or delay non-essential spending until income covers the period cost.";
+        } elseif ($expenseToIncome !== null) {
+            $actions[] = "Expense used {$expenseToIncome}% of income; keep the next period below {$summary['total_expense']} to preserve the current cash-flow position.";
+        }
+
+        if ($topCategory && BigDecimal::of($topCategory['current_expense'])->isGreaterThan('0')) {
+            $actions[] = "Start with {$topCategory['category_name']}: it is the largest category at {$topCategory['current_expense']} with {$topCategory['expense_share']}% share and score {$topCategory['opportunity_score']}/100.";
+        }
+
+        if (($leakage['transaction_count'] ?? 0) > 0) {
+            $actions[] = "Review small transactions below {$leakage['threshold']}; {$leakage['transaction_count']} entries totaled {$leakage['total_amount']} and made up {$leakageShare}% of expense.";
+        }
+
+        if (BigDecimal::of($largestTransactionShare)->isGreaterThanOrEqualTo('25')) {
+            $actions[] = "Audit the largest transaction because it represented {$largestTransactionShare}% of the period expense.";
+        }
+
+        if ($highestDay && BigDecimal::of($highestDay['expense'])->isGreaterThan('0')) {
+            $actions[] = "Use {$highestDay['label']} as the review day; it had the highest expense at {$highestDay['expense']} across {$highestDay['transaction_count']} transactions.";
+        }
+
+        if ($anomalies->isNotEmpty()) {
+            $first = $anomalies->first();
+            $actions[] = "Check the anomaly in {$first['category_name']}: {$first['amount']} was {$first['deviation_percentage']}% above the category average.";
+        }
+
+        return array_slice($actions, 0, 6);
     }
 
     private function monthlyRecommendations(Collection $categoryRows, array $recurring, array $leakage, array $forecast): array
