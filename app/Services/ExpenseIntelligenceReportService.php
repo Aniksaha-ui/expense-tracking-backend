@@ -95,6 +95,7 @@ class ExpenseIntelligenceReportService
             'trend_rows' => $this->dailyHoursTrend($userId, $fromDate, $toDate),
             'chart_rows' => $this->chartRows($categoryRows, 'current_expense', (int) config('expense_intelligence_reports.top_categories')),
             'account_rows' => $this->accountBreakdown($userId, $fromDate, $toDate),
+            'definitions' => $this->reportDefinitions('daily'),
             'calculation_hints' => $this->calculationHints('daily'),
             'insights' => $this->dailyInsights($summary, $historicalDailyAverage, $increasePercentage, $largestExpenses, $leakage),
             'recommendations' => $this->dailyRecommendations($summary, $historicalDailyAverage, $increasePercentage, $leakage, $anomalies),
@@ -140,6 +141,7 @@ class ExpenseIntelligenceReportService
                 'target_low' => (string) $targetLow,
                 'target_high' => (string) $targetHigh,
             ],
+            'definitions' => $this->reportDefinitions('weekly'),
             'calculation_hints' => $this->calculationHints('weekly'),
             'recommendations' => $this->weeklyRecommendations($categoryRows, $leakage, $anomalies, (string) $targetHigh),
         ];
@@ -184,6 +186,7 @@ class ExpenseIntelligenceReportService
                 'target_low' => (string) $targetLow,
                 'target_high' => (string) $targetHigh,
             ],
+            'definitions' => $this->reportDefinitions('bi-weekly'),
             'calculation_hints' => $this->calculationHints('bi-weekly'),
             'recommendations' => $this->weeklyRecommendations($categoryRows, $leakage, $anomalies, (string) $targetHigh),
         ];
@@ -227,6 +230,7 @@ class ExpenseIntelligenceReportService
             'forecast' => $forecast,
             'budget' => $this->nextMonthBudget($forecast, $summary['total_income'], $recurring['monthly_commitment']),
             'risks' => $this->nextMonthRisks($categoryRows, $recurring, $leakage),
+            'definitions' => $this->reportDefinitions('monthly'),
             'calculation_hints' => $this->calculationHints('monthly'),
             'recommendations' => $this->monthlyRecommendations($categoryRows, $recurring, $leakage, $forecast),
         ];
@@ -855,6 +859,76 @@ class ExpenseIntelligenceReportService
                 'Daily comparison uses the average of historical daily expense totals before the report date.',
             ],
         };
+    }
+
+    private function reportDefinitions(string $frequency): array
+    {
+        $periodLabel = match ($frequency) {
+            'daily' => 'selected day',
+            'weekly' => 'selected week',
+            'bi-weekly' => 'selected 14-day period',
+            'monthly' => 'selected month',
+            default => 'selected period',
+        };
+
+        return [
+            [
+                'name' => 'Total income',
+                'definition' => "Sum of INCOME transactions during the {$periodLabel}.",
+            ],
+            [
+                'name' => 'Total expense',
+                'definition' => "Sum of EXPENSE and RECURRING transactions during the {$periodLabel}.",
+            ],
+            [
+                'name' => 'Net cash flow',
+                'definition' => 'Total income minus total expense. Positive means cash increased; negative means spending exceeded income.',
+            ],
+            [
+                'name' => 'Average transaction',
+                'definition' => 'Total expense divided by the number of expense transactions in the report period.',
+            ],
+            [
+                'name' => 'Small Txn Threshold',
+                'definition' => 'Transactions below '.config('expense_intelligence_reports.small_transaction_threshold', '500.00').' are counted as small expenses. Change EXPENSE_INTELLIGENCE_SMALL_TRANSACTION_THRESHOLD to adjust this.',
+            ],
+            [
+                'name' => 'Money leakage',
+                'definition' => 'The count, total, and average of small transactions. It shows when many small purchases become meaningful together.',
+            ],
+            [
+                'name' => 'Previous period',
+                'definition' => "The same number of days immediately before this {$periodLabel}. Growth and difference use this comparison period.",
+            ],
+            [
+                'name' => 'Growth %',
+                'definition' => '((Current period expense - previous period expense) / previous period expense) x 100. It is N/A when previous spending is zero.',
+            ],
+            [
+                'name' => 'Historical average',
+                'definition' => 'Average historical monthly spending for that category before the report start date. Daily reports also compare against historical daily average.',
+            ],
+            [
+                'name' => 'Expense share',
+                'definition' => '(Category expense / total report expense) x 100. Categories are read dynamically from the database.',
+            ],
+            [
+                'name' => 'Opportunity score',
+                'definition' => 'A 0-100 score: expense share up to 35 points + positive growth up to 25 + transaction frequency up to 20 + positive historical deviation up to 20.',
+            ],
+            [
+                'name' => 'Potential saving',
+                'definition' => 'Estimated only. Formula: current category expense x opportunity score x '.config('expense_intelligence_reports.max_savings_rate', '0.30').' / 100.',
+            ],
+            [
+                'name' => 'Anomaly',
+                'definition' => 'A transaction is flagged only when its category has at least '.config('expense_intelligence_reports.minimum_anomaly_samples', 5).' historical samples and the amount is at least '.config('expense_intelligence_reports.anomaly_multiplier', '2.50').'x that category average.',
+            ],
+            [
+                'name' => 'Graph lookback',
+                'definition' => 'Monthly charts use the last '.config('expense_intelligence_reports.lookback_months', 12).' months. Change EXPENSE_INTELLIGENCE_LOOKBACK_MONTHS to adjust this.',
+            ],
+        ];
     }
 
     private function dailyInsights(array $summary, string $historicalAverage, ?string $increasePercentage, Collection $largestExpenses, array $leakage): array

@@ -32,10 +32,15 @@
         .data-table th { background: #eaf4f1; color: #125f4f; font-size: 7px; font-weight: bold; text-transform: uppercase; }
         .data-table .name, .data-table .left { text-align: left; }
         .score { color: #147d64; font-weight: bold; }
-        .bar-table { border-collapse: separate; border-spacing: 0 4px; margin-bottom: 9px; }
+        .guide-table { border: 1px solid #d8e8e2; margin-bottom: 11px; table-layout: fixed; }
+        .guide-table th, .guide-table td { border-bottom: 1px solid #e5e9ef; padding: 6px 7px; text-align: left; vertical-align: top; }
+        .guide-table th { background: #f2f7f5; color: #125f4f; font-size: 7px; font-weight: bold; text-transform: uppercase; width: 22%; }
+        .guide-table tr:last-child th, .guide-table tr:last-child td { border-bottom: 0; }
+        .chart-box { background: #fbfcfe; border: 1px solid #dbe4ed; margin-bottom: 10px; padding: 8px 9px; page-break-inside: avoid; }
+        .bar-table { border-collapse: separate; border-spacing: 0 5px; margin-bottom: 0; }
         .bar-label { color: #172033; font-weight: bold; width: 24%; }
-        .bar-track { background: #e9eef4; border-radius: 5px; height: 9px; width: 100%; }
-        .bar-fill { background: #147d64; border-radius: 5px; height: 9px; }
+        .bar-fill-cell { background: #147d64; height: 11px; line-height: 11px; }
+        .bar-empty-cell { background: #e9eef4; height: 11px; line-height: 11px; }
         .bar-value { color: #475467; font-weight: bold; text-align: right; width: 14%; }
         .list { margin: 0 0 9px 15px; padding: 0; }
         .list li { margin-bottom: 3px; }
@@ -55,7 +60,12 @@
             return $max > 0 ? $max : 1;
         };
         $barWidth = function ($value, $max): int {
-            return max(2, (int) round(((float) $value / $max) * 100));
+            return max(1, min(100, (int) round(((float) $value / $max) * 100)));
+        };
+        $barCells = function ($value, $max) use ($barWidth): array {
+            $filled = $barWidth($value, $max);
+
+            return [$filled, max(0, 100 - $filled)];
         };
     ?>
 
@@ -103,6 +113,19 @@
             </tr>
         </table>
 
+        <?php if (! empty($report['definitions'])): ?>
+            <div class="section-title">How to read this report</div>
+            <div class="section-note">These definitions explain the metrics and calculations used in this PDF.</div>
+            <table class="guide-table">
+                <?php foreach ($report['definitions'] as $definition): ?>
+                    <tr>
+                        <th><?= e($definition['name']) ?></th>
+                        <td><?= e($definition['definition']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+        <?php endif; ?>
+
         <?php if ($frequency === 'daily'): ?>
             <div class="section-title">Today at a glance</div>
             <table class="data-table">
@@ -116,34 +139,75 @@
             </table>
         <?php endif; ?>
 
-        <div class="section-title"><?= $frequency === 'monthly' ? 'Monthly trend graph' : (in_array($frequency, ['weekly', 'bi-weekly'], true) ? 'Daily spending trend graph' : 'Category spending graph') ?></div>
+        <div class="section-title"><?= $frequency === 'monthly' ? 'Monthly trend chart' : (in_array($frequency, ['weekly', 'bi-weekly'], true) ? 'Daily spending trend chart' : 'Category spending chart') ?></div>
         <?php
             $graphRows = $frequency === 'monthly' ? $report['trend_rows'] : (in_array($frequency, ['weekly', 'bi-weekly'], true) ? $report['chart_rows'] : $report['chart_rows']);
             $graphKey = $frequency === 'monthly' || in_array($frequency, ['weekly', 'bi-weekly'], true) ? 'expense' : 'current_expense';
             $maxGraphValue = $maxChartValue($graphRows, $graphKey);
         ?>
-        <table class="bar-table">
-            <?php foreach ($graphRows as $row): ?>
-                <tr>
-                    <td class="bar-label"><?= e($row['label'] ?? $row['category_name']) ?></td>
-                    <td><div class="bar-track"><div class="bar-fill" style="width: <?= e($barWidth($row[$graphKey] ?? 0, $maxGraphValue)) ?>%;"></div></div></td>
-                    <td class="bar-value"><?= e($row[$graphKey] ?? '0.00') ?></td>
-                </tr>
-            <?php endforeach; ?>
-        </table>
-
-        <?php if (! empty($report['top_categories']) && $report['top_categories']->isNotEmpty()): ?>
-            <div class="section-title">Top spending category graph</div>
-            <?php $topCategoryMax = $maxChartValue($report['top_categories'], 'current_expense'); ?>
+        <div class="chart-box">
             <table class="bar-table">
-                <?php foreach ($report['top_categories'] as $row): ?>
+                <?php foreach ($graphRows as $row): ?>
+                    <?php [$filled, $empty] = $barCells($row[$graphKey] ?? 0, $maxGraphValue); ?>
                     <tr>
-                        <td class="bar-label"><?= e($row['category_name']) ?></td>
-                        <td><div class="bar-track"><div class="bar-fill" style="width: <?= e($barWidth($row['current_expense'], $topCategoryMax)) ?>%;"></div></div></td>
-                        <td class="bar-value"><?= e($row['current_expense']) ?></td>
+                        <td class="bar-label"><?= e($row['label'] ?? $row['category_name']) ?></td>
+                        <td>
+                            <table>
+                                <tr>
+                                    <td class="bar-fill-cell" width="<?= e($filled) ?>%">&nbsp;</td>
+                                    <td class="bar-empty-cell" width="<?= e($empty) ?>%">&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td class="bar-value"><?= e($row[$graphKey] ?? '0.00') ?></td>
                     </tr>
                 <?php endforeach; ?>
             </table>
+        </div>
+
+        <?php if (! empty($report['top_categories']) && $report['top_categories']->isNotEmpty()): ?>
+            <div class="section-title">Top spending category chart</div>
+            <?php $topCategoryMax = $maxChartValue($report['top_categories'], 'current_expense'); ?>
+            <div class="chart-box">
+                <table class="bar-table">
+                    <?php foreach ($report['top_categories'] as $row): ?>
+                        <?php [$filled, $empty] = $barCells($row['current_expense'], $topCategoryMax); ?>
+                        <tr>
+                            <td class="bar-label"><?= e($row['category_name']) ?></td>
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td class="bar-fill-cell" width="<?= e($filled) ?>%">&nbsp;</td>
+                                        <td class="bar-empty-cell" width="<?= e($empty) ?>%">&nbsp;</td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td class="bar-value"><?= e($row['current_expense']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
+            </div>
+
+            <div class="section-title">Category share chart</div>
+            <div class="chart-box">
+                <table class="bar-table">
+                    <?php foreach ($report['top_categories'] as $row): ?>
+                        <?php [$filled, $empty] = $barCells($row['expense_share'], 100); ?>
+                        <tr>
+                            <td class="bar-label"><?= e($row['category_name']) ?></td>
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td class="bar-fill-cell" width="<?= e($filled) ?>%">&nbsp;</td>
+                                        <td class="bar-empty-cell" width="<?= e($empty) ?>%">&nbsp;</td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td class="bar-value"><?= e($row['expense_share']) ?>%</td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
+            </div>
         <?php endif; ?>
 
         <?php if (! empty($report['comparison'])): ?>
