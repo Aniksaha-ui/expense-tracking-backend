@@ -93,8 +93,8 @@ class ExpenseIntelligenceReportService
             'leakage' => $leakage,
             'anomalies' => $anomalies,
             'trend_rows' => $this->dailyHoursTrend($userId, $fromDate, $toDate),
-            'chart_rows' => $this->chartRows($categoryRows, 'current_expense', (int) config('expense_intelligence_reports.top_categories')),
-            'top_categories' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['current_expense'])->take((int) config('expense_intelligence_reports.top_categories'))->values(),
+            'daily_cost_rows' => $this->dailyTrend($userId, $fromDate, $toDate),
+            'account_balance_rows' => $this->accountDailyBalances($userId, $fromDate, $toDate),
             'account_rows' => $this->accountBreakdown($userId, $fromDate, $toDate),
             'definitions' => $this->reportDefinitions('daily'),
             'section_guides' => $this->sectionGuides('daily'),
@@ -126,8 +126,8 @@ class ExpenseIntelligenceReportService
             ],
             'trend_rows' => $dailyTrend,
             'category_rows' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['difference'])->values(),
-            'chart_rows' => $dailyTrend,
-            'top_categories' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['current_expense'])->take(5)->values(),
+            'daily_cost_rows' => $dailyTrend,
+            'account_balance_rows' => $this->accountDailyBalances($userId, $fromDate, $toDate),
             'leakage' => [
                 ...$leakage,
                 'repeated_similar_expenses' => $this->repeatedSimilarExpenses($userId, $fromDate, $toDate),
@@ -172,8 +172,8 @@ class ExpenseIntelligenceReportService
             ],
             'trend_rows' => $dailyTrend,
             'category_rows' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['difference'])->values(),
-            'chart_rows' => $dailyTrend,
-            'top_categories' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['current_expense'])->take(8)->values(),
+            'daily_cost_rows' => $dailyTrend,
+            'account_balance_rows' => $this->accountDailyBalances($userId, $fromDate, $toDate),
             'leakage' => [
                 ...$leakage,
                 'repeated_similar_expenses' => $this->repeatedSimilarExpenses($userId, $fromDate, $toDate),
@@ -217,6 +217,8 @@ class ExpenseIntelligenceReportService
                 'highest_expense_category' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['current_expense'])->first()['category_name'] ?? null,
             ],
             'trend_rows' => $monthlyTrend,
+            'daily_cost_rows' => $this->dailyTrend($userId, $fromDate, $toDate),
+            'account_balance_rows' => $this->accountDailyBalances($userId, $fromDate, $toDate),
             'category_rows' => $categoryRows,
             'category_trends' => $this->categoryTrends($userId, $toDate, (int) config('expense_intelligence_reports.lookback_months')),
             'recurring' => $recurring,
@@ -234,7 +236,6 @@ class ExpenseIntelligenceReportService
             'forecast' => $forecast,
             'budget' => $this->nextMonthBudget($forecast, $summary['total_income'], $recurring['monthly_commitment']),
             'risks' => $this->nextMonthRisks($categoryRows, $recurring, $leakage),
-            'top_categories' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['current_expense'])->take((int) config('expense_intelligence_reports.top_categories'))->values(),
             'definitions' => $this->reportDefinitions('monthly'),
             'section_guides' => $this->sectionGuides('monthly'),
             'calculation_hints' => $this->calculationHints('monthly'),
@@ -822,6 +823,49 @@ class ExpenseIntelligenceReportService
             ]);
     }
 
+    private function accountDailyBalances(int $userId, CarbonImmutable $fromDate, CarbonImmutable $toDate): Collection
+    {
+        return DB::table('transactions')
+            ->join('accounts', 'accounts.id', '=', 'transactions.account_id')
+            ->select([
+                'transactions.account_id',
+                'accounts.name as account_name',
+                'accounts.type as account_type',
+                'transactions.balance_before',
+                'transactions.balance_after',
+                'transactions.transaction_date',
+                DB::raw('DATE(transactions.transaction_date) as balance_date'),
+            ])
+            ->where('transactions.user_id', $userId)
+            ->whereDate('transactions.transaction_date', '>=', $fromDate->toDateString())
+            ->whereDate('transactions.transaction_date', '<=', $toDate->toDateString())
+            ->orderBy('transactions.transaction_date')
+            ->orderBy('transactions.id')
+            ->get()
+            ->groupBy(fn (object $row): string => $row->balance_date.'-'.$row->account_id)
+            ->map(function (Collection $rows): array {
+                $first = $rows->first();
+                $last = $rows->last();
+
+                return [
+                    'date' => $first->balance_date,
+                    'label' => CarbonImmutable::parse($first->balance_date)->format('d M').' - '.$first->account_name,
+                    'account_id' => (int) $first->account_id,
+                    'account_name' => $first->account_name,
+                    'account_type' => $first->account_type,
+                    'opening_balance' => $this->money($first->balance_before),
+                    'closing_balance' => $this->money($last->balance_after),
+                    'movement' => $this->money(BigDecimal::of($last->balance_after)->minus($first->balance_before)),
+                    'transaction_count' => $rows->count(),
+                ];
+            })
+            ->sortBy([
+                ['date', 'asc'],
+                ['account_name', 'asc'],
+            ])
+            ->values();
+    }
+
     private function periodComparison(string $currentExpense, string $previousExpense): array
     {
         $difference = BigDecimal::of($currentExpense)->minus($previousExpense)->toScale(2, RoundingMode::HALF_UP);
@@ -931,8 +975,12 @@ class ExpenseIntelligenceReportService
                 'definition' => 'A transaction is flagged only when its category has at least '.config('expense_intelligence_reports.minimum_anomaly_samples', 5).' historical samples and the amount is at least '.config('expense_intelligence_reports.anomaly_multiplier', '2.50').'x that category average.',
             ],
             [
-                'name' => 'Graph lookback',
-                'definition' => 'Monthly charts use the last '.config('expense_intelligence_reports.lookback_months', 12).' months. Change EXPENSE_INTELLIGENCE_LOOKBACK_MONTHS to adjust this.',
+                'name' => 'Daily costing graph',
+                'definition' => 'Groups EXPENSE and RECURRING transaction totals by each transaction date in the selected report period.',
+            ],
+            [
+                'name' => 'Account balance graph',
+                'definition' => 'For each account and day, opening balance is the first transaction balance_before and closing balance is the last transaction balance_after.',
             ],
         ];
     }
@@ -954,9 +1002,11 @@ class ExpenseIntelligenceReportService
             ],
             [
                 'section' => 'Trend chart',
-                'definition' => $frequency === 'monthly'
-                    ? 'Shows month-by-month expense movement for the configured lookback window.'
-                    : 'Shows daily expense movement inside the selected period.',
+                'definition' => 'Shows day-by-day expense totals grouped by transaction date for the selected report period.',
+            ],
+            [
+                'section' => 'Account balance chart',
+                'definition' => 'Shows each account opening balance and closing balance for every day where that account had transactions.',
             ],
             [
                 'section' => 'Category analysis',
@@ -1144,22 +1194,6 @@ class ExpenseIntelligenceReportService
             'annual_low' => (string) $base->multipliedBy('0.80')->multipliedBy('12')->toScale(2, RoundingMode::HALF_UP),
             'annual_high' => (string) $base->multipliedBy('1.20')->multipliedBy('12')->toScale(2, RoundingMode::HALF_UP),
         ];
-    }
-
-    private function chartRows(Collection $rows, string $valueKey, int $limit): Collection
-    {
-        $sortedRows = $rows->sortByDesc(fn (array $row): float => (float) $row[$valueKey]);
-        $topRows = $sortedRows->take($limit)->values();
-        $remaining = $sortedRows->slice($limit);
-
-        if ($remaining->isEmpty()) {
-            return $topRows;
-        }
-
-        return $topRows->push([
-            'category_name' => 'Other',
-            $valueKey => $this->sumAmounts($remaining, $valueKey),
-        ]);
     }
 
     private function opportunityScore(string $share, ?string $growth, ?string $deviation, int $count, int $maxCount): int

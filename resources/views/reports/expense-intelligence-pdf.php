@@ -77,8 +77,8 @@
         $svgText = fn ($value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
         $svgMoney = fn ($value): string => number_format((float) $value, 2);
         $svgBarChart = function ($rows, string $valueKey, string $labelKey, string $title) use ($svgText, $svgMoney) {
-            $rows = collect($rows)->values()->take(12);
-            $rowHeight = 34;
+            $rows = collect($rows)->values();
+            $rowHeight = 24;
             $width = 920;
             $height = max(160, 72 + ($rows->count() * $rowHeight));
             $labelWidth = 185;
@@ -96,56 +96,47 @@
                 $value = (float) data_get($row, $valueKey, 0);
                 $barWidth = max(2, (int) round(($value / $max) * $plotWidth));
                 $label = $svgText(data_get($row, $labelKey, data_get($row, 'category_name', 'N/A')));
-                $svg .= '<text x="18" y="'.($y + 14).'" fill="#172033" font-family="Helvetica, Arial" font-size="12" font-weight="700">'.$label.'</text>';
-                $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$plotWidth.'" height="18" fill="#e9eef4"/>';
-                $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$barWidth.'" height="18" fill="#147d64"/>';
-                $svg .= '<text x="'.$valueX.'" y="'.($y + 14).'" fill="#475467" font-family="Helvetica, Arial" font-size="12" font-weight="700">'.$svgMoney($value).'</text>';
+                $svg .= '<text x="18" y="'.($y + 12).'" fill="#172033" font-family="Helvetica, Arial" font-size="10" font-weight="700">'.$label.'</text>';
+                $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$plotWidth.'" height="14" fill="#e9eef4"/>';
+                $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$barWidth.'" height="14" fill="#147d64"/>';
+                $svg .= '<text x="'.$valueX.'" y="'.($y + 12).'" fill="#475467" font-family="Helvetica, Arial" font-size="10" font-weight="700">'.$svgMoney($value).'</text>';
             }
 
             $svg .= '</svg>';
 
             return 'data:image/svg+xml;base64,'.base64_encode($svg);
         };
-        $svgLineChart = function ($rows, string $valueKey, string $labelKey, string $title) use ($svgText, $svgMoney) {
-            $rows = collect($rows)->values()->take(12);
+        $svgGroupedBarChart = function ($rows, string $firstValueKey, string $secondValueKey, string $labelKey, string $title, string $firstLabel, string $secondLabel) use ($svgText, $svgMoney) {
+            $rows = collect($rows)->values();
+            $rowHeight = 32;
             $width = 920;
-            $height = 250;
-            $left = 58;
-            $right = 32;
-            $top = 48;
-            $bottom = 45;
-            $plotWidth = $width - $left - $right;
-            $plotHeight = $height - $top - $bottom;
-            $max = max(1, (float) $rows->max(fn ($row) => (float) data_get($row, $valueKey, 0)));
-            $count = max(1, $rows->count() - 1);
-            $points = [];
+            $height = max(180, 88 + ($rows->count() * $rowHeight));
+            $labelWidth = 210;
+            $plotWidth = 520;
+            $valueX = $labelWidth + $plotWidth + 28;
+            $max = max(1, (float) $rows->max(fn ($row) => max((float) data_get($row, $firstValueKey, 0), (float) data_get($row, $secondValueKey, 0))));
             $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$width.'" height="'.$height.'" viewBox="0 0 '.$width.' '.$height.'">';
             $svg .= '<rect width="100%" height="100%" fill="#fbfcfe"/>';
             $svg .= '<text x="18" y="25" fill="#172033" font-family="Helvetica, Arial" font-size="17" font-weight="700">'.$svgText($title).'</text>';
-
-            for ($grid = 0; $grid <= 4; $grid++) {
-                $y = $top + (($plotHeight / 4) * $grid);
-                $svg .= '<line x1="'.$left.'" y1="'.$y.'" x2="'.($width - $right).'" y2="'.$y.'" stroke="#e5e9ef" stroke-width="1"/>';
-            }
+            $svg .= '<rect x="18" y="39" width="12" height="12" fill="#147d64"/><text x="36" y="50" fill="#475467" font-family="Helvetica, Arial" font-size="11">'.$svgText($firstLabel).'</text>';
+            $svg .= '<rect x="145" y="39" width="12" height="12" fill="#f59e0b"/><text x="163" y="50" fill="#475467" font-family="Helvetica, Arial" font-size="11">'.$svgText($secondLabel).'</text>';
 
             foreach ($rows as $index => $row) {
-                $value = (float) data_get($row, $valueKey, 0);
-                $x = $left + (($plotWidth / $count) * $index);
-                $y = $top + $plotHeight - (($value / $max) * $plotHeight);
-                $points[] = round($x, 1).','.round($y, 1);
+                $y = 66 + ($index * $rowHeight);
+                $firstValue = (float) data_get($row, $firstValueKey, 0);
+                $secondValue = (float) data_get($row, $secondValueKey, 0);
+                $firstWidth = max(2, (int) round(($firstValue / $max) * $plotWidth));
+                $secondWidth = max(2, (int) round(($secondValue / $max) * $plotWidth));
+                $label = $svgText(data_get($row, $labelKey, 'N/A'));
+                $svg .= '<text x="18" y="'.($y + 16).'" fill="#172033" font-family="Helvetica, Arial" font-size="9" font-weight="700">'.$label.'</text>';
+                $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$plotWidth.'" height="10" fill="#e9eef4"/>';
+                $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$firstWidth.'" height="10" fill="#147d64"/>';
+                $svg .= '<rect x="'.$labelWidth.'" y="'.($y + 13).'" width="'.$plotWidth.'" height="10" fill="#e9eef4"/>';
+                $svg .= '<rect x="'.$labelWidth.'" y="'.($y + 13).'" width="'.$secondWidth.'" height="10" fill="#f59e0b"/>';
+                $svg .= '<text x="'.$valueX.'" y="'.($y + 9).'" fill="#147d64" font-family="Helvetica, Arial" font-size="9" font-weight="700">'.$svgMoney($firstValue).'</text>';
+                $svg .= '<text x="'.$valueX.'" y="'.($y + 22).'" fill="#b45309" font-family="Helvetica, Arial" font-size="9" font-weight="700">'.$svgMoney($secondValue).'</text>';
             }
 
-            $svg .= '<polyline points="'.implode(' ', $points).'" fill="none" stroke="#147d64" stroke-width="4"/>';
-
-            foreach ($rows as $index => $row) {
-                $value = (float) data_get($row, $valueKey, 0);
-                $x = $left + (($plotWidth / $count) * $index);
-                $y = $top + $plotHeight - (($value / $max) * $plotHeight);
-                $svg .= '<circle cx="'.round($x, 1).'" cy="'.round($y, 1).'" r="5" fill="#147d64"/>';
-                $svg .= '<text x="'.round($x - 18, 1).'" y="'.round($height - 18, 1).'" fill="#667085" font-family="Helvetica, Arial" font-size="10">'.$svgText(data_get($row, $labelKey, '')).'</text>';
-            }
-
-            $svg .= '<text x="'.$left.'" y="'.($top - 10).'" fill="#475467" font-family="Helvetica, Arial" font-size="11">Max: '.$svgMoney($max).'</text>';
             $svg .= '</svg>';
 
             return 'data:image/svg+xml;base64,'.base64_encode($svg);
@@ -234,81 +225,63 @@
             </table>
         <?php endif; ?>
 
-        <div class="section-title"><?= $frequency === 'monthly' ? 'Monthly trend chart' : (in_array($frequency, ['weekly', 'bi-weekly'], true) ? 'Daily spending trend chart' : 'Category spending chart') ?></div>
-        <?php
-            $graphRows = $frequency === 'monthly' ? $report['trend_rows'] : (in_array($frequency, ['weekly', 'bi-weekly'], true) ? $report['chart_rows'] : $report['chart_rows']);
-            $graphKey = $frequency === 'monthly' || in_array($frequency, ['weekly', 'bi-weekly'], true) ? 'expense' : 'current_expense';
-            $maxGraphValue = $maxChartValue($graphRows, $graphKey);
-        ?>
-        <div class="chart-box">
-            <img class="svg-chart" src="<?= e($frequency === 'monthly' ? $svgLineChart($graphRows, $graphKey, 'label', 'Expense trend') : $svgBarChart($graphRows, $graphKey, 'label', 'Expense trend')) ?>" alt="Expense trend chart">
-            <table class="bar-table">
-                <?php foreach ($graphRows as $row): ?>
-                    <?php [$filled, $empty] = $barCells($row[$graphKey] ?? 0, $maxGraphValue); ?>
+        <?php if (! empty($report['daily_cost_rows']) && $report['daily_cost_rows']->isNotEmpty()): ?>
+            <div class="section-title">Daily costing graph</div>
+            <div class="section-note">Expense is grouped by transaction date for the selected report period.</div>
+            <div class="chart-box">
+                <?php $dailyCostMax = $maxChartValue($report['daily_cost_rows'], 'expense'); ?>
+                <img class="svg-chart" src="<?= e($svgBarChart($report['daily_cost_rows'], 'expense', 'label', 'Every day costing')) ?>" alt="Daily costing graph">
+                <table class="bar-table">
+                    <?php foreach ($report['daily_cost_rows'] as $row): ?>
+                        <?php [$filled, $empty] = $barCells($row['expense'], $dailyCostMax); ?>
+                        <tr>
+                            <td class="bar-label"><?= e($row['label']) ?></td>
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td class="bar-fill-cell" bgcolor="#147d64" width="<?= e($filled) ?>%">&nbsp;</td>
+                                        <td class="bar-empty-cell" bgcolor="#e9eef4" width="<?= e($empty) ?>%">&nbsp;</td>
+                                    </tr>
+                                </table>
+                                <div class="bar-text"><?= e($textBar($row['expense'], $dailyCostMax)) ?></div>
+                            </td>
+                            <td class="bar-value"><?= e($row['expense']) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
+            </div>
+            <table class="data-table">
+                <tr><th class="left">Day</th><th>Expense</th><th>Transactions</th><th>Average</th></tr>
+                <?php foreach ($report['daily_cost_rows'] as $row): ?>
                     <tr>
-                        <td class="bar-label"><?= e($row['label'] ?? $row['category_name']) ?></td>
-                        <td>
-                            <table>
-                                <tr>
-                                    <td class="bar-fill-cell" bgcolor="#147d64" width="<?= e($filled) ?>%">&nbsp;</td>
-                                    <td class="bar-empty-cell" bgcolor="#e9eef4" width="<?= e($empty) ?>%">&nbsp;</td>
-                                </tr>
-                            </table>
-                            <div class="bar-text"><?= e($textBar($row[$graphKey] ?? 0, $maxGraphValue)) ?></div>
-                        </td>
-                        <td class="bar-value"><?= e($row[$graphKey] ?? '0.00') ?></td>
+                        <td class="left"><?= e($row['label']) ?></td>
+                        <td><?= e($row['expense']) ?></td>
+                        <td><?= e($row['transaction_count']) ?></td>
+                        <td><?= e($row['average']) ?></td>
                     </tr>
                 <?php endforeach; ?>
             </table>
-        </div>
+        <?php endif; ?>
 
-        <?php if (! empty($report['top_categories']) && $report['top_categories']->isNotEmpty()): ?>
-            <div class="section-title">Top spending category chart</div>
-            <?php $topCategoryMax = $maxChartValue($report['top_categories'], 'current_expense'); ?>
+        <?php if (! empty($report['account_balance_rows']) && $report['account_balance_rows']->isNotEmpty()): ?>
+            <div class="section-title">Daily account opening and closing balance graph</div>
+            <div class="section-note">Opening balance is the first transaction balance_before for the account on that day. Closing balance is the last transaction balance_after for the same account and day.</div>
             <div class="chart-box">
-                <img class="svg-chart" src="<?= e($svgBarChart($report['top_categories'], 'current_expense', 'category_name', 'Top spending categories')) ?>" alt="Top spending category chart">
-                <table class="bar-table">
-                    <?php foreach ($report['top_categories'] as $row): ?>
-                        <?php [$filled, $empty] = $barCells($row['current_expense'], $topCategoryMax); ?>
-                        <tr>
-                            <td class="bar-label"><?= e($row['category_name']) ?></td>
-                            <td>
-                                <table>
-                                    <tr>
-                                        <td class="bar-fill-cell" bgcolor="#147d64" width="<?= e($filled) ?>%">&nbsp;</td>
-                                        <td class="bar-empty-cell" bgcolor="#e9eef4" width="<?= e($empty) ?>%">&nbsp;</td>
-                                    </tr>
-                                </table>
-                                <div class="bar-text"><?= e($textBar($row['current_expense'], $topCategoryMax)) ?></div>
-                            </td>
-                            <td class="bar-value"><?= e($row['current_expense']) ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </table>
+                <img class="svg-chart" src="<?= e($svgGroupedBarChart($report['account_balance_rows'], 'opening_balance', 'closing_balance', 'label', 'Every account opening vs closing balance', 'Opening', 'Closing')) ?>" alt="Daily account opening and closing balance graph">
             </div>
-
-            <div class="section-title">Category share chart</div>
-            <div class="chart-box">
-                <img class="svg-chart" src="<?= e($svgBarChart($report['top_categories'], 'expense_share', 'category_name', 'Category share percentage')) ?>" alt="Category share chart">
-                <table class="bar-table">
-                    <?php foreach ($report['top_categories'] as $row): ?>
-                        <?php [$filled, $empty] = $barCells($row['expense_share'], 100); ?>
-                        <tr>
-                            <td class="bar-label"><?= e($row['category_name']) ?></td>
-                            <td>
-                                <table>
-                                    <tr>
-                                        <td class="bar-fill-cell" bgcolor="#147d64" width="<?= e($filled) ?>%">&nbsp;</td>
-                                        <td class="bar-empty-cell" bgcolor="#e9eef4" width="<?= e($empty) ?>%">&nbsp;</td>
-                                    </tr>
-                                </table>
-                                <div class="bar-text"><?= e($textBar($row['expense_share'], 100)) ?></div>
-                            </td>
-                            <td class="bar-value"><?= e($row['expense_share']) ?>%</td>
-                        </tr>
-                    <?php endforeach; ?>
-                </table>
-            </div>
+            <table class="data-table">
+                <tr><th class="left">Date / Account</th><th>Type</th><th>Opening</th><th>Closing</th><th>Movement</th><th>Transactions</th></tr>
+                <?php foreach ($report['account_balance_rows'] as $row): ?>
+                    <tr>
+                        <td class="left"><?= e($row['label']) ?></td>
+                        <td><?= e($row['account_type']) ?></td>
+                        <td><?= e($row['opening_balance']) ?></td>
+                        <td><?= e($row['closing_balance']) ?></td>
+                        <td><?= e($row['movement']) ?></td>
+                        <td><?= e($row['transaction_count']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
         <?php endif; ?>
 
         <?php if (! empty($report['comparison'])): ?>
