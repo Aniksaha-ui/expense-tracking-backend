@@ -94,8 +94,10 @@ class ExpenseIntelligenceReportService
             'anomalies' => $anomalies,
             'trend_rows' => $this->dailyHoursTrend($userId, $fromDate, $toDate),
             'chart_rows' => $this->chartRows($categoryRows, 'current_expense', (int) config('expense_intelligence_reports.top_categories')),
+            'top_categories' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['current_expense'])->take((int) config('expense_intelligence_reports.top_categories'))->values(),
             'account_rows' => $this->accountBreakdown($userId, $fromDate, $toDate),
             'definitions' => $this->reportDefinitions('daily'),
+            'section_guides' => $this->sectionGuides('daily'),
             'calculation_hints' => $this->calculationHints('daily'),
             'insights' => $this->dailyInsights($summary, $historicalDailyAverage, $increasePercentage, $largestExpenses, $leakage),
             'recommendations' => $this->dailyRecommendations($summary, $historicalDailyAverage, $increasePercentage, $leakage, $anomalies),
@@ -142,6 +144,7 @@ class ExpenseIntelligenceReportService
                 'target_high' => (string) $targetHigh,
             ],
             'definitions' => $this->reportDefinitions('weekly'),
+            'section_guides' => $this->sectionGuides('weekly'),
             'calculation_hints' => $this->calculationHints('weekly'),
             'recommendations' => $this->weeklyRecommendations($categoryRows, $leakage, $anomalies, (string) $targetHigh),
         ];
@@ -187,6 +190,7 @@ class ExpenseIntelligenceReportService
                 'target_high' => (string) $targetHigh,
             ],
             'definitions' => $this->reportDefinitions('bi-weekly'),
+            'section_guides' => $this->sectionGuides('bi-weekly'),
             'calculation_hints' => $this->calculationHints('bi-weekly'),
             'recommendations' => $this->weeklyRecommendations($categoryRows, $leakage, $anomalies, (string) $targetHigh),
         ];
@@ -230,7 +234,9 @@ class ExpenseIntelligenceReportService
             'forecast' => $forecast,
             'budget' => $this->nextMonthBudget($forecast, $summary['total_income'], $recurring['monthly_commitment']),
             'risks' => $this->nextMonthRisks($categoryRows, $recurring, $leakage),
+            'top_categories' => $categoryRows->sortByDesc(fn (array $row): float => (float) $row['current_expense'])->take((int) config('expense_intelligence_reports.top_categories'))->values(),
             'definitions' => $this->reportDefinitions('monthly'),
+            'section_guides' => $this->sectionGuides('monthly'),
             'calculation_hints' => $this->calculationHints('monthly'),
             'recommendations' => $this->monthlyRecommendations($categoryRows, $recurring, $leakage, $forecast),
         ];
@@ -931,6 +937,59 @@ class ExpenseIntelligenceReportService
         ];
     }
 
+    private function sectionGuides(string $frequency): array
+    {
+        $period = match ($frequency) {
+            'daily' => 'day',
+            'weekly' => 'week',
+            'bi-weekly' => '14-day period',
+            'monthly' => 'month',
+            default => 'period',
+        };
+
+        $guides = [
+            [
+                'section' => 'Summary',
+                'definition' => "Shows income, expense, net cash flow, transaction count, average transaction, and used categories for the selected {$period}.",
+            ],
+            [
+                'section' => 'Trend chart',
+                'definition' => $frequency === 'monthly'
+                    ? 'Shows month-by-month expense movement for the configured lookback window.'
+                    : 'Shows daily expense movement inside the selected period.',
+            ],
+            [
+                'section' => 'Category analysis',
+                'definition' => 'Compares every database expense category against the previous equal-length period and historical category average.',
+            ],
+            [
+                'section' => 'Opportunity ranking',
+                'definition' => 'Ranks categories by score so the highest row is the strongest data-backed cost reduction candidate.',
+            ],
+            [
+                'section' => 'Money leakage',
+                'definition' => 'Adds up small repeated expenses under the configured threshold to reveal hidden cumulative spending.',
+            ],
+            [
+                'section' => 'Anomaly detection',
+                'definition' => 'Flags unusually large transactions only when enough historical category data exists.',
+            ],
+            [
+                'section' => 'Recommendations',
+                'definition' => 'Each recommendation is generated only from calculated report data such as top growth, leakage, anomaly, target, forecast, or recurring commitment.',
+            ],
+        ];
+
+        if ($frequency === 'monthly') {
+            $guides[] = [
+                'section' => 'Forecast and budget',
+                'definition' => 'Estimates next month using recent monthly averages, latest trend movement, and active recurring commitments.',
+            ];
+        }
+
+        return $guides;
+    }
+
     private function dailyInsights(array $summary, string $historicalAverage, ?string $increasePercentage, Collection $largestExpenses, array $leakage): array
     {
         $insights = [];
@@ -961,18 +1020,23 @@ class ExpenseIntelligenceReportService
         $recommendations = [];
 
         if ($increasePercentage !== null && BigDecimal::of($increasePercentage)->isGreaterThan(config('expense_intelligence_reports.significant_change_percentage'))) {
-            $recommendations[] = "Try to keep tomorrow's spending close to the historical daily average of {$historicalAverage}.";
+            $recommendations[] = "Tomorrow target: keep spending close to {$historicalAverage}, because today's expense was {$increasePercentage}% above the historical daily average.";
         }
 
         if ($leakage['transaction_count'] >= 3) {
-            $recommendations[] = 'Review repeated small purchases before making similar transactions tomorrow.';
+            $recommendations[] = "Limit small purchases below {$leakage['threshold']}; {$leakage['transaction_count']} such transactions totaled {$leakage['total_amount']} today.";
         }
 
         if ($anomalies->isNotEmpty()) {
-            $recommendations[] = 'Review unusually large transactions before repeating similar spending.';
+            $first = $anomalies->first();
+            $recommendations[] = "Review {$first['category_name']} before repeating similar spending; {$first['amount']} was {$first['deviation_percentage']}% above its category average.";
         }
 
-        return $recommendations ?: ['Keep tomorrow spending aligned with your recent database-backed average.'];
+        if ($recommendations === []) {
+            $recommendations[] = "No high-risk pattern crossed the configured thresholds; keep tomorrow spending near today's total of {$summary['total_expense']} or lower.";
+        }
+
+        return $recommendations;
     }
 
     private function weeklyAlerts(array $summary, Collection $categoryRows): array
@@ -998,21 +1062,28 @@ class ExpenseIntelligenceReportService
     private function weeklyRecommendations(Collection $categoryRows, array $leakage, Collection $anomalies, string $targetHigh): array
     {
         $recommendations = ["Keep next week's total spending near or below {$targetHigh}."];
+        $topOpportunity = $categoryRows->sortByDesc('opportunity_score')->first();
+
+        if ($topOpportunity && $topOpportunity['opportunity_score'] > 0) {
+            $recommendations[] = "Focus first on {$topOpportunity['category_name']}; it has score {$topOpportunity['opportunity_score']}/100, current spending {$topOpportunity['current_expense']}, and estimated saving {$topOpportunity['potential_saving']}.";
+        }
+
         $topGrowth = $categoryRows
             ->filter(fn (array $row): bool => $row['growth_percentage'] !== null)
             ->sortByDesc(fn (array $row): float => (float) $row['growth_percentage'])
             ->first();
 
         if ($topGrowth && BigDecimal::of($topGrowth['growth_percentage'])->isGreaterThan('0')) {
-            $recommendations[] = "Monitor {$topGrowth['category_name']}, the highest-growth category.";
+            $recommendations[] = "Monitor {$topGrowth['category_name']}; it grew {$topGrowth['growth_percentage']}% with a difference of {$topGrowth['difference']} versus the previous period.";
         }
 
         if ($leakage['transaction_count'] > 0) {
-            $recommendations[] = 'Limit repeated small transactions that became meaningful in total.';
+            $recommendations[] = "Control small transactions below {$leakage['threshold']}; {$leakage['transaction_count']} transactions totaled {$leakage['total_amount']}.";
         }
 
         if ($anomalies->isNotEmpty()) {
-            $recommendations[] = 'Review large unusual transactions before repeating them next week.';
+            $first = $anomalies->first();
+            $recommendations[] = "Check unusual {$first['category_name']} spending; {$first['amount']} was {$first['deviation_percentage']}% above its category average.";
         }
 
         return array_slice($recommendations, 0, 5);
@@ -1020,22 +1091,22 @@ class ExpenseIntelligenceReportService
 
     private function monthlyRecommendations(Collection $categoryRows, array $recurring, array $leakage, array $forecast): array
     {
-        $recommendations = ["Keep total spending near the forecast target of {$forecast['expected']}."];
+        $recommendations = ["Next month expense target: keep spending near {$forecast['expected']} within the estimated range {$forecast['range_low']} - {$forecast['range_high']}."];
         $topOpportunity = $categoryRows->sortByDesc('opportunity_score')->first();
 
         if ($topOpportunity) {
-            $recommendations[] = "Monitor {$topOpportunity['category_name']}, the highest opportunity category.";
+            $recommendations[] = "Highest cost reduction focus: {$topOpportunity['category_name']} scored {$topOpportunity['opportunity_score']}/100 with current spending {$topOpportunity['current_expense']} and estimated saving {$topOpportunity['potential_saving']}.";
         }
 
         if (BigDecimal::of($recurring['monthly_commitment'])->isGreaterThan('0')) {
-            $recommendations[] = 'Review active recurring expenses before the next billing cycle.';
+            $recommendations[] = "Review recurring expenses before the next billing cycle; active commitments total {$recurring['monthly_commitment']} and consume {$recurring['income_commitment_percentage']}% of this month's income.";
         }
 
         if ($leakage['transaction_count'] > 0) {
-            $recommendations[] = 'Reduce repeated small expenses before they accumulate.';
+            $recommendations[] = "Reduce small expenses below {$leakage['threshold']}; {$leakage['transaction_count']} small transactions totaled {$leakage['total_amount']} this month.";
         }
 
-        $recommendations[] = 'Maintain the recommended savings target when actual income allows it.';
+        $recommendations[] = "Use the forecast basis in this report before setting the final budget: {$forecast['basis']}";
 
         return array_slice($recommendations, 0, 6);
     }

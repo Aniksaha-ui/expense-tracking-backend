@@ -37,11 +37,13 @@
         .guide-table th { background: #f2f7f5; color: #125f4f; font-size: 7px; font-weight: bold; text-transform: uppercase; width: 22%; }
         .guide-table tr:last-child th, .guide-table tr:last-child td { border-bottom: 0; }
         .chart-box { background: #fbfcfe; border: 1px solid #dbe4ed; margin-bottom: 10px; padding: 8px 9px; page-break-inside: avoid; }
+        .svg-chart { border: 1px solid #e5e9ef; display: block; margin-bottom: 7px; width: 100%; }
         .bar-table { border-collapse: separate; border-spacing: 0 5px; margin-bottom: 0; }
         .bar-label { color: #172033; font-weight: bold; width: 24%; }
-        .bar-fill-cell { background: #147d64; height: 11px; line-height: 11px; }
-        .bar-empty-cell { background: #e9eef4; height: 11px; line-height: 11px; }
+        .bar-fill-cell { background: #147d64; color: #147d64; height: 12px; line-height: 12px; }
+        .bar-empty-cell { background: #e9eef4; color: #e9eef4; height: 12px; line-height: 12px; }
         .bar-value { color: #475467; font-weight: bold; text-align: right; width: 14%; }
+        .bar-text { color: #147d64; font-family: Courier, monospace; font-size: 9px; font-weight: bold; margin-top: 2px; }
         .list { margin: 0 0 9px 15px; padding: 0; }
         .list li { margin-bottom: 3px; }
         .empty { background: #f8fafc; border: 1px solid #e3e8ef; border-radius: 8px; color: #667085; font-size: 12px; padding: 28px; text-align: center; }
@@ -66,6 +68,87 @@
             $filled = $barWidth($value, $max);
 
             return [$filled, max(0, 100 - $filled)];
+        };
+        $textBar = function ($value, $max): string {
+            $length = max(1, min(30, (int) round(((float) $value / max((float) $max, 1)) * 30)));
+
+            return str_repeat('|', $length);
+        };
+        $svgText = fn ($value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+        $svgMoney = fn ($value): string => number_format((float) $value, 2);
+        $svgBarChart = function ($rows, string $valueKey, string $labelKey, string $title) use ($svgText, $svgMoney) {
+            $rows = collect($rows)->values()->take(12);
+            $rowHeight = 34;
+            $width = 920;
+            $height = max(160, 72 + ($rows->count() * $rowHeight));
+            $labelWidth = 185;
+            $plotWidth = 555;
+            $valueX = $labelWidth + $plotWidth + 28;
+            $max = max(1, (float) $rows->max(fn ($row) => (float) data_get($row, $valueKey, 0)));
+            $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$width.'" height="'.$height.'" viewBox="0 0 '.$width.' '.$height.'">';
+            $svg .= '<rect width="100%" height="100%" fill="#fbfcfe"/>';
+            $svg .= '<text x="18" y="25" fill="#172033" font-family="Helvetica, Arial" font-size="17" font-weight="700">'.$svgText($title).'</text>';
+            $svg .= '<line x1="'.$labelWidth.'" y1="45" x2="'.($labelWidth + $plotWidth).'" y2="45" stroke="#d8e2eb" stroke-width="1"/>';
+            $svg .= '<line x1="'.$labelWidth.'" y1="45" x2="'.$labelWidth.'" y2="'.($height - 18).'" stroke="#d8e2eb" stroke-width="1"/>';
+
+            foreach ($rows as $index => $row) {
+                $y = 58 + ($index * $rowHeight);
+                $value = (float) data_get($row, $valueKey, 0);
+                $barWidth = max(2, (int) round(($value / $max) * $plotWidth));
+                $label = $svgText(data_get($row, $labelKey, data_get($row, 'category_name', 'N/A')));
+                $svg .= '<text x="18" y="'.($y + 14).'" fill="#172033" font-family="Helvetica, Arial" font-size="12" font-weight="700">'.$label.'</text>';
+                $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$plotWidth.'" height="18" fill="#e9eef4"/>';
+                $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$barWidth.'" height="18" fill="#147d64"/>';
+                $svg .= '<text x="'.$valueX.'" y="'.($y + 14).'" fill="#475467" font-family="Helvetica, Arial" font-size="12" font-weight="700">'.$svgMoney($value).'</text>';
+            }
+
+            $svg .= '</svg>';
+
+            return 'data:image/svg+xml;base64,'.base64_encode($svg);
+        };
+        $svgLineChart = function ($rows, string $valueKey, string $labelKey, string $title) use ($svgText, $svgMoney) {
+            $rows = collect($rows)->values()->take(12);
+            $width = 920;
+            $height = 250;
+            $left = 58;
+            $right = 32;
+            $top = 48;
+            $bottom = 45;
+            $plotWidth = $width - $left - $right;
+            $plotHeight = $height - $top - $bottom;
+            $max = max(1, (float) $rows->max(fn ($row) => (float) data_get($row, $valueKey, 0)));
+            $count = max(1, $rows->count() - 1);
+            $points = [];
+            $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$width.'" height="'.$height.'" viewBox="0 0 '.$width.' '.$height.'">';
+            $svg .= '<rect width="100%" height="100%" fill="#fbfcfe"/>';
+            $svg .= '<text x="18" y="25" fill="#172033" font-family="Helvetica, Arial" font-size="17" font-weight="700">'.$svgText($title).'</text>';
+
+            for ($grid = 0; $grid <= 4; $grid++) {
+                $y = $top + (($plotHeight / 4) * $grid);
+                $svg .= '<line x1="'.$left.'" y1="'.$y.'" x2="'.($width - $right).'" y2="'.$y.'" stroke="#e5e9ef" stroke-width="1"/>';
+            }
+
+            foreach ($rows as $index => $row) {
+                $value = (float) data_get($row, $valueKey, 0);
+                $x = $left + (($plotWidth / $count) * $index);
+                $y = $top + $plotHeight - (($value / $max) * $plotHeight);
+                $points[] = round($x, 1).','.round($y, 1);
+            }
+
+            $svg .= '<polyline points="'.implode(' ', $points).'" fill="none" stroke="#147d64" stroke-width="4"/>';
+
+            foreach ($rows as $index => $row) {
+                $value = (float) data_get($row, $valueKey, 0);
+                $x = $left + (($plotWidth / $count) * $index);
+                $y = $top + $plotHeight - (($value / $max) * $plotHeight);
+                $svg .= '<circle cx="'.round($x, 1).'" cy="'.round($y, 1).'" r="5" fill="#147d64"/>';
+                $svg .= '<text x="'.round($x - 18, 1).'" y="'.round($height - 18, 1).'" fill="#667085" font-family="Helvetica, Arial" font-size="10">'.$svgText(data_get($row, $labelKey, '')).'</text>';
+            }
+
+            $svg .= '<text x="'.$left.'" y="'.($top - 10).'" fill="#475467" font-family="Helvetica, Arial" font-size="11">Max: '.$svgMoney($max).'</text>';
+            $svg .= '</svg>';
+
+            return 'data:image/svg+xml;base64,'.base64_encode($svg);
         };
     ?>
 
@@ -126,6 +209,18 @@
             </table>
         <?php endif; ?>
 
+        <?php if (! empty($report['section_guides'])): ?>
+            <div class="section-title">Report section guide</div>
+            <table class="guide-table">
+                <?php foreach ($report['section_guides'] as $guide): ?>
+                    <tr>
+                        <th><?= e($guide['section']) ?></th>
+                        <td><?= e($guide['definition']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
+        <?php endif; ?>
+
         <?php if ($frequency === 'daily'): ?>
             <div class="section-title">Today at a glance</div>
             <table class="data-table">
@@ -146,6 +241,7 @@
             $maxGraphValue = $maxChartValue($graphRows, $graphKey);
         ?>
         <div class="chart-box">
+            <img class="svg-chart" src="<?= e($frequency === 'monthly' ? $svgLineChart($graphRows, $graphKey, 'label', 'Expense trend') : $svgBarChart($graphRows, $graphKey, 'label', 'Expense trend')) ?>" alt="Expense trend chart">
             <table class="bar-table">
                 <?php foreach ($graphRows as $row): ?>
                     <?php [$filled, $empty] = $barCells($row[$graphKey] ?? 0, $maxGraphValue); ?>
@@ -154,10 +250,11 @@
                         <td>
                             <table>
                                 <tr>
-                                    <td class="bar-fill-cell" width="<?= e($filled) ?>%">&nbsp;</td>
-                                    <td class="bar-empty-cell" width="<?= e($empty) ?>%">&nbsp;</td>
+                                    <td class="bar-fill-cell" bgcolor="#147d64" width="<?= e($filled) ?>%">&nbsp;</td>
+                                    <td class="bar-empty-cell" bgcolor="#e9eef4" width="<?= e($empty) ?>%">&nbsp;</td>
                                 </tr>
                             </table>
+                            <div class="bar-text"><?= e($textBar($row[$graphKey] ?? 0, $maxGraphValue)) ?></div>
                         </td>
                         <td class="bar-value"><?= e($row[$graphKey] ?? '0.00') ?></td>
                     </tr>
@@ -169,6 +266,7 @@
             <div class="section-title">Top spending category chart</div>
             <?php $topCategoryMax = $maxChartValue($report['top_categories'], 'current_expense'); ?>
             <div class="chart-box">
+                <img class="svg-chart" src="<?= e($svgBarChart($report['top_categories'], 'current_expense', 'category_name', 'Top spending categories')) ?>" alt="Top spending category chart">
                 <table class="bar-table">
                     <?php foreach ($report['top_categories'] as $row): ?>
                         <?php [$filled, $empty] = $barCells($row['current_expense'], $topCategoryMax); ?>
@@ -177,10 +275,11 @@
                             <td>
                                 <table>
                                     <tr>
-                                        <td class="bar-fill-cell" width="<?= e($filled) ?>%">&nbsp;</td>
-                                        <td class="bar-empty-cell" width="<?= e($empty) ?>%">&nbsp;</td>
+                                        <td class="bar-fill-cell" bgcolor="#147d64" width="<?= e($filled) ?>%">&nbsp;</td>
+                                        <td class="bar-empty-cell" bgcolor="#e9eef4" width="<?= e($empty) ?>%">&nbsp;</td>
                                     </tr>
                                 </table>
+                                <div class="bar-text"><?= e($textBar($row['current_expense'], $topCategoryMax)) ?></div>
                             </td>
                             <td class="bar-value"><?= e($row['current_expense']) ?></td>
                         </tr>
@@ -190,6 +289,7 @@
 
             <div class="section-title">Category share chart</div>
             <div class="chart-box">
+                <img class="svg-chart" src="<?= e($svgBarChart($report['top_categories'], 'expense_share', 'category_name', 'Category share percentage')) ?>" alt="Category share chart">
                 <table class="bar-table">
                     <?php foreach ($report['top_categories'] as $row): ?>
                         <?php [$filled, $empty] = $barCells($row['expense_share'], 100); ?>
@@ -198,10 +298,11 @@
                             <td>
                                 <table>
                                     <tr>
-                                        <td class="bar-fill-cell" width="<?= e($filled) ?>%">&nbsp;</td>
-                                        <td class="bar-empty-cell" width="<?= e($empty) ?>%">&nbsp;</td>
+                                        <td class="bar-fill-cell" bgcolor="#147d64" width="<?= e($filled) ?>%">&nbsp;</td>
+                                        <td class="bar-empty-cell" bgcolor="#e9eef4" width="<?= e($empty) ?>%">&nbsp;</td>
                                     </tr>
                                 </table>
+                                <div class="bar-text"><?= e($textBar($row['expense_share'], 100)) ?></div>
                             </td>
                             <td class="bar-value"><?= e($row['expense_share']) ?>%</td>
                         </tr>
