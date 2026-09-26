@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\FileManagerController;
 use App\Http\Controllers\Api\RecurringExpenseController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\TransactionController;
@@ -67,5 +68,25 @@ Route::middleware('auth:api')->group(function () {
         Route::get('weekly-current-month-analysis', [ReportController::class, 'currentMonthWeeklyExpenseAnalysis']);
         Route::get('current-vs-previous-month-analysis', [ReportController::class, 'currentVsPreviousMonthAnalysis']);
         Route::get('due-recurring', [ReportController::class, 'dueRecurring']);
+    });
+
+    Route::prefix('file-manager')->group(function () {
+        Route::get('items', [FileManagerController::class, 'index']);
+        Route::post('folders', [FileManagerController::class, 'storeFolder']);
+        Route::patch('folders/{folderId}', [FileManagerController::class, 'renameFolder']);
+        Route::delete('folders/{folderId}', [FileManagerController::class, 'destroyFolder']);
+        Route::post('folders/{folderId}/delete', [FileManagerController::class, 'destroyFolder']);
+        Route::post('files', [FileManagerController::class, 'uploadFiles']);
+        Route::get('files/{fileId}/versions', [FileManagerController::class, 'versions']);
+        Route::post('files/{fileId}/versions', [FileManagerController::class, 'uploadVersion']);
+        Route::post('files/{fileId}/versions/{versionId}/restore', [FileManagerController::class, 'restoreVersion']);
+        Route::get('files/{fileId}/preview', [FileManagerController::class, 'previewFile']);
+        Route::get('files/{fileId}/content', [FileManagerController::class, 'textContent']);
+        Route::post('files/{fileId}/content', [FileManagerController::class, 'updateTextContent']);
+        Route::get('files/{fileId}/download', [FileManagerController::class, 'downloadFile']);
+        Route::post('files/download', [FileManagerController::class, 'downloadFiles']);
+        Route::patch('files/{fileId}', [FileManagerController::class, 'renameFile']);
+        Route::delete('files/{fileId}', [FileManagerController::class, 'destroyFile']);
+        Route::post('files/{fileId}/delete', [FileManagerController::class, 'destroyFile']);
     });
 });

@@ -25,11 +25,6 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -66,5 +61,15 @@ class User extends Authenticatable
     public function recurringExpenses(): HasMany
     {
         return $this->hasMany(RecurringExpense::class);
+    }
+
+    public function fileManagerFolders(): HasMany
+    {
+        return $this->hasMany(FileManagerFolder::class);
+    }
+
+    public function fileManagerFiles(): HasMany
+    {
+        return $this->hasMany(FileManagerFile::class);
     }
 }
