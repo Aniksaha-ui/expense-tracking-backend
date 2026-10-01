@@ -55,19 +55,19 @@ class ReportController extends Controller
         }
     }
 
-    public function categoryUsageAnalysis(): JsonResponse
+    public function categoryUsageAnalysis(ReportFilterRequest $request): JsonResponse
     {
         try {
-            return $this->successResponse($this->reportService->categoryUsageAnalysis(auth()->id()));
+            return $this->successResponse($this->reportService->categoryUsageAnalysis(auth()->id(), $request->validated()));
         } catch (\Exception $exception) {
             return $this->errorResponse($exception->getMessage(), status: 500);
         }
     }
 
-    public function burnRateAnalysis(): JsonResponse
+    public function burnRateAnalysis(ReportFilterRequest $request): JsonResponse
     {
         try {
-            return $this->successResponse($this->reportService->burnRateAnalysis(auth()->id()));
+            return $this->successResponse($this->reportService->burnRateAnalysis(auth()->id(), $request->validated()));
         } catch (\Exception $exception) {
             return $this->errorResponse($exception->getMessage(), status: 500);
         }
@@ -82,19 +82,19 @@ class ReportController extends Controller
         }
     }
 
-    public function currentMonthWeeklyExpenseAnalysis(): JsonResponse
+    public function currentMonthWeeklyExpenseAnalysis(ReportFilterRequest $request): JsonResponse
     {
         try {
-            return $this->successResponse($this->reportService->currentMonthWeeklyExpenseAnalysis(auth()->id()));
+            return $this->successResponse($this->reportService->currentMonthWeeklyExpenseAnalysis(auth()->id(), $request->validated()));
         } catch (\Exception $exception) {
             return $this->errorResponse($exception->getMessage(), status: 500);
         }
     }
 
-    public function currentVsPreviousMonthAnalysis(): JsonResponse
+    public function currentVsPreviousMonthAnalysis(ReportFilterRequest $request): JsonResponse
     {
         try {
-            return $this->successResponse($this->reportService->currentVsPreviousMonthAnalysis(auth()->id()));
+            return $this->successResponse($this->reportService->currentVsPreviousMonthAnalysis(auth()->id(), $request->validated()));
         } catch (\Exception $exception) {
             return $this->errorResponse($exception->getMessage(), status: 500);
         }

@@ -109,7 +109,7 @@ class ReportService extends BaseFinanceService
         ]);
     }
 
-    public function categoryUsageAnalysis(int $userId): array
+    public function categoryUsageAnalysis(int $userId, array $filters = []): array
     {
         $rows = DB::table('transactions')
             ->join('categories', 'categories.id', '=', 'transactions.category_id')
@@ -123,8 +123,10 @@ class ReportService extends BaseFinanceService
             ->where('transactions.type', TransactionType::EXPENSE->value)
             ->groupBy('transactions.category_id', 'categories.name')
             ->orderByDesc('usage_count')
-            ->orderByDesc('total_amount')
-            ->get();
+            ->orderByDesc('total_amount');
+
+        $this->applyTransactionDateFilters($rows, $filters);
+        $rows = $rows->get();
 
         $totalAmount = $rows->reduce(
             fn (string $carry, object $row): string => $this->addAggregate($carry, $row->total_amount ?? '0'),
@@ -176,7 +178,7 @@ class ReportService extends BaseFinanceService
         ];
     }
 
-    public function burnRateAnalysis(int $userId): array
+    public function burnRateAnalysis(int $userId, array $filters = []): array
     {
         $rows = DB::table('transactions')
             ->select([
@@ -187,8 +189,10 @@ class ReportService extends BaseFinanceService
             ->where('user_id', $userId)
             ->where('type', TransactionType::EXPENSE->value)
             ->groupBy(DB::raw("DATE_FORMAT(transaction_date, '%Y-%m')"))
-            ->orderBy('month')
-            ->get();
+            ->orderBy('month');
+
+        $this->applyTransactionDateFilters($rows, $filters);
+        $rows = $rows->get();
 
         $table = $rows->map(function (object $row): array {
             $totalExpense = $this->formatAggregate($row->total_expense ?? '0');
@@ -277,10 +281,14 @@ class ReportService extends BaseFinanceService
         });
     }
 
-    public function currentMonthWeeklyExpenseAnalysis(int $userId): array
+    public function currentMonthWeeklyExpenseAnalysis(int $userId, array $filters = []): array
     {
-        $monthStart = now()->startOfMonth();
-        $monthEnd = now()->endOfMonth();
+        $monthStart = ! empty($filters['from_date'])
+            ? Carbon::parse($filters['from_date'])->startOfDay()
+            : now()->startOfMonth();
+        $monthEnd = ! empty($filters['to_date'])
+            ? Carbon::parse($filters['to_date'])->endOfDay()
+            : now()->endOfDay();
 
         $weeklyExpenseRows = DB::table('transactions')
             ->select([
@@ -365,14 +373,19 @@ class ReportService extends BaseFinanceService
         ];
     }
 
-    public function currentVsPreviousMonthAnalysis(int $userId): array
+    public function currentVsPreviousMonthAnalysis(int $userId, array $filters = []): array
     {
-        $currentMonthDate = now();
-        $currentMonthStart = $currentMonthDate->copy()->startOfMonth();
-        $currentMonthEnd = $currentMonthDate->copy()->endOfMonth();
-        $previousMonthDate = $currentMonthDate->copy()->subMonthNoOverflow();
-        $previousMonthStart = $previousMonthDate->copy()->startOfMonth();
-        $previousMonthEnd = $previousMonthDate->copy()->endOfMonth();
+        $currentMonthStart = ! empty($filters['from_date'])
+            ? Carbon::parse($filters['from_date'])->startOfDay()
+            : now()->startOfMonth();
+        $currentMonthEnd = ! empty($filters['to_date'])
+            ? Carbon::parse($filters['to_date'])->endOfDay()
+            : now()->endOfDay();
+        $periodLength = $currentMonthStart->diffInDays($currentMonthEnd);
+        $previousMonthEnd = $currentMonthStart->copy()->subDay()->endOfDay();
+        $previousMonthStart = $previousMonthEnd->copy()->subDays($periodLength)->startOfDay();
+        $currentMonthDate = $currentMonthStart->copy();
+        $previousMonthDate = $previousMonthStart->copy();
 
         $reportRows = DB::table('transactions')
             ->selectRaw(
@@ -396,6 +409,7 @@ class ReportService extends BaseFinanceService
             )
             ->where('user_id', $userId)
             ->whereDate('transaction_date', '>=', $previousMonthStart->toDateString())
+            ->whereDate('transaction_date', '<=', $currentMonthEnd->toDateString())
             ->groupBy('period')
             ->get()
             ->keyBy('period');
