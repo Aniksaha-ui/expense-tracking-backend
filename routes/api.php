@@ -63,6 +63,7 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::prefix('reports')->group(function () {
+        Route::get('financial-overview', [ReportController::class, 'financialOverview']);
         Route::get('summary', [ReportController::class, 'summary']);
         Route::get('account-balances', [ReportController::class, 'accountBalances']);
         Route::get('burn-rate-analysis', [ReportController::class, 'burnRateAnalysis']);

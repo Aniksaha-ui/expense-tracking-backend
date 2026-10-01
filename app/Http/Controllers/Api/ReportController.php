@@ -26,6 +26,17 @@ class ReportController extends Controller
         }
     }
 
+    public function financialOverview(ReportFilterRequest $request): JsonResponse
+    {
+        try {
+            return $this->successResponse(
+                $this->reportService->financialOverview(auth()->id(), $request->validated())
+            );
+        } catch (\Exception $exception) {
+            return $this->errorResponse($exception->getMessage(), status: 500);
+        }
+    }
+
     public function accountBalances(): JsonResponse
     {
         try {

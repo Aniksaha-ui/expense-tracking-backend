@@ -12,6 +12,124 @@ use Illuminate\Support\Facades\DB;
 class ReportService extends BaseFinanceService
 {
 
+    /**
+     * A ledger-based, portfolio-wide report. Transfers have an equal debit and
+     * credit entry and therefore correctly leave the portfolio balance unchanged.
+     */
+    public function financialOverview(int $userId, array $filters): array
+    {
+        $fromDate = Carbon::parse($filters['from_date'] ?? now()->startOfMonth()->toDateString())->startOfDay();
+        $toDate = Carbon::parse($filters['to_date'] ?? now()->toDateString())->endOfDay();
+        $granularity = $filters['granularity'] ?? 'monthly';
+        $periodExpression = $granularity === 'daily'
+            ? 'DATE(transaction_date)'
+            : "DATE_FORMAT(transaction_date, '%Y-%m-01')";
+
+        $ledger = DB::table('transactions')->where('user_id', $userId);
+        $beforeRange = (clone $ledger)->where('transaction_date', '<', $fromDate);
+        $inRange = (clone $ledger)
+            ->whereBetween('transaction_date', [$fromDate, $toDate]);
+
+        $openingBalance = $this->portfolioBalance($beforeRange);
+        $totalIncome = $this->sumByTypes((clone $inRange), [TransactionType::INCOME->value]);
+        $totalCosting = $this->sumByTypes((clone $inRange), [
+            TransactionType::EXPENSE->value,
+            TransactionType::RECURRING->value,
+        ]);
+        $closingBalance = $this->portfolioBalance(
+            (clone $ledger)->where('transaction_date', '<=', $toDate)
+        );
+
+        $dailyRows = (clone $inRange)
+            ->selectRaw("{$periodExpression} as report_date")
+            ->selectRaw("SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as total_income", [TransactionType::INCOME->value])
+            ->selectRaw("SUM(CASE WHEN type IN (?, ?) THEN amount ELSE 0 END) as total_costing", [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
+            ->selectRaw('COUNT(*) as transaction_count')
+            ->groupByRaw($periodExpression)
+            ->orderBy('report_date')
+            ->get();
+
+        $runningBalance = BigDecimal::of($openingBalance);
+        $daily = $dailyRows->map(function (object $row) use (&$runningBalance, $userId, $fromDate, $toDate, $granularity): array {
+            $income = $this->formatAggregate($row->total_income ?? '0');
+            $costing = $this->formatAggregate($row->total_costing ?? '0');
+            // Account for every ledger entry for the period closing balance,
+            // including deposits, withdrawals, and account-to-account transfers.
+            $periodStart = Carbon::parse($row->report_date)->startOfDay();
+            $periodEnd = $granularity === 'daily'
+                ? (clone $periodStart)->endOfDay()
+                : (clone $periodStart)->endOfMonth();
+            $rangeStart = $periodStart->greaterThan($fromDate) ? $periodStart : $fromDate;
+            $rangeEnd = $periodEnd->lessThan($toDate) ? $periodEnd : $toDate;
+            $dayLedger = DB::table('transactions')
+                ->where('user_id', $userId)
+                ->whereBetween('transaction_date', [$rangeStart, $rangeEnd]);
+            $dailyNet = $this->portfolioNet($dayLedger);
+            $dayOpening = (string) $runningBalance->toScale(2);
+            $runningBalance = $runningBalance->plus($dailyNet);
+
+            return [
+                'date' => $row->report_date,
+                'opening_balance' => $dayOpening,
+                'total_income' => $income,
+                'total_costing' => $costing,
+                'net_income' => (string) BigDecimal::of($income)->minus($costing)->toScale(2),
+                'closing_balance' => (string) $runningBalance->toScale(2),
+                'transaction_count' => (int) $row->transaction_count,
+            ];
+        })->values();
+
+        $categories = DB::table('transactions')
+            ->leftJoin('categories', 'categories.id', '=', 'transactions.category_id')
+            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
+            ->where('transactions.user_id', $userId)
+            ->whereBetween('transactions.transaction_date', [$fromDate, $toDate])
+            ->selectRaw("COALESCE(categories.name, 'Uncategorized') as category")
+            ->selectRaw('SUM(transactions.amount) as amount')
+            ->groupByRaw("COALESCE(categories.name, 'Uncategorized')")
+            ->orderByDesc('amount')
+            ->get()
+            ->map(fn (object $row): array => [
+                'category' => $row->category,
+                'amount' => $this->formatAggregate($row->amount),
+            ])
+            ->values();
+
+        return [
+            'period' => ['from_date' => $fromDate->toDateString(), 'to_date' => $toDate->toDateString()],
+            'granularity' => $granularity,
+            'summary' => [
+                'opening_balance' => $openingBalance,
+                'closing_balance' => $closingBalance,
+                'total_income' => $totalIncome,
+                'total_costing' => $totalCosting,
+                'net_income' => (string) BigDecimal::of($totalIncome)->minus($totalCosting)->toScale(2),
+            ],
+            'daily' => $daily,
+            'costing_by_category' => $categories,
+        ];
+    }
+
+    private function sumByTypes(Builder $query, array $types): string
+    {
+        return $this->formatAggregate($query->whereIn('type', $types)->sum('amount'));
+    }
+
+    private function portfolioBalance(Builder $query): string
+    {
+        return $this->portfolioNet($query);
+    }
+
+    private function portfolioNet(Builder $query): string
+    {
+        $credits = [TransactionType::OPENING_BALANCE->value, TransactionType::INCOME->value, TransactionType::DEPOSIT->value];
+        $debits = [TransactionType::EXPENSE->value, TransactionType::RECURRING->value, TransactionType::WITHDRAW->value, TransactionType::TRANSFER->value];
+        $creditTotal = (clone $query)->whereIn('type', $credits)->sum('amount');
+        $debitTotal = (clone $query)->whereIn('type', $debits)->sum('amount');
+
+        return $this->subtractAggregate($this->formatAggregate($creditTotal), $this->formatAggregate($debitTotal));
+    }
+
      public function send(TelegramService $telegram,$message)
     {
         $telegram->sendMessage($message);

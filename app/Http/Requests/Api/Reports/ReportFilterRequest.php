@@ -12,6 +12,7 @@ class ReportFilterRequest extends ApiFormRequest
             'from_date' => ['nullable', 'date'],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
             'through_date' => ['nullable', 'date'],
+            'granularity' => ['nullable', 'in:monthly,daily'],
         ];
     }
 }
