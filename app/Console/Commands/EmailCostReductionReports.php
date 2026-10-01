@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Mail\CostReductionReportMail;
 use App\Models\User;
 use App\Services\CostReductionReportService;
-use App\Services\NotificationService;
+use App\Services\CronReportDeliveryService;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +21,7 @@ class EmailCostReductionReports extends Command
 
     protected $description = 'Email database-driven cost reduction PDF reports to users';
 
-    public function handle(CostReductionReportService $reportService, NotificationService $notificationService): int
+    public function handle(CostReductionReportService $reportService, CronReportDeliveryService $notificationService): int
     {
         try {
             [$fromDate, $toDate] = $this->resolveDateRange();
@@ -59,9 +59,10 @@ class EmailCostReductionReports extends Command
 
                     $report = $reportService->generate($user, $fromDate, $toDate, $analysis);
 
-                    $notificationService->sendEmail(
-                        to: $recipient ?: $user->email,
-                        mail: new CostReductionReportMail(
+                    $notificationService->deliver(
+                        $user,
+                        'cost_reduction_reports',
+                        new CostReductionReportMail(
                             user: $user,
                             fromDate: $fromDate,
                             toDate: $toDate,
@@ -69,8 +70,7 @@ class EmailCostReductionReports extends Command
                             pdf: $report['pdf'],
                             filename: $report['filename'],
                         ),
-                        cc: $cc,
-                        bcc: $bcc,
+                        "<b>Cost reduction report ready</b>\nPeriod: {$fromDate->toDateString()} to {$toDate->toDateString()}",
                     );
 
                     $sent++;

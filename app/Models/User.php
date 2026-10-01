@@ -63,6 +63,11 @@ class User extends Authenticatable
         return $this->hasMany(RecurringExpense::class);
     }
 
+    public function cronReportDeliverySettings(): HasMany
+    {
+        return $this->hasMany(CronReportDeliverySetting::class);
+    }
+
     public function fileManagerFolders(): HasMany
     {
         return $this->hasMany(FileManagerFolder::class);

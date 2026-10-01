@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Mail\CategoryExpenseReportMail;
 use App\Models\User;
 use App\Services\CategoryExpenseReportService;
-use App\Services\NotificationService;
+use App\Services\CronReportDeliveryService;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +21,7 @@ class EmailCategoryExpenseReports extends Command
 
     protected $description = 'Email category-wise expense PDF reports to users';
 
-    public function handle(CategoryExpenseReportService $reportService, NotificationService $notificationService): int
+    public function handle(CategoryExpenseReportService $reportService, CronReportDeliveryService $notificationService): int
     {
         try {
             [$fromDate, $toDate] = $this->resolveDateRange();
@@ -59,9 +59,10 @@ class EmailCategoryExpenseReports extends Command
 
                     $report = $reportService->generate($user, $fromDate, $toDate, $summary);
 
-                    $notificationService->sendEmail(
-                        to: $recipient ?: $user->email,
-                        mail: new CategoryExpenseReportMail(
+                    $notificationService->deliver(
+                        $user,
+                        'expense_reports',
+                        new CategoryExpenseReportMail(
                             user: $user,
                             fromDate: $fromDate,
                             toDate: $toDate,
@@ -70,8 +71,7 @@ class EmailCategoryExpenseReports extends Command
                             pdf: $report['pdf'],
                             filename: $report['filename'],
                         ),
-                        cc: $cc,
-                        bcc: $bcc,
+                        "<b>Category expense report ready</b>\nPeriod: {$fromDate->toDateString()} to {$toDate->toDateString()}\nTotal expense: {$report['total']}",
                     );
 
                     $sent++;

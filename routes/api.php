@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CronReportDeliverySettingController;
+use App\Http\Controllers\Api\CronReportJobController;
 use App\Http\Controllers\Api\FileManagerController;
 use App\Http\Controllers\Api\RecurringExpenseController;
 use App\Http\Controllers\Api\ReportController;
@@ -22,6 +24,9 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('cron-report-delivery-settings', [CronReportDeliverySettingController::class, 'index']);
+    Route::put('cron-report-delivery-settings', [CronReportDeliverySettingController::class, 'update']);
+    Route::post('cron-report-jobs/{jobKey}/run', [CronReportJobController::class, 'run']);
     Route::apiResource('accounts', AccountController::class)->only(['index', 'store', 'show', 'update']);
     Route::get('categories', [CategoryController::class, 'index']);
     Route::post('categories', [CategoryController::class, 'store']);

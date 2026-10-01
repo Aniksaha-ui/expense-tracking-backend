@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Mail\ExpenseIntelligenceReportMail;
 use App\Models\User;
 use App\Services\ExpenseIntelligenceReportService;
-use App\Services\NotificationService;
+use App\Services\CronReportDeliveryService;
 use Brick\Math\BigDecimal;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
@@ -23,7 +23,7 @@ class EmailExpenseIntelligenceReports extends Command
 
     protected $description = 'Email data-driven expense intelligence PDF reports to users';
 
-    public function handle(ExpenseIntelligenceReportService $reportService, NotificationService $notificationService): int
+    public function handle(ExpenseIntelligenceReportService $reportService, CronReportDeliveryService $notificationService): int
     {
         $frequency = str_replace('_', '-', strtolower((string) $this->argument('frequency')));
         $frequency = $frequency === 'biweekly' ? 'bi-weekly' : $frequency;
@@ -68,9 +68,10 @@ class EmailExpenseIntelligenceReports extends Command
                         continue;
                     }
 
-                    $notificationService->sendEmail(
-                        to: $recipient ?: $user->email,
-                        mail: new ExpenseIntelligenceReportMail(
+                    $notificationService->deliver(
+                        $user,
+                        'expense_intelligence_reports',
+                        new ExpenseIntelligenceReportMail(
                             user: $user,
                             frequency: $frequency,
                             title: $report['title'],
@@ -80,8 +81,7 @@ class EmailExpenseIntelligenceReports extends Command
                             pdf: $report['pdf'],
                             filename: $report['filename'],
                         ),
-                        cc: $cc,
-                        bcc: $bcc,
+                        "<b>Expense intelligence report ready</b>\nFrequency: {$frequency}\nPeriod: {$fromDate->toDateString()} to {$toDate->toDateString()}",
                     );
 
                     $sent++;
