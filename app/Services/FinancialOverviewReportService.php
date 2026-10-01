@@ -26,7 +26,6 @@ class FinancialOverviewReportService
             'toDate' => $toDate,
             'summary' => $report['summary'],
             'rows' => $report['daily'],
-            'categories' => $report['costing_by_category'],
         ];
 
         return [

@@ -36,6 +36,9 @@ class ReportService extends BaseFinanceService
             TransactionType::EXPENSE->value,
             TransactionType::RECURRING->value,
         ]);
+        // Each bank-to-bank transfer has a matching deposit entry. Report the
+        // outgoing transfer once so the amount is visible without changing net income.
+        $totalBankTransfers = $this->sumByTypes((clone $inRange), [TransactionType::TRANSFER->value]);
         $closingBalance = $this->portfolioBalance(
             (clone $ledger)->where('transaction_date', '<=', $toDate)
         );
@@ -44,6 +47,7 @@ class ReportService extends BaseFinanceService
             ->selectRaw("{$periodExpression} as report_date")
             ->selectRaw("SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as total_income", [TransactionType::INCOME->value])
             ->selectRaw("SUM(CASE WHEN type IN (?, ?) THEN amount ELSE 0 END) as total_costing", [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
+            ->selectRaw("SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as total_bank_transfers", [TransactionType::TRANSFER->value])
             ->selectRaw('COUNT(*) as transaction_count')
             ->groupByRaw($periodExpression)
             ->orderBy('report_date')
@@ -53,6 +57,7 @@ class ReportService extends BaseFinanceService
         $daily = $dailyRows->map(function (object $row) use (&$runningBalance, $userId, $fromDate, $toDate, $granularity): array {
             $income = $this->formatAggregate($row->total_income ?? '0');
             $costing = $this->formatAggregate($row->total_costing ?? '0');
+            $bankTransfers = $this->formatAggregate($row->total_bank_transfers ?? '0');
             // Account for every ledger entry for the period closing balance,
             // including deposits, withdrawals, and account-to-account transfers.
             $periodStart = Carbon::parse($row->report_date)->startOfDay();
@@ -73,27 +78,12 @@ class ReportService extends BaseFinanceService
                 'opening_balance' => $dayOpening,
                 'total_income' => $income,
                 'total_costing' => $costing,
+                'total_bank_transfers' => $bankTransfers,
                 'net_income' => (string) BigDecimal::of($income)->minus($costing)->toScale(2),
                 'closing_balance' => (string) $runningBalance->toScale(2),
                 'transaction_count' => (int) $row->transaction_count,
             ];
         })->values();
-
-        $categories = DB::table('transactions')
-            ->leftJoin('categories', 'categories.id', '=', 'transactions.category_id')
-            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->where('transactions.user_id', $userId)
-            ->whereBetween('transactions.transaction_date', [$fromDate, $toDate])
-            ->selectRaw("COALESCE(categories.name, 'Uncategorized') as category")
-            ->selectRaw('SUM(transactions.amount) as amount')
-            ->groupByRaw("COALESCE(categories.name, 'Uncategorized')")
-            ->orderByDesc('amount')
-            ->get()
-            ->map(fn (object $row): array => [
-                'category' => $row->category,
-                'amount' => $this->formatAggregate($row->amount),
-            ])
-            ->values();
 
         return [
             'period' => ['from_date' => $fromDate->toDateString(), 'to_date' => $toDate->toDateString()],
@@ -103,10 +93,10 @@ class ReportService extends BaseFinanceService
                 'closing_balance' => $closingBalance,
                 'total_income' => $totalIncome,
                 'total_costing' => $totalCosting,
+                'total_bank_transfers' => $totalBankTransfers,
                 'net_income' => (string) BigDecimal::of($totalIncome)->minus($totalCosting)->toScale(2),
             ],
             'daily' => $daily,
-            'costing_by_category' => $categories,
         ];
     }
 
