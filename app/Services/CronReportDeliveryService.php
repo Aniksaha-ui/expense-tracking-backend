@@ -8,7 +8,7 @@ use Illuminate\Mail\Mailable;
 
 class CronReportDeliveryService
 {
-    public const JOBS = ['expense_reports' => ['label' => 'Category expense report', 'command' => 'expense-reports:email'], 'cost_reduction_reports' => ['label' => 'Cost reduction report', 'command' => 'cost-reduction-reports:email'], 'expense_intelligence_reports' => ['label' => 'Expense intelligence report', 'command' => 'expense-intelligence-reports:email']];
+    public const JOBS = ['expense_reports' => ['label' => 'Category expense report', 'command' => 'expense-reports:email'], 'cost_reduction_reports' => ['label' => 'Cost reduction report', 'command' => 'cost-reduction-reports:email'], 'expense_intelligence_reports' => ['label' => 'Expense intelligence report', 'command' => 'expense-intelligence-reports:email'], 'financial_overview_reports' => ['label' => 'Financial overview report', 'command' => 'financial-overview-reports:email']];
     public function settingsFor(User $user): array
     {
         $stored = CronReportDeliverySetting::query()->where('user_id', $user->id)->get()->keyBy('job_key');

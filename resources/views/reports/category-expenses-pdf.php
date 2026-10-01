@@ -76,6 +76,8 @@
         .summary-value.primary { color: #147d64; }
         .section-title { font-size: 13px; font-weight: bold; margin: 0 0 3px; }
         .section-note { color: #667085; font-size: 9px; margin-bottom: 8px; }
+        .chart-box { background: #fbfcfe; border: 1px solid #dbe4ed; margin: 0 0 15px; padding: 10px; page-break-inside: avoid; }
+        .chart-box img { display: block; width: 100%; }
         .category-group { margin-bottom: 11px; page-break-inside: avoid; }
         .category-table {
             border: 1px solid #dde3ea;
@@ -133,6 +135,37 @@
     <?php
         $periodDays = (int) $fromDate->diffInDays($toDate) + 1;
         $categoryGroups = $rows->chunk(5);
+        $chartRows = $rows->take(12)->values();
+        $chartDataUri = null;
+
+        if ($chartRows->isNotEmpty()) {
+            $chartWidth = 920;
+            $rowHeight = 27;
+            $chartHeight = 78 + ($chartRows->count() * $rowHeight);
+            $labelWidth = 220;
+            $plotWidth = 520;
+            $valueX = $labelWidth + $plotWidth + 24;
+            $maxAmount = max(1, (float) $chartRows->max(fn (array $row): float => (float) $row['total_amount']));
+            $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$chartWidth.'" height="'.$chartHeight.'" viewBox="0 0 '.$chartWidth.' '.$chartHeight.'">';
+            $svg .= '<rect width="100%" height="100%" fill="#fbfcfe"/>';
+            $svg .= '<text x="18" y="25" fill="#172033" font-family="Helvetica, Arial" font-size="17" font-weight="700">Spending by category</text>';
+            $svg .= '<text x="18" y="45" fill="#667085" font-family="Helvetica, Arial" font-size="10">Bar length shows each category’s share of the largest spend.</text>';
+
+            foreach ($chartRows as $index => $row) {
+                $y = 57 + ($index * $rowHeight);
+                $amount = (float) $row['total_amount'];
+                $barWidth = max(2, (int) round(($amount / $maxAmount) * $plotWidth));
+                $name = htmlspecialchars((string) $row['category_name'], ENT_QUOTES, 'UTF-8');
+                $amountLabel = number_format($amount, 2);
+                $svg .= '<text x="18" y="'.($y + 13).'" fill="#172033" font-family="Helvetica, Arial" font-size="10" font-weight="700">'.$name.'</text>';
+                $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$plotWidth.'" height="14" fill="#e8eef3"/>';
+                $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$barWidth.'" height="14" fill="#147d64"/>';
+                $svg .= '<text x="'.$valueX.'" y="'.($y + 12).'" fill="#475467" font-family="Helvetica, Arial" font-size="10" font-weight="700">BDT '.$amountLabel.'</text>';
+            }
+
+            $svg .= '</svg>';
+            $chartDataUri = 'data:image/svg+xml;base64,'.base64_encode($svg);
+        }
     ?>
 
     <table class="header-table">
@@ -194,7 +227,13 @@
         </table>
 
         <div class="section-title">Expense distribution</div>
-        <div class="section-note">Categories are arranged as columns for quick comparison.</div>
+        <div class="section-note">The graph makes the largest spending categories immediately visible; the detailed tables below retain every category.</div>
+
+        <?php if ($chartDataUri): ?>
+            <div class="chart-box">
+                <img src="<?= e($chartDataUri) ?>" alt="Bar chart of spending by category">
+            </div>
+        <?php endif; ?>
 
         <?php foreach ($categoryGroups as $group): ?>
             <div class="category-group">
