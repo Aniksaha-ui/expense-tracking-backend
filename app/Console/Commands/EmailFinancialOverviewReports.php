@@ -44,7 +44,7 @@ class EmailFinancialOverviewReports extends Command
                     $deliveryService->deliver(
                         $user,
                         'financial_overview_reports',
-                        new FinancialOverviewReportMail($user, $fromDate, $toDate, $summary, $report['pdf'], $report['filename']),
+                        new FinancialOverviewReportMail($user, $fromDate, $toDate, $summary, $report['transferReceiptsByAccount'], $report['pdf'], $report['filename']),
                         "<b>Financial overview ready</b>\nPeriod: {$fromDate->toDateString()} to {$toDate->toDateString()}\nClosing balance: {$summary['closing_balance']}",
                     );
                     $sent++;

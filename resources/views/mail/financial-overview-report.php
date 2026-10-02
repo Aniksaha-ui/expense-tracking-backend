@@ -10,4 +10,11 @@
     <tr><td>Closing balance</td><td><strong><?= e($summary['closing_balance']) ?></strong></td></tr>
 </table>
 
+<p><strong>Transfer receipts by destination account</strong></p>
+<table cellpadding="7" cellspacing="0" border="1" style="border-collapse: collapse; border-color: #d1d5db;">
+    <tr><th>Account</th><th>Total received</th></tr>
+    <?php if (empty($transferReceiptsByAccount)): ?><tr><td colspan="2">No transfers were received during this period.</td></tr><?php endif; ?>
+    <?php foreach ($transferReceiptsByAccount as $receipt): ?><tr><td><?= e($receipt['account_name']) ?></td><td><strong><?= e($receipt['total_amount']) ?></strong></td></tr><?php endforeach; ?>
+</table>
+
 <p>Regards,<br><?= e(config('app.name')) ?></p>

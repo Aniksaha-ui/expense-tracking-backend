@@ -80,6 +80,11 @@
     <?php if ($balanceChart): ?><div class="chart"><img src="<?= e($balanceChart) ?>" alt="Opening and closing balance chart"></div><?php else: ?><div class="section-note">No balance movement is available for this period.</div><?php endif; ?>
     <h2>Income and costing movement</h2><div class="section-note">Compare earned income against costs for each reporting period.</div>
     <?php if ($flowChart): ?><div class="chart"><img src="<?= e($flowChart) ?>" alt="Income and costing chart"></div><?php else: ?><div class="section-note">No income or costing movement is available for this period.</div><?php endif; ?>
+    <h2>Transfer receipts by account</h2><div class="section-note">Total transfers received by each destination account in this reporting period.</div>
+    <table class="data"><thead><tr><th>Destination account</th><th>Total received</th></tr></thead><tbody>
+        <?php if (empty($transferReceiptsByAccount)): ?><tr><td colspan="2" style="text-align:center; padding:20px;">No transfers were received during this period.</td></tr><?php endif; ?>
+        <?php foreach ($transferReceiptsByAccount as $receipt): ?><tr><td><?= e($receipt['account_name']) ?></td><td>BDT <?= e(number_format((float) $receipt['total_amount'], 2)) ?></td></tr><?php endforeach; ?>
+    </tbody></table>
     <h2>Monthly financial ledger</h2><div class="muted">Opening and closing balances with income, costing, and bank-to-bank transfers by period.</div>
     <table class="data"><thead><tr><th>Month</th><th>Opening</th><th>Income</th><th>Costing</th><th>Transfers</th><th>Net Income</th><th>Closing</th><th>Entries</th></tr></thead><tbody>
         <?php if (empty($rows)): ?><tr><td colspan="8" style="text-align:center; padding:20px;">No transactions were recorded for this period.</td></tr><?php endif; ?>

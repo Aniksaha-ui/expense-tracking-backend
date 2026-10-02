@@ -25,6 +25,7 @@ class FinancialOverviewReportService
             'fromDate' => $fromDate,
             'toDate' => $toDate,
             'summary' => $report['summary'],
+            'transferReceiptsByAccount' => $report['transfer_receipts_by_account'],
             'rows' => $report['daily'],
         ];
 

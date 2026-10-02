@@ -20,6 +20,7 @@ class FinancialOverviewReportMail extends Mailable
         public readonly CarbonImmutable $fromDate,
         public readonly CarbonImmutable $toDate,
         public readonly array $summary,
+        public readonly array $transferReceiptsByAccount,
         private readonly string $pdf,
         private readonly string $filename,
     ) {

@@ -39,6 +39,21 @@ class ReportService extends BaseFinanceService
         // Each bank-to-bank transfer has a matching deposit entry. Report the
         // outgoing transfer once so the amount is visible without changing net income.
         $totalBankTransfers = $this->sumByTypes((clone $inRange), [TransactionType::TRANSFER->value]);
+        $transferReceiptsByAccount = DB::table('transfers')
+            ->join('accounts', 'transfers.to_account_id', '=', 'accounts.id')
+            ->where('transfers.user_id', $userId)
+            ->where('accounts.user_id', $userId)
+            ->whereBetween('transfers.transfer_date', [$fromDate, $toDate])
+            ->groupBy('accounts.id', 'accounts.name')
+            ->orderBy('accounts.name')
+            ->selectRaw('accounts.name as account_name, SUM(transfers.amount) as total_amount')
+            ->get()
+            ->map(fn (object $row): array => [
+                'account_name' => $row->account_name,
+                'total_amount' => $this->formatAggregate($row->total_amount ?? '0'),
+            ])
+            ->values()
+            ->all();
         $closingBalance = $this->portfolioBalance(
             (clone $ledger)->where('transaction_date', '<=', $toDate)
         );
@@ -96,6 +111,7 @@ class ReportService extends BaseFinanceService
                 'total_bank_transfers' => $totalBankTransfers,
                 'net_income' => (string) BigDecimal::of($totalIncome)->minus($totalCosting)->toScale(2),
             ],
+            'transfer_receipts_by_account' => $transferReceiptsByAccount,
             'daily' => $daily,
         ];
     }
