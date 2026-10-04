@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Transactions\StoreDepositRequest;
+use App\Http\Requests\Api\Transactions\StoreBulkTransactionRequest;
 use App\Http\Requests\Api\Transactions\StoreExpenseRequest;
 use App\Http\Requests\Api\Transactions\StoreIncomeRequest;
 use App\Http\Requests\Api\Transactions\TransactionFilterRequest;
@@ -74,6 +75,26 @@ class TransactionController extends Controller
             return $this->successResponse(
                 new TransactionResource($transaction),
                 'Deposit transaction created successfully.',
+                201
+            );
+        } catch (\RuntimeException $exception) {
+            return $this->errorResponse($exception->getMessage(), status: 422);
+        } catch (\Exception $exception) {
+            return $this->errorResponse($exception->getMessage(), status: 500);
+        }
+    }
+
+    public function storeBulk(StoreBulkTransactionRequest $request): JsonResponse
+    {
+        try {
+            $transactions = $this->transactionService->createBulkTransactions(
+                $request->validated()['transactions'],
+                auth()->id()
+            );
+
+            return $this->successResponse(
+                TransactionResource::collection($transactions),
+                count($transactions).' transactions created successfully.',
                 201
             );
         } catch (\RuntimeException $exception) {

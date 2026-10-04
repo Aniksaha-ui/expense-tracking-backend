@@ -109,6 +109,26 @@ class TransactionService extends BaseFinanceService
         return $this->createTransaction($data, $userId, TransactionType::DEPOSIT, true);
     }
 
+    /**
+     * Create a batch atomically. Account balances are recalculated entry by entry
+     * within the same database transaction, so multiple rows may target one account.
+     */
+    public function createBulkTransactions(array $transactions, int $userId): array
+    {
+        return DB::transaction(function () use ($transactions, $userId) {
+            return array_map(function (array $transaction) use ($userId) {
+                $type = strtoupper($transaction['entry_type']);
+
+                return match ($type) {
+                    TransactionType::INCOME->value => $this->createIncome($transaction, $userId),
+                    TransactionType::EXPENSE->value => $this->createExpense($transaction, $userId),
+                    TransactionType::DEPOSIT->value => $this->createDeposit($transaction, $userId),
+                    default => throw new RuntimeException('Invalid transaction type.'),
+                };
+            }, $transactions);
+        });
+    }
+
     public function createRecurringExpense(array $data, int $userId): object
     {
         return $this->createTransaction(

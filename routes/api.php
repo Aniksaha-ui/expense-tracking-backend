@@ -42,6 +42,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('income', [TransactionController::class, 'storeIncome']);
         Route::post('expense', [TransactionController::class, 'storeExpense']);
         Route::post('deposit', [TransactionController::class, 'storeDeposit']);
+        Route::post('bulk', [TransactionController::class, 'storeBulk']);
         Route::put('{transactionId}', [TransactionController::class, 'update']);
         Route::patch('{transactionId}', [TransactionController::class, 'update']);
     });
