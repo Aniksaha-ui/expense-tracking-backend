@@ -45,4 +45,25 @@ return [
         'chat_id'  => env('TELEGRAM_CHAT_ID'),
     ],
 
+    'transaction_ocr' => [
+        'driver' => env('OCR_DRIVER', 'google_vision'),
+        'enabled' => env('OCR_ENABLED', true),
+        'openai' => [
+            'api_key' => env('OCR_OPENAI_API_KEY'),
+            'model' => env('OCR_OPENAI_MODEL', 'gpt-4.1-mini'),
+        ],
+        'google_vision' => [
+            'project_id' => env('GOOGLE_CLOUD_PROJECT'),
+            'credentials' => env('GOOGLE_APPLICATION_CREDENTIALS'),
+        ],
+    ],
+
+    'financial_overview_ai' => [
+        // Keep this separate from receipt OCR so reporting can use a dedicated project/key.
+        'api_key' => env('OPENAI_REPORT_API_KEY', env('OCR_OPENAI_API_KEY')),
+        'model' => env('OPENAI_REPORT_MODEL', 'gpt-4o-mini'),
+    ],
+    'serper' => ['api_key' => env('SERPER_API_KEY')],
+    'offers' => ['latitude' => env('OFFERS_LATITUDE'), 'longitude' => env('OFFERS_LONGITUDE'), 'location' => env('OFFERS_SEARCH_LOCATION', 'Bangladesh')],
+
 ];

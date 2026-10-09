@@ -10,6 +10,7 @@ class FinancialOverviewReportService
     public function __construct(
         private readonly ReportService $reportService,
         private readonly PdfService $pdfService,
+        private readonly FinancialOverviewAnalysisService $analysisService,
     ) {
     }
 
@@ -20,6 +21,13 @@ class FinancialOverviewReportService
             'to_date' => $toDate->toDateString(),
             'granularity' => 'monthly',
         ]);
+        $analysis = $this->analysisService->generate(
+            $report['summary'],
+            $report['daily'],
+            $report['transfer_receipts_by_account'],
+            $report['category_costing_comparison'],
+            $report['last_12_month_costing'],
+        );
         $viewData = [
             'user' => $user,
             'fromDate' => $fromDate,
@@ -27,6 +35,9 @@ class FinancialOverviewReportService
             'summary' => $report['summary'],
             'transferReceiptsByAccount' => $report['transfer_receipts_by_account'],
             'rows' => $report['daily'],
+            'analysis' => $analysis,
+            'categoryCostingComparison' => $report['category_costing_comparison'],
+            'lastTwelveMonthCosting' => $report['last_12_month_costing'],
         ];
 
         return [

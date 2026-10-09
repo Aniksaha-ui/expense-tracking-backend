@@ -6,6 +6,7 @@ use App\Mail\FinancialOverviewReportMail;
 use App\Models\User;
 use App\Services\CronReportDeliveryService;
 use App\Services\FinancialOverviewReportService;
+use App\Services\SavingsOffersReportService;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +21,7 @@ class EmailFinancialOverviewReports extends Command
 
     protected $description = 'Send financial overview reports to configured recipients';
 
-    public function handle(FinancialOverviewReportService $reportService, CronReportDeliveryService $deliveryService): int
+    public function handle(FinancialOverviewReportService $reportService, SavingsOffersReportService $savingsOffersReportService, CronReportDeliveryService $deliveryService): int
     {
         try {
             [$fromDate, $toDate] = $this->resolveDateRange();
@@ -36,15 +37,16 @@ class EmailFinancialOverviewReports extends Command
             $users->whereKey((int) $this->option('user'));
         }
 
-        $users->chunkById(100, function ($users) use ($reportService, $deliveryService, $fromDate, $toDate, &$sent, &$failed): void {
+        $users->chunkById(100, function ($users) use ($reportService, $savingsOffersReportService, $deliveryService, $fromDate, $toDate, &$sent, &$failed): void {
             foreach ($users as $user) {
                 try {
                     $report = $reportService->generate($user, $fromDate, $toDate);
+                    $offersReport = $savingsOffersReportService->generate($user, $fromDate, $toDate);
                     $summary = $report['summary'];
                     $deliveryService->deliver(
                         $user,
                         'financial_overview_reports',
-                        new FinancialOverviewReportMail($user, $fromDate, $toDate, $summary, $report['transferReceiptsByAccount'], $report['pdf'], $report['filename']),
+                        new FinancialOverviewReportMail($user, $fromDate, $toDate, $summary, $report['transferReceiptsByAccount'], $report['analysis'], $report['pdf'], $report['filename'], $offersReport['pdf'], $offersReport['filename']),
                         "<b>Financial overview ready</b>\nPeriod: {$fromDate->toDateString()} to {$toDate->toDateString()}\nClosing balance: {$summary['closing_balance']}",
                     );
                     $sent++;

@@ -100,6 +100,19 @@ class ReportService extends BaseFinanceService
             ];
         })->values();
 
+        $categoryCostingRows = DB::table('transactions')
+            ->leftJoin('categories', 'transactions.category_id', '=', 'categories.id')
+            ->where('transactions.user_id', $userId)
+            ->whereBetween('transactions.transaction_date', [$fromDate, $toDate])
+            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
+            ->selectRaw("DATE_FORMAT(transactions.transaction_date, '%Y-%m-01') as report_month")
+            ->selectRaw("COALESCE(categories.name, 'Uncategorized') as category_name")
+            ->selectRaw('SUM(transactions.amount) as total_amount')
+            ->groupByRaw("DATE_FORMAT(transactions.transaction_date, '%Y-%m-01'), COALESCE(categories.name, 'Uncategorized')")
+            ->orderBy('report_month')
+            ->orderBy('category_name')
+            ->get();
+
         return [
             'period' => ['from_date' => $fromDate->toDateString(), 'to_date' => $toDate->toDateString()],
             'granularity' => $granularity,
@@ -113,6 +126,59 @@ class ReportService extends BaseFinanceService
             ],
             'transfer_receipts_by_account' => $transferReceiptsByAccount,
             'daily' => $daily,
+            'category_costing_comparison' => $this->categoryCostingComparison($categoryCostingRows),
+            'last_12_month_costing' => $this->lastTwelveMonthCosting($userId, $toDate),
+        ];
+    }
+
+    private function lastTwelveMonthCosting(int $userId, Carbon $toDate): array
+    {
+        $start = $toDate->copy()->subMonthsNoOverflow(11)->startOfMonth();
+
+        return DB::table('transactions')
+            ->leftJoin('categories', 'transactions.category_id', '=', 'categories.id')
+            ->where('transactions.user_id', $userId)
+            ->whereBetween('transactions.transaction_date', [$start, $toDate])
+            ->whereIn('transactions.type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
+            ->selectRaw("COALESCE(categories.name, 'Uncategorized') as category_name, SUM(transactions.amount) as total_amount, AVG(transactions.amount) as average_transaction_amount, COUNT(*) as transaction_count")
+            ->groupByRaw("COALESCE(categories.name, 'Uncategorized')")
+            ->orderByDesc('total_amount')
+            ->limit(10)
+            ->get()
+            ->map(fn (object $row): array => [
+                'category_name' => $row->category_name,
+                'total_amount' => $this->formatAggregate($row->total_amount ?? '0'),
+                'average_transaction_amount' => (string) BigDecimal::of((string) ($row->average_transaction_amount ?? '0'))
+                    ->toScale(2, RoundingMode::HALF_UP),
+                'transaction_count' => (int) $row->transaction_count,
+            ])->all();
+    }
+
+    private function categoryCostingComparison($rows): array
+    {
+        $months = $rows->pluck('report_month')->unique()->values()->all();
+        $categories = $rows->groupBy('category_name')->map(function ($categoryRows, string $categoryName) use ($months): array {
+            $amountsByMonth = $categoryRows
+                ->mapWithKeys(fn (object $row): array => [$row->report_month => $this->formatAggregate($row->total_amount ?? '0')])
+                ->all();
+            $amounts = array_map(fn (string $month): string => $amountsByMonth[$month] ?? '0.00', $months);
+            $latest = (float) ($amounts[count($amounts) - 1] ?? 0);
+            $previous = (float) ($amounts[count($amounts) - 2] ?? 0);
+
+            return [
+                'category_name' => $categoryName,
+                'amounts' => $amounts,
+                'total_amount' => $this->formatAggregate(array_sum(array_map('floatval', $amounts))),
+                'latest_amount' => number_format($latest, 2, '.', ''),
+                'previous_amount' => number_format($previous, 2, '.', ''),
+                'change_amount' => number_format($latest - $previous, 2, '.', ''),
+                'change_percentage' => $previous == 0.0 ? null : round((($latest - $previous) / $previous) * 100, 1),
+            ];
+        })->sortByDesc(fn (array $row): float => (float) $row['total_amount'])->values()->all();
+
+        return [
+            'months' => $months,
+            'categories' => $categories,
         ];
     }
 
@@ -614,7 +680,7 @@ class ReportService extends BaseFinanceService
 
     private function formatAggregate(mixed $value): string
     {
-        return (string) BigDecimal::of((string) ($value ?? '0'))->toScale(2);
+        return (string) BigDecimal::of((string) ($value ?? '0'))->toScale(2, RoundingMode::HALF_UP);
     }
 
     private function addAggregate(mixed $left, mixed $right): string

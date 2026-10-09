@@ -47,6 +47,12 @@ if (config('financial_overview_reports.enabled', true)) {
         ->onOneServer();
 }
 
+Schedule::command('savings-offers-reports:email')
+    ->dailyAt('10:00')
+    ->timezone(config('app.timezone'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
 if (config('expense_intelligence_reports.enabled', true)) {
     Schedule::command('expense-intelligence-reports:email daily')
         ->dailyAt(config('expense_intelligence_reports.daily_send_time', '21:00'))

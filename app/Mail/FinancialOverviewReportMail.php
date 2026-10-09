@@ -21,8 +21,11 @@ class FinancialOverviewReportMail extends Mailable
         public readonly CarbonImmutable $toDate,
         public readonly array $summary,
         public readonly array $transferReceiptsByAccount,
+        public readonly array $analysis,
         private readonly string $pdf,
         private readonly string $filename,
+        private readonly string $offersPdf,
+        private readonly string $offersFilename,
     ) {
     }
 
@@ -40,6 +43,8 @@ class FinancialOverviewReportMail extends Mailable
     {
         return [
             Attachment::fromData(fn (): string => $this->pdf, $this->filename)
+                ->withMime('application/pdf'),
+            Attachment::fromData(fn (): string => $this->offersPdf, $this->offersFilename)
                 ->withMime('application/pdf'),
         ];
     }

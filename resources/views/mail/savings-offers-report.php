@@ -1,0 +1,1 @@
+<p>Your personalized Savings Offers PDF is attached.</p><p><strong>Quick suggestions</strong></p><ul><?php foreach($advice as $item): ?><li><?= e($item) ?></li><?php endforeach; ?></ul><p>Offer eligibility and expiry dates must be checked on the linked official pages.</p>

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\FileManagerController;
 use App\Http\Controllers\Api\RecurringExpenseController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\TransactionController;
+use App\Http\Controllers\Api\TransactionReceiptOcrController;
 use App\Http\Controllers\Api\TransferController;
 use App\Http\Controllers\Admin\Menu\MenuController as AdminMenuController;
 use Illuminate\Support\Facades\Route;
@@ -43,6 +44,7 @@ Route::middleware('auth:api')->group(function () {
         Route::post('expense', [TransactionController::class, 'storeExpense']);
         Route::post('deposit', [TransactionController::class, 'storeDeposit']);
         Route::post('bulk', [TransactionController::class, 'storeBulk']);
+        Route::post('scan-receipt', [TransactionReceiptOcrController::class, 'scan']);
         Route::put('{transactionId}', [TransactionController::class, 'update']);
         Route::patch('{transactionId}', [TransactionController::class, 'update']);
     });

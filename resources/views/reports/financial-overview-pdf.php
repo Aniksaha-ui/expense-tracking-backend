@@ -8,7 +8,7 @@
         * { box-sizing: border-box; }
         body { color: #172033; font-family: Helvetica, Arial, sans-serif; font-size: 10px; margin: 0; }
         table { border-collapse: collapse; width: 100%; }
-        h1 { font-size: 25px; margin: 5px 0; } .muted { color: #667085; }
+        h1 { color: #0f172a; font-size: 25px; font-weight: 800; margin: 5px 0; } h2 { color: #0f172a; font-weight: 800; } .muted { color: #667085; }
         .brand { color: #2563eb; font-size: 10px; font-weight: bold; letter-spacing: 1.4px; text-transform: uppercase; }
         .period { background: #2563eb; border-radius: 7px; color: white; margin: 16px 0; padding: 13px 16px; }
         .period small { color: #dbeafe; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
@@ -24,6 +24,7 @@
         .data { border: 1px solid #dbe3ef; margin-top: 8px; } .data th, .data td { border-bottom: 1px solid #e5e9ef; border-right: 1px solid #e5e9ef; padding: 7px 6px; text-align: right; }
         .data th { background: #eff6ff; color: #1d4ed8; font-size: 8px; text-transform: uppercase; } .data td:first-child, .data th:first-child { text-align: left; }
         .data tr:last-child td { border-bottom: 0; } .data th:last-child, .data td:last-child { border-right: 0; }
+        .category-section { page-break-before: always; } .analysis-grid { border-collapse: separate; border-spacing: 8px; margin: 0 -8px 10px; } .analysis-grid td { background: #f8fafc; border: 1px solid #dbe3ef; border-top: 3px solid #2563eb; padding: 10px; vertical-align: top; width: 50%; } .analysis-grid strong { color: #1d4ed8; display: block; font-size: 9px; letter-spacing: .5px; margin-bottom: 6px; text-transform: uppercase; } .analysis-grid ul { margin: 0; padding-left: 14px; } .analysis-grid li { line-height: 1.5; margin-bottom: 4px; }
         .footer { bottom: -18px; color: #98a2b3; font-size: 8px; left: 0; position: fixed; right: 0; text-align: center; }
     </style>
 </head>
@@ -48,7 +49,7 @@
             $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$width.'" height="'.$height.'" viewBox="0 0 '.$width.' '.$height.'"><rect width="100%" height="100%" fill="#fbfcfe"/>';
             $svg .= '<text x="18" y="25" fill="#172033" font-family="Helvetica, Arial" font-size="17" font-weight="700">Opening balance vs closing balance</text>';
             $svg .= '<rect x="18" y="36" width="11" height="11" fill="#60a5fa"/><text x="35" y="46" fill="#475467" font-family="Helvetica, Arial" font-size="10">Opening</text><rect x="108" y="36" width="11" height="11" fill="#2563eb"/><text x="125" y="46" fill="#475467" font-family="Helvetica, Arial" font-size="10">Closing</text>';
-            for ($grid = 0; $grid <= 4; $grid++) { $y = $top + ($grid * $plotHeight / 4); $value = $max - ($grid * $range / 4); $svg .= '<line x1="'.$left.'" y1="'.$y.'" x2="'.($width - $right).'" y2="'.$y.'" stroke="#dbe4ed" stroke-width="1"/><text x="8" y="'.($y + 3).'" fill="#667085" font-family="Helvetica, Arial" font-size="8">'.number_format($value, 0).'</text>'; }
+            for ($grid = 0; $grid <= 4; $grid++) { $y = $top + ($grid * $plotHeight / 4); $value = $max - ($grid * $range / 4); $svg .= '<line x1="'.$left.'" y1="'.$y.'" x2="'.($width - $right).'" y2="'.$y.'" stroke="#dbe4ed" stroke-width="1"/><text x="8" y="'.($y + 3).'" fill="#667085" font-family="Helvetica, Arial" font-size="8">BDT '.number_format($value, 0).'</text>'; }
             $openingPoints = []; $closingPoints = [];
             foreach ($chartRows as $index => $row) { [$x1, $y1] = $point((float) $row['opening_balance'], $index); [$x2, $y2] = $point((float) $row['closing_balance'], $index); $openingPoints[] = $x1.','.$y1; $closingPoints[] = $x2.','.$y2; $svg .= '<text x="'.($x1 - 16).'" y="'.($height - 15).'" fill="#667085" font-family="Helvetica, Arial" font-size="8">'.$svgText($axisLabel($row)).'</text>'; }
             $svg .= '<polyline fill="none" stroke="#60a5fa" stroke-width="3" points="'.implode(' ', $openingPoints).'"/><polyline fill="none" stroke="#2563eb" stroke-width="3" points="'.implode(' ', $closingPoints).'"/>';
@@ -64,6 +65,27 @@
             $svg .= '<text x="18" y="25" fill="#172033" font-family="Helvetica, Arial" font-size="17" font-weight="700">Income vs costing by month</text><rect x="18" y="38" width="11" height="11" fill="#16a34a"/><text x="35" y="48" fill="#475467" font-family="Helvetica, Arial" font-size="10">Income</text><rect x="105" y="38" width="11" height="11" fill="#e11d48"/><text x="122" y="48" fill="#475467" font-family="Helvetica, Arial" font-size="10">Costing</text>';
             foreach ($chartRows as $index => $row) { $y = 61 + ($index * $rowHeight); $income = (float) $row['total_income']; $costing = (float) $row['total_costing']; $incomeWidth = max(2, (int) round($income / $max * $plotWidth)); $costingWidth = max(2, (int) round($costing / $max * $plotWidth)); $svg .= '<text x="18" y="'.($y + 14).'" fill="#172033" font-family="Helvetica, Arial" font-size="10" font-weight="700">'.$svgText($axisLabel($row)).'</text><rect x="'.$labelWidth.'" y="'.$y.'" width="'.$plotWidth.'" height="10" fill="#e8eef3"/><rect x="'.$labelWidth.'" y="'.$y.'" width="'.$incomeWidth.'" height="10" fill="#16a34a"/><rect x="'.$labelWidth.'" y="'.($y + 13).'" width="'.$plotWidth.'" height="10" fill="#e8eef3"/><rect x="'.$labelWidth.'" y="'.($y + 13).'" width="'.$costingWidth.'" height="10" fill="#e11d48"/><text x="'.$valueX.'" y="'.($y + 9).'" fill="#15803d" font-family="Helvetica, Arial" font-size="9">BDT '.$svgMoney($income).'</text><text x="'.$valueX.'" y="'.($y + 22).'" fill="#be123c" font-family="Helvetica, Arial" font-size="9">BDT '.$svgMoney($costing).'</text>'; }
             $flowChart = $svgDataUri($svg.'</svg>');
+        }
+
+        $categoryMonths = $categoryCostingComparison['months'] ?? [];
+        $categoryRows = $categoryCostingComparison['categories'] ?? [];
+        $categoryChart = null;
+        if (! empty($categoryRows) && ! empty($categoryMonths)) {
+            $latestIndex = count($categoryMonths) - 1;
+            $previousIndex = $latestIndex - 1;
+            $chartCategories = array_slice($categoryRows, 0, 8);
+            $max = max(1, ...array_map(fn (array $row): float => max((float) ($row['amounts'][$latestIndex] ?? 0), (float) ($row['amounts'][$previousIndex] ?? 0)), $chartCategories));
+            $width = 940; $rowHeight = 34; $height = 85 + (count($chartCategories) * $rowHeight); $labelWidth = 190; $plotWidth = 500; $valueX = 710;
+            $latestLabel = \Carbon\Carbon::parse($categoryMonths[$latestIndex])->format('M Y');
+            $previousLabel = $previousIndex >= 0 ? \Carbon\Carbon::parse($categoryMonths[$previousIndex])->format('M Y') : 'No prior month';
+            $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$width.'" height="'.$height.'" viewBox="0 0 '.$width.' '.$height.'"><rect width="100%" height="100%" fill="#fbfcfe"/>';
+            $svg .= '<text x="18" y="25" fill="#172033" font-family="Helvetica, Arial" font-size="17" font-weight="700">Category costing: latest month vs prior month</text><rect x="18" y="38" width="11" height="11" fill="#2563eb"/><text x="35" y="48" fill="#475467" font-family="Helvetica, Arial" font-size="10">'.$svgText($latestLabel).'</text><rect x="150" y="38" width="11" height="11" fill="#94a3b8"/><text x="167" y="48" fill="#475467" font-family="Helvetica, Arial" font-size="10">'.$svgText($previousLabel).'</text>';
+            foreach ($chartCategories as $index => $row) {
+                $y = 64 + ($index * $rowHeight); $latest = (float) ($row['amounts'][$latestIndex] ?? 0); $previous = (float) ($row['amounts'][$previousIndex] ?? 0);
+                $latestWidth = max(0, (int) round($latest / $max * $plotWidth)); $previousWidth = max(0, (int) round($previous / $max * $plotWidth));
+                $svg .= '<text x="18" y="'.($y + 14).'" fill="#172033" font-family="Helvetica, Arial" font-size="10" font-weight="700">'.$svgText(mb_strimwidth($row['category_name'], 0, 25, '…')).'</text><rect x="'.$labelWidth.'" y="'.$y.'" width="'.$plotWidth.'" height="10" fill="#e8eef3"/><rect x="'.$labelWidth.'" y="'.$y.'" width="'.$latestWidth.'" height="10" fill="#2563eb"/><rect x="'.$labelWidth.'" y="'.($y + 14).'" width="'.$plotWidth.'" height="10" fill="#e8eef3"/><rect x="'.$labelWidth.'" y="'.($y + 14).'" width="'.$previousWidth.'" height="10" fill="#94a3b8"/><text x="'.$valueX.'" y="'.($y + 9).'" fill="#1d4ed8" font-family="Helvetica, Arial" font-size="9">BDT '.$svgMoney($latest).'</text><text x="'.$valueX.'" y="'.($y + 23).'" fill="#64748b" font-family="Helvetica, Arial" font-size="9">BDT '.$svgMoney($previous).'</text>';
+            }
+            $categoryChart = $svgDataUri($svg.'</svg>');
         }
 
     ?>
@@ -88,8 +110,20 @@
     <h2>Monthly financial ledger</h2><div class="muted">Opening and closing balances with income, costing, and bank-to-bank transfers by period.</div>
     <table class="data"><thead><tr><th>Month</th><th>Opening</th><th>Income</th><th>Costing</th><th>Transfers</th><th>Net Income</th><th>Closing</th><th>Entries</th></tr></thead><tbody>
         <?php if (empty($rows)): ?><tr><td colspan="8" style="text-align:center; padding:20px;">No transactions were recorded for this period.</td></tr><?php endif; ?>
-        <?php foreach ($rows as $row): ?><tr><td><?= e(\Carbon\Carbon::parse($row['date'])->format('M Y')) ?></td><td><?= e($row['opening_balance']) ?></td><td><?= e($row['total_income']) ?></td><td><?= e($row['total_costing']) ?></td><td><?= e($row['total_bank_transfers']) ?></td><td><?= e($row['net_income']) ?></td><td><?= e($row['closing_balance']) ?></td><td><?= e($row['transaction_count']) ?></td></tr><?php endforeach; ?>
+        <?php foreach ($rows as $row): ?><tr><td><?= e(\Carbon\Carbon::parse($row['date'])->format('M Y')) ?></td><td>BDT <?= e(number_format((float) $row['opening_balance'], 2)) ?></td><td>BDT <?= e(number_format((float) $row['total_income'], 2)) ?></td><td>BDT <?= e(number_format((float) $row['total_costing'], 2)) ?></td><td>BDT <?= e(number_format((float) $row['total_bank_transfers'], 2)) ?></td><td>BDT <?= e(number_format((float) $row['net_income'], 2)) ?></td><td>BDT <?= e(number_format((float) $row['closing_balance'], 2)) ?></td><td><?= e($row['transaction_count']) ?></td></tr><?php endforeach; ?>
     </tbody></table>
+    <div class="category-section"><h2>Category-wise costing comparison</h2><div class="section-note">Compare expense and recurring costing by category across the reporting months. This is the final section of the report.</div>
+    <?php if ($categoryChart): ?><div class="chart"><img src="<?= e($categoryChart) ?>" alt="Category costing comparison chart"></div><?php else: ?><div class="section-note">No category costing was recorded for this period.</div><?php endif; ?>
+    <table class="data"><thead><tr><th>Category</th><?php foreach ($categoryMonths as $month): ?><th><?= e(\Carbon\Carbon::parse($month)->format('M Y')) ?></th><?php endforeach; ?><th>Total</th><th>Latest change</th></tr></thead><tbody>
+        <?php if (empty($categoryRows)): ?><tr><td colspan="<?= e(count($categoryMonths) + 3) ?>" style="text-align:center; padding:20px;">No category costing was recorded for this period.</td></tr><?php endif; ?>
+        <?php foreach ($categoryRows as $category): ?><tr><td><?= e($category['category_name']) ?></td><?php foreach ($category['amounts'] as $amount): ?><td>BDT <?= e(number_format((float) $amount, 2)) ?></td><?php endforeach; ?><td><strong>BDT <?= e(number_format((float) $category['total_amount'], 2)) ?></strong></td><td><?= (float) $category['change_amount'] >= 0 ? '+' : '' ?>BDT <?= e(number_format((float) $category['change_amount'], 2)) ?><?= $category['change_percentage'] === null ? '' : ' ('.e($category['change_percentage']).'%)' ?></td></tr><?php endforeach; ?>
+    </tbody></table>
+    <h2>OpenAI category-wise costing analysis</h2><div class="section-note">Narrative analysis based only on the figures in this report.</div>
+    <h2>Last 12 months: category cost reduction opportunities</h2><div class="section-note">Highest-cost categories across the previous 12 months, used to inform the suggestions below.</div>
+    <table class="data"><thead><tr><th>Category</th><th>12-month costing</th><th>Transactions</th><th>Average transaction</th></tr></thead><tbody><?php if (empty($lastTwelveMonthCosting)): ?><tr><td colspan="4" style="text-align:center; padding:20px;">No category costing was recorded in the last 12 months.</td></tr><?php endif; ?><?php foreach ($lastTwelveMonthCosting as $item): ?><tr><td><?= e($item['category_name']) ?></td><td>BDT <?= e(number_format((float) $item['total_amount'], 2)) ?></td><td><?= e($item['transaction_count']) ?></td><td>BDT <?= e(number_format((float) $item['average_transaction_amount'], 2)) ?></td></tr><?php endforeach; ?></tbody></table>
+    <?php $analysisCards = []; foreach (['snapshot' => 'Snapshot', 'trends' => 'Trends', 'category_comparison' => 'Category comparison', 'watchouts' => 'Watchouts', 'next_steps' => 'Next steps', 'cost_reduction_suggestions' => 'Cost reduction suggestions'] as $key => $label) { if (! empty($analysis['sections'][$key])) $analysisCards[] = ['label' => $label, 'items' => $analysis['sections'][$key]]; } ?>
+    <table class="analysis-grid"><?php foreach (array_chunk($analysisCards, 2) as $cardRow): ?><tr><?php foreach ($cardRow as $card): ?><td><strong><?= e($card['label']) ?></strong><ul><?php foreach ($card['items'] as $item): ?><li><?= e($item) ?></li><?php endforeach; ?></ul></td><?php endforeach; ?><?php if (count($cardRow) === 1): ?><td></td><?php endif; ?></tr><?php endforeach; ?></table>
+    </div>
     <div class="footer"><?= e(config('app.name')) ?> · Financial Overview · <?= e($fromDate->format('d M Y')) ?> to <?= e($toDate->format('d M Y')) ?></div>
 </body>
 </html>
