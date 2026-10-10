@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 
 class SavingsOffersReportService
 {
-    public function __construct(private readonly PdfService $pdfService, private readonly SavingsOffersAnalysisService $analysisService) {}
+    public function __construct(private readonly PdfService $pdfService, private readonly SavingsOffersAnalysisService $analysisService, private readonly ProviderConfigurationService $providerConfigurations) {}
 
     public function generate(User $user, CarbonImmutable $from, CarbonImmutable $to): array
     {
@@ -36,11 +36,12 @@ class SavingsOffersReportService
 
     private function searchOffers(array $spending, string $location): array
     {
-        if (! config('services.offers.enabled')) {
+        $provider = $this->providerConfigurations->offers();
+        if (! $provider['enabled']) {
             return [[], 'Savings Offers searches are disabled by configuration.'];
         }
 
-        $key = trim((string) config('services.serper.api_key'));
+        $key = trim((string) $provider['serper_api_key']);
         if ($spending === []) {
             return [[], 'Offers are available only for food and shopping purchases in this report.'];
         }

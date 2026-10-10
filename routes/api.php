@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CronReportDeliverySettingController;
 use App\Http\Controllers\Api\CronReportJobController;
 use App\Http\Controllers\Api\FileManagerController;
 use App\Http\Controllers\Api\OfferLocationController;
+use App\Http\Controllers\Api\ProviderConfigurationController;
 use App\Http\Controllers\Api\RecurringExpenseController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\TransactionController;
@@ -28,6 +29,8 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:api')->group(function () {
     Route::get('offer-location', [OfferLocationController::class, 'show']);
     Route::put('offer-location', [OfferLocationController::class, 'update']);
+    Route::get('provider-configurations', [ProviderConfigurationController::class, 'index']);
+    Route::put('provider-configurations', [ProviderConfigurationController::class, 'update']);
     Route::get('cron-report-delivery-settings', [CronReportDeliverySettingController::class, 'index']);
     Route::put('cron-report-delivery-settings', [CronReportDeliverySettingController::class, 'update']);
     Route::post('cron-report-jobs/{jobKey}/run', [CronReportJobController::class, 'run']);

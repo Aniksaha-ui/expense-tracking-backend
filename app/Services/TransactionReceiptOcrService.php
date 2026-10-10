@@ -9,24 +9,26 @@ use RuntimeException;
 
 class TransactionReceiptOcrService
 {
+    public function __construct(private readonly ProviderConfigurationService $providerConfigurations) {}
     public function scan(UploadedFile $receipt, array $expenseCategories = []): array
     {
-        if (! config('services.transaction_ocr.enabled')) {
+        $provider = $this->providerConfigurations->ocr();
+        if (! $provider['enabled']) {
             throw new RuntimeException('Receipt scanning is not configured. Ask an administrator to enable OCR.');
         }
 
-        return match (strtolower((string) config('services.transaction_ocr.driver'))) {
-            'google_vision', 'google' => $this->scanWithGoogleVision($receipt),
-            'openai' => $this->scanWithOpenAi($receipt, $expenseCategories),
+        return match (strtolower((string) $provider['driver'])) {
+            'google_vision', 'google' => $this->scanWithGoogleVision($receipt, $provider),
+            'openai' => $this->scanWithOpenAi($receipt, $expenseCategories, $provider['openai_api_key']),
             default => throw new RuntimeException('The configured receipt OCR provider is not supported.'),
         };
     }
 
-    private function scanWithGoogleVision(UploadedFile $receipt): array
+    private function scanWithGoogleVision(UploadedFile $receipt, array $provider): array
     {
         $config = config('services.transaction_ocr.google_vision');
-        $projectId = trim((string) ($config['project_id'] ?? ''));
-        $credentialsPath = trim((string) ($config['credentials'] ?? ''));
+        $projectId = trim((string) ($provider['google_project'] ?? $config['project_id'] ?? ''));
+        $credentialsPath = trim((string) ($provider['google_credentials'] ?? $config['credentials'] ?? ''));
 
         if ($projectId === '' || $credentialsPath === '' || ! is_readable($credentialsPath)) {
             throw new RuntimeException('Google Vision is not configured. Set GOOGLE_CLOUD_PROJECT and GOOGLE_APPLICATION_CREDENTIALS.');
@@ -84,10 +86,10 @@ class TransactionReceiptOcrService
         return $this->extractReceiptDetails($rawText);
     }
 
-    private function scanWithOpenAi(UploadedFile $receipt, array $expenseCategories): array
+    private function scanWithOpenAi(UploadedFile $receipt, array $expenseCategories, ?string $configuredApiKey = null): array
     {
         $config = config('services.transaction_ocr.openai');
-        $apiKey = trim((string) ($config['api_key'] ?? ''));
+        $apiKey = trim((string) ($configuredApiKey ?? $config['api_key'] ?? ''));
 
         if ($apiKey === '') {
             throw new RuntimeException('OpenAI receipt scanning is not configured. Set OCR_OPENAI_API_KEY.');
