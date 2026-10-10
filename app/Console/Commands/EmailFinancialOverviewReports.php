@@ -41,12 +41,14 @@ class EmailFinancialOverviewReports extends Command
             foreach ($users as $user) {
                 try {
                     $report = $reportService->generate($user, $fromDate, $toDate);
-                    $offersReport = $savingsOffersReportService->generate($user, $fromDate, $toDate);
+                    $offersReport = config('services.offers.enabled')
+                        ? $savingsOffersReportService->generate($user, $fromDate, $toDate)
+                        : null;
                     $summary = $report['summary'];
                     $deliveryService->deliver(
                         $user,
                         'financial_overview_reports',
-                        new FinancialOverviewReportMail($user, $fromDate, $toDate, $summary, $report['transferReceiptsByAccount'], $report['analysis'], $report['pdf'], $report['filename'], $offersReport['pdf'], $offersReport['filename']),
+                        new FinancialOverviewReportMail($user, $fromDate, $toDate, $summary, $report['transferReceiptsByAccount'], $report['analysis'], $report['pdf'], $report['filename'], $offersReport['pdf'] ?? null, $offersReport['filename'] ?? null),
                         "<b>Financial overview ready</b>\nPeriod: {$fromDate->toDateString()} to {$toDate->toDateString()}\nClosing balance: {$summary['closing_balance']}",
                     );
                     $sent++;

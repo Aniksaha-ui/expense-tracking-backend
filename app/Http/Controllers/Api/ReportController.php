@@ -14,8 +14,7 @@ class ReportController extends Controller
 {
     public function __construct(
         private readonly ReportService $reportService,
-    ) {
-    }
+    ) {}
 
     public function summary(ReportFilterRequest $request): JsonResponse
     {

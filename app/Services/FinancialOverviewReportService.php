@@ -26,7 +26,7 @@ class FinancialOverviewReportService
             $report['daily'],
             $report['transfer_receipts_by_account'],
             $report['category_costing_comparison'],
-            $report['last_12_month_costing'],
+            $report['period_category_costing'],
         );
         $viewData = [
             'user' => $user,
@@ -37,7 +37,7 @@ class FinancialOverviewReportService
             'rows' => $report['daily'],
             'analysis' => $analysis,
             'categoryCostingComparison' => $report['category_costing_comparison'],
-            'lastTwelveMonthCosting' => $report['last_12_month_costing'],
+            'periodCategoryCosting' => $report['period_category_costing'],
         ];
 
         return [

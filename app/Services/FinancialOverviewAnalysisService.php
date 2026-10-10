@@ -12,7 +12,7 @@ class FinancialOverviewAnalysisService
      * Generate a short narrative from report facts only. Failure is intentionally
      * non-blocking: scheduled financial reports must still be delivered.
      */
-    public function generate(array $summary, iterable $rows, array $transferReceiptsByAccount, array $categoryCostingComparison, array $lastTwelveMonthCosting): array
+    public function generate(array $summary, iterable $rows, array $transferReceiptsByAccount, array $categoryCostingComparison, array $periodCategoryCosting): array
     {
         $config = config('services.financial_overview_ai');
         $apiKey = trim((string) ($config['api_key'] ?? ''));
@@ -26,7 +26,7 @@ class FinancialOverviewAnalysisService
             'monthly_ledger' => array_slice(is_array($rows) ? array_values($rows) : iterator_to_array($rows, false), -24),
             'transfer_receipts_by_account' => $transferReceiptsByAccount,
             'category_costing_comparison' => $categoryCostingComparison,
-            'last_12_month_category_costing' => $lastTwelveMonthCosting,
+            'selected_period_category_costing' => $periodCategoryCosting,
         ];
 
         try {
@@ -35,7 +35,7 @@ class FinancialOverviewAnalysisService
                 ->timeout(45)
                 ->post('https://api.openai.com/v1/responses', [
                     'model' => $config['model'] ?? 'gpt-4o-mini',
-                    'instructions' => 'You are a careful financial-report analyst. All monetary figures are Bangladeshi Taka (BDT); always write BDT or Taka, never dollars or USD. Use only the supplied figures; do not invent data, make guarantees, or give regulated financial advice. Each insight must be concise, factual, and understandable to a non-finance reader. For category comparison, identify the largest categories and meaningful latest-month changes. Give 2–3 specific, non-prescriptive cost-reduction suggestions using the last 12 months of category data; target high-cost or frequent categories and state the relevant figure. Mention insufficient data when applicable.',
+                    'instructions' => 'You are a careful financial-report analyst. All monetary figures are Bangladeshi Taka (BDT); always write BDT or Taka, never dollars or USD. Use only the supplied figures; do not invent data, make guarantees, or give regulated financial advice. Each insight must be concise, factual, and understandable to a non-finance reader. For category comparison, identify the largest categories and meaningful latest-month changes. Give 2–3 specific, non-prescriptive cost-reduction suggestions using only the selected report-period category data; target high-cost or frequent categories and state the relevant figure. Mention insufficient data when applicable.',
                     'input' => 'Analyze this financial overview data for the report recipient. Every monetary figure is in Bangladeshi Taka (BDT):\n'.json_encode($facts, JSON_THROW_ON_ERROR),
                     'text' => [
                         'format' => [

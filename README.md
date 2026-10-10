@@ -30,6 +30,15 @@ php artisan expense-reports:email --from=2026-06-01 --to=2026-06-30
 
 Laravel's scheduler must be triggered once per minute in production.
 
+## Disable Savings Offers PDFs and Google searches
+
+Set the following in `.env` to prevent Savings Offers PDF generation, attachment,
+and all Serper/Google offer searches:
+
+```env
+SAVINGS_OFFERS_ENABLED=false
+```
+
 Linux cron:
 
 ```cron

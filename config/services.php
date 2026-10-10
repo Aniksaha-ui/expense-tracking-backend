@@ -64,6 +64,13 @@ return [
         'model' => env('OPENAI_REPORT_MODEL', 'gpt-4o-mini'),
     ],
     'serper' => ['api_key' => env('SERPER_API_KEY')],
-    'offers' => ['latitude' => env('OFFERS_LATITUDE'), 'longitude' => env('OFFERS_LONGITUDE'), 'location' => env('OFFERS_SEARCH_LOCATION', 'Bangladesh')],
+    'offers' => [
+        // Disable this to prevent Savings Offers PDF generation and all Serper/Google searches.
+        'enabled' => env('SAVINGS_OFFERS_ENABLED', true),
+        'radius_km' => (float) env('OFFERS_RADIUS_KM', 2),
+        'latitude' => env('OFFERS_LATITUDE'),
+        'longitude' => env('OFFERS_LONGITUDE'),
+        'location' => env('OFFERS_SEARCH_LOCATION', 'Bangladesh'),
+    ],
 
 ];

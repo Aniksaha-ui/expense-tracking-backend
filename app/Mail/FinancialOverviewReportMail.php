@@ -24,8 +24,8 @@ class FinancialOverviewReportMail extends Mailable
         public readonly array $analysis,
         private readonly string $pdf,
         private readonly string $filename,
-        private readonly string $offersPdf,
-        private readonly string $offersFilename,
+        private readonly ?string $offersPdf,
+        private readonly ?string $offersFilename,
     ) {
     }
 
@@ -41,11 +41,16 @@ class FinancialOverviewReportMail extends Mailable
 
     public function attachments(): array
     {
-        return [
+        $attachments = [
             Attachment::fromData(fn (): string => $this->pdf, $this->filename)
                 ->withMime('application/pdf'),
-            Attachment::fromData(fn (): string => $this->offersPdf, $this->offersFilename)
-                ->withMime('application/pdf'),
         ];
+
+        if ($this->offersPdf !== null && $this->offersFilename !== null) {
+            $attachments[] = Attachment::fromData(fn (): string => $this->offersPdf, $this->offersFilename)
+                ->withMime('application/pdf');
+        }
+
+        return $attachments;
     }
 }
