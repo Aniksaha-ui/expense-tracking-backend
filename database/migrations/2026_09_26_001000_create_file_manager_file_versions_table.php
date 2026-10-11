@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('file_manager_file_versions')) {
+            return;
+        }
+
         Schema::create('file_manager_file_versions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('file_id')->constrained('file_manager_files')->cascadeOnDelete();

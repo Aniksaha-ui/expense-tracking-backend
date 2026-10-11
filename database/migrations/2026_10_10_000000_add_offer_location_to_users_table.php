@@ -8,9 +8,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table): void {
-            $table->decimal('offers_latitude', 10, 7)->nullable()->after('password');
-            $table->decimal('offers_longitude', 10, 7)->nullable()->after('offers_latitude');
+        $hasLatitude = Schema::hasColumn('users', 'offers_latitude');
+        $hasLongitude = Schema::hasColumn('users', 'offers_longitude');
+
+        if ($hasLatitude && $hasLongitude) {
+            return;
+        }
+
+        Schema::table('users', function (Blueprint $table) use ($hasLatitude, $hasLongitude): void {
+            if (! $hasLatitude) {
+                $table->decimal('offers_latitude', 10, 7)->nullable()->after('password');
+            }
+
+            if (! $hasLongitude) {
+                $table->decimal('offers_longitude', 10, 7)->nullable()->after('offers_latitude');
+            }
         });
     }
 

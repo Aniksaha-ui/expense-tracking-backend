@@ -22,7 +22,7 @@ class SavingsOffersReportService
             ->groupByRaw("COALESCE(categories.name, 'Uncategorized')")->orderByDesc('total_amount')->get()
             ->map(fn ($row) => ['category' => $row->category_name, 'amount' => number_format((float) $row->total_amount, 2, '.', '')])->all();
         $total = array_sum(array_map(fn ($row) => (float) $row['amount'], $spending));
-        $location = $this->location($user);
+        $location = $this->location();
         // Offers are intentionally limited to purchases where a discount is useful.
         // Recurring bills, rent, transport, utilities, and other expense types do
         // not trigger a search-result link in this report.
@@ -58,11 +58,24 @@ class SavingsOffersReportService
             ];
         })->unique()->values();
         try {
-            $offers = $queries->flatMap(function (string $query) use ($key) {
+            $failures = [];
+            $offers = $queries->flatMap(function (string $query) use ($key, &$failures) {
                 $response = Http::withHeaders(['X-API-KEY' => $key])->acceptJson()->timeout(20)->post('https://google.serper.dev/search', ['q' => $query, 'gl' => 'bd', 'num' => 3]);
-                return $response->successful() ? collect($response->json('organic', []))->map(fn (array $item) => ['provider' => parse_url($item['link'] ?? '', PHP_URL_HOST) ?: 'Google result', 'focus' => $item['title'] ?? 'Offer', 'source' => $item['snippet'] ?? 'Open this result for offer terms.', 'url' => $item['link'] ?? ''])->filter(fn (array $item) => $item['url'] !== '') : [];
+                if (! $response->successful()) {
+                    $failures[] = $response->status();
+
+                    return [];
+                }
+
+                return collect($response->json('organic', []))->map(fn (array $item) => ['provider' => parse_url($item['link'] ?? '', PHP_URL_HOST) ?: 'Google result', 'focus' => $item['title'] ?? 'Offer', 'source' => $item['snippet'] ?? 'Open this result for offer terms.', 'url' => $item['link'] ?? ''])->filter(fn (array $item) => $item['url'] !== '');
             })->unique('url')->take(12)->map(fn (array $offer) => $this->withSourceDetails($offer))->values()->all();
-            return [$offers, $offers === [] ? 'No live food or shopping offers were found for this period.' : null];
+            if ($offers !== []) {
+                return [$offers, null];
+            }
+
+            return [[], $failures === []
+                ? 'No live food or shopping offers were found for this period.'
+                : 'Live offer search was rejected by Serper (HTTP '.implode(', ', array_unique($failures)).'). Check the active SERPER_API_KEY and Serper quota.'];
         } catch (\Throwable $exception) { report($exception); return [[], 'Live offer search is unavailable. Check the internet connection, Serper API key, and quota.']; }
     }
 
@@ -138,14 +151,8 @@ class SavingsOffersReportService
         return null;
     }
 
-    private function location(User $user): string
+    private function location(): string
     {
-        $lat = $user->offers_latitude ?? trim((string) config('services.offers.latitude'));
-        $lng = $user->offers_longitude ?? trim((string) config('services.offers.longitude'));
-        $radius = max(0.1, (float) config('services.offers.radius_km', 2));
-
-        return $lat !== null && $lat !== '' && $lng !== null && $lng !== ''
-            ? "within {$radius} km of {$lat}, {$lng}"
-            : (trim((string) config('services.offers.location')) ?: 'Bangladesh');
+        return trim((string) config('services.offers.location')) ?: 'Bangladesh';
     }
 }
