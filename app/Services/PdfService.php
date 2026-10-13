@@ -39,6 +39,13 @@ class PdfService
         if ($encodedHtml !== false) {
             $html = json_decode($encodedHtml, true, 512, JSON_THROW_ON_ERROR);
         }
+        // Dompdf's SVG/font stack can still invoke iconv for legacy malformed
+        // labels. Scheduled attachments must be deliverable even when old
+        // records contain invalid multibyte data, so keep their renderer input
+        // strictly ASCII-safe. This affects presentation text only, never data.
+        if (in_array($view, ['reports.financial-overview-pdf', 'reports.savings-offers-pdf'], true)) {
+            $html = preg_replace('/[^\x00-\x7F]/', '?', $html) ?? $html;
+        }
         $dompdf->loadHtml($html);
         $dompdf->render();
 

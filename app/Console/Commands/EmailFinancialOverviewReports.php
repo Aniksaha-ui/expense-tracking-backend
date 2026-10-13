@@ -41,9 +41,14 @@ class EmailFinancialOverviewReports extends Command
             foreach ($users as $user) {
                 try {
                     $report = $reportService->generate($user, $fromDate, $toDate);
-                    $offersReport = config('services.offers.enabled')
-                        ? $savingsOffersReportService->generate($user, $fromDate, $toDate)
-                        : null;
+                    $offersReport = null;
+                    if (config('services.offers.enabled')) {
+                        try {
+                            $offersReport = $savingsOffersReportService->generate($user, $fromDate, $toDate);
+                        } catch (Throwable $exception) {
+                            Log::warning('Savings Offers attachment was unavailable; sending Financial Overview without it.', ['user_id' => $user->id, 'exception' => $exception]);
+                        }
+                    }
                     $summary = $report['summary'];
                     $deliveryService->deliver(
                         $user,
