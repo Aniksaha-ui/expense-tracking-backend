@@ -17,6 +17,7 @@ class FinancialIntelligenceService
     {
         [$from, $to] = $this->period($filters);
         $metrics = $this->metrics($userId, $from, $to);
+        $weeklySpending = $this->weeklySpending($userId, $from, $to);
         // Scheduled historical reports supply the reconciled portfolio balance
         // at their reporting cutoff. Do not mix it with today's account balances.
         if (array_key_exists('closing_balance', $filters)) {
@@ -27,6 +28,7 @@ class FinancialIntelligenceService
         return [
             'period' => ['from_date' => $from->toDateString(), 'to_date' => $to->toDateString()],
             'metrics' => $metrics,
+            'weekly_spending' => $weeklySpending,
             'forecast' => $forecast,
             'insights' => $this->insights($metrics, $forecast),
             'recommendations' => $this->recommendations($metrics, $forecast),
@@ -126,6 +128,17 @@ class FinancialIntelligenceService
     private function monthlyHistory(int $userId, CarbonImmutable $from, CarbonImmutable $to): Collection
     {
         return DB::table('transactions')->where('user_id', $userId)->whereBetween('transaction_date', [$from->startOfMonth(), $to->endOfDay()])->whereIn('type', [TransactionType::INCOME->value, TransactionType::EXPENSE->value, TransactionType::RECURRING->value])->get()->groupBy(fn (object $row): string => CarbonImmutable::parse($row->transaction_date)->format('Y-m'))->map(fn (Collection $rows, string $month): array => ['month' => $month, 'income' => $this->sum($rows->where('type', TransactionType::INCOME->value)), 'expenses' => $this->sum($rows->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value]))])->values();
+    }
+
+    private function weeklySpending(int $userId, CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        $rows = DB::table('transactions')->where('user_id', $userId)->whereBetween('transaction_date', [$from, $to])
+            ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])->get()
+            ->groupBy(fn (object $row): string => CarbonImmutable::parse($row->transaction_date)->startOfWeek()->toDateString())
+            ->map(fn (Collection $items, string $week): array => ['week_start' => $week, 'week_end' => CarbonImmutable::parse($week)->addDays(6)->min($to)->toDateString(), 'total_expenses' => $this->sum($items), 'transaction_count' => $items->count()])
+            ->sortBy('week_start')->values()->all();
+
+        return ['rows' => $rows, 'note' => 'Weekly totals include recorded expense and recurring-expense entries only.'];
     }
 
     private function currentBalance(int $userId): string { return $this->money(DB::table('accounts')->where('user_id', $userId)->sum('current_balance')); }
