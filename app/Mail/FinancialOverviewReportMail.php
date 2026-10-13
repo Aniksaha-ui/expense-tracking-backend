@@ -36,7 +36,19 @@ class FinancialOverviewReportMail extends Mailable
 
     public function content(): Content
     {
-        return new Content(view: 'mail.financial-overview-report');
+        // Database records created under an old/misconfigured character set can
+        // contain invalid UTF-8. Symfony's mail encoder delegates those values
+        // to iconv, which otherwise prevents the whole scheduled report from
+        // being sent. Keep the outbound mail payload UTF-8 safe.
+        return new Content(view: 'mail.financial-overview-report', with: [
+            'userName' => $this->safeText($this->user->name),
+            'fromDate' => $this->fromDate,
+            'toDate' => $this->toDate,
+            'summary' => $this->summary,
+            'transferReceiptsByAccount' => $this->safeValues($this->transferReceiptsByAccount),
+            'analysis' => $this->safeValues($this->analysis),
+            'appName' => $this->safeText((string) config('app.name')),
+        ]);
     }
 
     public function attachments(): array
@@ -52,5 +64,31 @@ class FinancialOverviewReportMail extends Mailable
         }
 
         return $attachments;
+    }
+
+    private function safeValues(mixed $value): mixed
+    {
+        if (is_string($value)) {
+            return $this->safeText($value);
+        }
+
+        if (is_array($value)) {
+            return array_map(fn (mixed $item): mixed => $this->safeValues($item), $value);
+        }
+
+        return $value;
+    }
+
+    private function safeText(?string $value): string
+    {
+        $value = (string) $value;
+
+        if (preg_match('//u', $value) === 1) {
+            return $value;
+        }
+
+        // This byte-oriented expression does not invoke iconv. Invalid source
+        // bytes are replaced rather than being allowed into the MIME encoder.
+        return preg_replace('/[^\x20-\x7E]/', '?', $value) ?? '';
     }
 }

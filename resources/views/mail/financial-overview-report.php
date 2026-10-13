@@ -1,4 +1,4 @@
-<p>Hello <?= e($user->name) ?>,</p>
+<p>Hello <?= e($userName) ?>,</p>
 
 <p>Your financial overview and personalized Savings Offers report for <?= e($fromDate->format('d M Y')) ?> to <?= e($toDate->format('d M Y')) ?> are attached as PDFs.</p>
 
@@ -20,4 +20,4 @@
     <?php foreach ($transferReceiptsByAccount as $receipt): ?><tr><td><?= e($receipt['account_name']) ?></td><td><strong>BDT <?= e(number_format((float) $receipt['total_amount'], 2)) ?></strong></td></tr><?php endforeach; ?>
 </table>
 
-<p>Regards,<br><?= e(config('app.name')) ?></p>
+<p>Regards,<br><?= e($appName) ?></p>

@@ -9,7 +9,7 @@
         }
 
         body {
-            font-family: DejaVu Sans, sans-serif;
+            font-family: Helvetica, sans-serif;
             color: #172033;
             font-size: 9px
         }
@@ -206,15 +206,6 @@
 </head>
 
 <body><?php
-        if (! function_exists('mb_strimwidth')) {
-            function mb_strimwidth($value, $start, $width, $trim = '')
-            {
-                $text = (string) $value;
-                $slice = substr($text, $start, $width);
-                $slice = preg_replace('/[\x80-\xBF]+$/', '', $slice) ?: '';
-                return strlen($text) > ($start + $width) ? $slice . $trim : $slice;
-            }
-        }
         $money = fn($v) => 'BDT ' . number_format((float)$v, 2);
         $partial = !$toDate->isEndOfMonth() || !$fromDate->isStartOfMonth();
         $allRows = collect($rows ?? [])->values();
@@ -229,6 +220,12 @@
         $forecast = $fi['forecast'] ?? [];
         $colors = ['#2563eb', '#16a34a', '#f59e0b', '#dc4c64', '#7c3aed', '#0891b2'];
         $svgUri = fn($svg) => 'data:image/svg+xml;base64,' . base64_encode($svg);
+        // Chart labels can originate from legacy user-entered categories. Keep
+        // SVG input byte-safe before Dompdf reaches its iconv font code.
+        $chartLabel = static function ($value, int $width): string {
+            $label = preg_replace('/[^\x20-\x7E]/', '?', (string) $value) ?? '';
+            return strlen($label) > $width ? substr($label, 0, $width) . '...' : $label;
+        };
         $pie = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 160"><circle cx="78" cy="80" r="48" fill="none" stroke="#e7edf5" stroke-width="24"/>';
         $offset = 0;
         foreach ($cats as $i => $c) {
@@ -236,14 +233,14 @@
             $dash = $share * 301.6;
             $pie .= '<circle cx="78" cy="80" r="48" fill="none" stroke="' . $colors[$i] . '" stroke-width="24" stroke-dasharray="' . $dash . ' ' . (301.6 - $dash) . '" stroke-dashoffset="' . (-$offset) . '" transform="rotate(-90 78 80)"/>';
             $offset += $dash;
-            $pie .= '<text x="125" y="' . (36 + $i * 18) . '" font-size="9" fill="#334155">' . htmlspecialchars(mb_strimwidth($c['category_name'], 0, 16, '…')) . ' ' . number_format($share * 100, 1) . '%</text>';
+            $pie .= '<text x="125" y="' . (36 + $i * 18) . '" font-size="9" fill="#334155">' . htmlspecialchars($chartLabel($c['category_name'] ?? '', 16), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . ' ' . number_format($share * 100, 1) . '%</text>';
         }
         $pie .= '</svg>';
         $bar = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 160">';
         foreach ($cats as $i => $c) {
             $y = 15 + $i * 23;
             $w = (float)$c['total_amount'] / $maxCat * 220;
-            $bar .= '<text x="2" y="' . ($y + 9) . '" font-size="9" fill="#334155">' . htmlspecialchars(mb_strimwidth($c['category_name'], 0, 16, '…')) . '</text><rect x="140" y="' . $y . '" width="220" height="11" fill="#e7edf5"/><rect x="140" y="' . $y . '" width="' . $w . '" height="11" fill="' . $colors[$i] . '"/><text x="365" y="' . ($y + 9) . '" font-size="8" fill="#334155">' . number_format((float)$c['total_amount'], 0) . '</text>';
+            $bar .= '<text x="2" y="' . ($y + 9) . '" font-size="9" fill="#334155">' . htmlspecialchars($chartLabel($c['category_name'] ?? '', 16), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</text><rect x="140" y="' . $y . '" width="220" height="11" fill="#e7edf5"/><rect x="140" y="' . $y . '" width="' . $w . '" height="11" fill="' . $colors[$i] . '"/><text x="365" y="' . ($y + 9) . '" font-size="8" fill="#334155">' . number_format((float)$c['total_amount'], 0) . '</text>';
         }
         $bar .= '</svg>';
         $comparison = $categoryCostingComparison ?? [];
@@ -257,7 +254,7 @@
                 $v = (float)($c['amounts'][count($c['amounts']) - count($months) + $j] ?? 0);
                 $pts[] = (34 + $j * max(1, 371 / max(count($months) - 1, 1))) . ',' . (130 - $v / $lineMax * 105);
             }
-            $line .= '<polyline points="' . implode(' ', $pts) . '" fill="none" stroke="' . $colors[$i] . '" stroke-width="2"/><text x="' . (45 + $i * 115) . '" y="150" font-size="8" fill="' . $colors[$i] . '">' . htmlspecialchars(mb_strimwidth($c['category_name'], 0, 14, '…')) . '</text>';
+            $line .= '<polyline points="' . implode(' ', $pts) . '" fill="none" stroke="' . $colors[$i] . '" stroke-width="2"/><text x="' . (45 + $i * 115) . '" y="150" font-size="8" fill="' . $colors[$i] . '">' . htmlspecialchars($chartLabel($c['category_name'] ?? '', 14), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</text>';
         }
         $line .= '</svg>';
         $weekly = $fi['weekly_spending']['rows'] ?? [];

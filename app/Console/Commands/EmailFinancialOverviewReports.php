@@ -60,7 +60,13 @@ class EmailFinancialOverviewReports extends Command
                 } catch (Throwable $exception) {
                     $failed++;
                     Log::error('Unable to send financial overview report.', ['user_id' => $user->id, 'exception' => $exception]);
-                    $this->warn("Financial overview report failed for user ID {$user->id}: {$exception->getMessage()}");
+                    $this->warn(sprintf(
+                        'Financial overview report failed for user ID %d: %s (%s:%d)',
+                        $user->id,
+                        $exception->getMessage(),
+                        $exception->getFile(),
+                        $exception->getLine(),
+                    ));
                 }
             }
         });
