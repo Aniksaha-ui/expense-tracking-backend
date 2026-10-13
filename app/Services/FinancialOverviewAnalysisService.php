@@ -35,7 +35,7 @@ class FinancialOverviewAnalysisService
                 ->timeout(45)
                 ->post('https://api.openai.com/v1/responses', [
                     'model' => $config['model'] ?? 'gpt-4o-mini',
-                    'instructions' => 'You are a careful financial-report analyst. All monetary figures are Bangladeshi Taka (BDT); always write BDT or Taka, never dollars or USD. Use only supplied figures; do not invent causes, transactions, guarantees, or regulated financial advice. Produce one concise, non-repetitive report analysis. In spending_analysis, explain the largest category shares and only material category movement supported by the supplied category data. Clearly label partial periods and never interpret missing partial-month spending as a permanent reduction. Recommendations must say review, assess, or set a limit unless the data directly supports a stronger claim; never suggest eliminating a category solely because it is large.',
+                    'instructions' => 'You are a careful financial-report analyst. All monetary figures are Bangladeshi Taka (BDT); always write BDT or Taka, never dollars or USD. Use only supplied figures; do not invent causes, transactions, guarantees, or regulated financial advice. Produce one concise, non-repetitive report analysis. Each list must contain at most three concise items. In spending_analysis, explain the largest category shares and only material category movement supported by the supplied category data. Clearly label partial periods and never interpret missing partial-month spending as a permanent reduction. Recommendations must say review, assess, or set a limit unless the data directly supports a stronger claim; never suggest eliminating a category solely because it is large.',
                     'input' => 'Analyze this financial overview data for the report recipient. Every monetary figure is in Bangladeshi Taka (BDT):\n'.json_encode($facts, JSON_THROW_ON_ERROR),
                     'text' => [
                         'format' => [
@@ -46,11 +46,11 @@ class FinancialOverviewAnalysisService
                                 'type' => 'object',
                                 'properties' => [
                                     'executive_summary' => ['type' => 'string'],
-                                    'key_findings' => ['type' => 'array', 'items' => ['type' => 'string']],
-                                    'spending_analysis' => ['type' => 'array', 'items' => ['type' => 'string']],
-                                    'watchouts' => ['type' => 'array', 'items' => ['type' => 'string']],
-                                    'recommendations' => ['type' => 'array', 'items' => ['type' => 'string']],
-                                    'limitations' => ['type' => 'array', 'items' => ['type' => 'string']],
+                                    'key_findings' => ['type' => 'array', 'maxItems' => 3, 'items' => ['type' => 'string']],
+                                    'spending_analysis' => ['type' => 'array', 'maxItems' => 3, 'items' => ['type' => 'string']],
+                                    'watchouts' => ['type' => 'array', 'maxItems' => 3, 'items' => ['type' => 'string']],
+                                    'recommendations' => ['type' => 'array', 'maxItems' => 3, 'items' => ['type' => 'string']],
+                                    'limitations' => ['type' => 'array', 'maxItems' => 3, 'items' => ['type' => 'string']],
                                 ],
                                 'required' => ['executive_summary', 'key_findings', 'spending_analysis', 'watchouts', 'recommendations', 'limitations'],
                                 'additionalProperties' => false,
@@ -110,7 +110,7 @@ class FinancialOverviewAnalysisService
     private function normalizeSections(array $sections): array
     {
         $keys = ['key_findings', 'spending_analysis', 'watchouts', 'recommendations', 'limitations'];
-        $normalized = collect($keys)->mapWithKeys(fn (string $key): array => [$key => array_slice(array_values(array_filter(array_map('strval', $sections[$key] ?? []))), 0, 3)])->all();
+        $normalized = collect($keys)->mapWithKeys(fn (string $key): array => [$key => array_values(array_filter(array_map('strval', $sections[$key] ?? [])))])->all();
         $normalized['executive_summary'] = trim((string) ($sections['executive_summary'] ?? ''));
         return $normalized;
     }

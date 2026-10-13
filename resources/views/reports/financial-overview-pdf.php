@@ -1,406 +1,114 @@
 <!doctype html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <style>
-        @page {
-            margin: 22px 28px 32px
-        }
-
-        body {
-            font-family: Helvetica, sans-serif;
-            color: #172033;
-            font-size: 9px
-        }
-
-        h1 {
-            font-size: 22px;
-            margin: 4px 0
-        }
-
-        h2 {
-            border-left: 3px solid #2563eb;
-            font-size: 13px;
-            margin: 14px 0 5px;
-            padding-left: 7px
-        }
-
-        h3 {
-            font-size: 10px;
-            margin: 0 0 4px
-        }
-
-        .head {
-            background: #102445;
-            color: #fff;
-            padding: 15px 18px;
-            border-radius: 9px
-        }
-
-        .period {
-            float: right;
-            text-align: right
-        }
-
-        .muted {
-            color: #64748b
-        }
-
-        .notice {
-            background: #fff7df;
-            border: 1px solid #f2d38a;
-            color: #7a5200;
-            padding: 7px;
-            margin: 7px 0
-        }
-
-        .cards,
-        .grid {
-            border-collapse: separate;
-            border-spacing: 6px;
-            margin: 8px -6px;
-            width: calc(100% + 12px)
-        }
-
-        .cards td,
-        .grid td {
-            background: #f8fafc;
-            border: 1px solid #dbe4ed;
-            border-radius: 7px;
-            padding: 8px;
-            vertical-align: top
-        }
-
-        .cards td {
-            width: 16.66%
-        }
-
-        .grid td {
-            width: 50%
-        }
-
-        .label {
-            font-size: 7px;
-            color: #64748b;
-            text-transform: uppercase
-        }
-
-        .value {
-            display: block;
-            font-size: 12px;
-            font-weight: bold;
-            margin-top: 4px
-        }
-
-        .box {
-            background: #f8fafc;
-            border: 1px solid #dbe4ed;
-            border-radius: 7px;
-            padding: 9px;
-            margin: 6px 0
-        }
-
-        .box p {
-            line-height: 1.45;
-            margin: 3px 0
-        }
-
-        .data {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 6px 0
-        }
-
-        .data th,
-        .data td {
-            border: 1px solid #dbe4ed;
-            padding: 6px
-        }
-
-        .data th {
-            background: #eaf2ff;
-            color: #1e40af;
-            text-align: left;
-            font-size: 8px;
-            text-transform: uppercase
-        }
-
-        .num {
-            text-align: right !important
-        }
-
-        .bar {
-            background: #e7edf5;
-            border-radius: 3px;
-            height: 9px;
-            min-width: 80px
-        }
-
-        .bar span {
-            background: #2563eb;
-            border-radius: 3px;
-            display: block;
-            height: 9px
-        }
-
-        .income span {
-            background: #159b66
-        }
-
-        .expense span {
-            background: #dc4c64
-        }
-
-        .page {
-            page-break-before: always
-        }
-
-        .foot {
-            bottom: -22px;
-            color: #94a3b8;
-            font-size: 8px;
-            left: 0;
-            position: fixed;
-            right: 0;
-            text-align: center
-        }
-
-        li {
-            line-height: 1.4;
-            margin: 3px 0
-        }
-
-        .chart-grid {
-            border-collapse: separate;
-            border-spacing: 6px;
-            margin: 5px -6px;
-            width: calc(100% + 12px)
-        }
-
-        .chart-grid td {
-            border: 1px solid #dbe4ed;
-            border-radius: 7px;
-            padding: 7px;
-            vertical-align: top;
-            width: 50%
-        }
-
-        .chart-grid img {
-            display: block;
-            width: 100%
-        }
-
-        .legend {
-            font-size: 8px;
-            line-height: 1.45
-        }
-
-        .dot {
-            display: inline-block;
-            height: 7px;
-            margin-right: 3px;
-            width: 7px
-        }
+        @page { margin: 20px 25px 28px; }
+        body { color:#172033; font-family:Helvetica,sans-serif; font-size:8.5px; line-height:1.35; }
+        h1 { font-size:21px; margin:3px 0 4px; }
+        h2 { border-left:4px solid #2563eb; font-size:12px; margin:12px 0 6px; padding-left:7px; }
+        h3 { font-size:9px; margin:0 0 4px; }
+        p { margin:3px 0; }
+        .hero { background:#102445; color:#fff; padding:14px 17px; }
+        .hero-meta { color:#dbeafe; font-size:8px; }
+        .period { float:right; text-align:right; }
+        .clear { clear:both; }
+        .muted { color:#64748b; }
+        .notice { background:#fff8e6; border:1px solid #f4ce75; color:#76500a; margin:6px 0; padding:6px 8px; }
+        .cards, .two-col { border-collapse:separate; border-spacing:5px; margin:3px -5px; width:calc(100% + 10px); }
+        .cards td, .two-col td { background:#f8fafc; border:1px solid #dbe4ed; padding:7px; vertical-align:top; }
+        .cards td { width:16.66%; }
+        .two-col td { width:50%; }
+        .label { color:#64748b; font-size:7px; text-transform:uppercase; }
+        .metric { display:block; font-size:11px; font-weight:bold; margin-top:2px; }
+        .positive { color:#087d53; }
+        .negative { color:#be123c; }
+        .table { border-collapse:collapse; margin:5px 0; width:100%; }
+        .table th, .table td { border:1px solid #dbe4ed; padding:5px 6px; vertical-align:middle; }
+        .table th { background:#eaf2ff; color:#1d4ed8; font-size:7.5px; text-align:left; text-transform:uppercase; }
+        .right { text-align:right !important; }
+        .bar-track { background:#e5eaf1; height:8px; min-width:70px; }
+        .bar { background:#2563eb; display:block; height:8px; }
+        .bar-expense { background:#dc4c64; }
+        .bar-income { background:#159b66; }
+        .bar-week { background:#7c3aed; }
+        .ai-card { border:1px solid #c7d7ee; margin:5px 0; padding:7px 8px; }
+        .ai-heading { color:#1d4ed8; font-size:8px; font-weight:bold; text-transform:uppercase; }
+        .ai-card ul, .ai-card ol { margin:4px 0 0 15px; padding:0; }
+        .ai-card li { margin:2px 0; }
+        .tag { background:#dbeafe; color:#1e40af; font-size:7px; padding:2px 4px; }
+        .page-break { page-break-before:always; }
+        .footer { bottom:-18px; color:#94a3b8; font-size:7px; left:0; position:fixed; right:0; text-align:center; }
     </style>
 </head>
-
 <body><?php
-        $money = fn($v) => 'BDT ' . number_format((float)$v, 2);
-        $partial = !$toDate->isEndOfMonth() || !$fromDate->isStartOfMonth();
-        $allRows = collect($rows ?? [])->values();
-        $rows = $allRows->take(-8);
-        $max = max(1, (float)$rows->flatMap(fn($r) => [(float)$r['total_income'], (float)$r['total_costing']])->max());
-        $cats = array_slice($periodCategoryCosting ?? [], 0, 6);
-        $maxCat = max(1, ...array_map(fn($r) => (float)$r['total_amount'], $cats ?: [['total_amount' => 1]]));
-        $total = (float)($summary['total_costing'] ?? 0);
-        $ai = $analysis['sections'] ?? [];
-        $fi = $financialIntelligence ?? [];
-        $metrics = $fi['metrics'] ?? [];
-        $forecast = $fi['forecast'] ?? [];
-        $colors = ['#2563eb', '#16a34a', '#f59e0b', '#dc4c64', '#7c3aed', '#0891b2'];
-        $svgUri = fn($svg) => 'data:image/svg+xml;base64,' . base64_encode($svg);
-        // Chart labels can originate from legacy user-entered categories. Keep
-        // SVG input byte-safe before Dompdf reaches its iconv font code.
-        $chartLabel = static function ($value, int $width): string {
-            $label = preg_replace('/[^\x20-\x7E]/', '?', (string) $value) ?? '';
-            return strlen($label) > $width ? substr($label, 0, $width) . '...' : $label;
-        };
-        $pie = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 160"><circle cx="78" cy="80" r="48" fill="none" stroke="#e7edf5" stroke-width="24"/>';
-        $offset = 0;
-        foreach ($cats as $i => $c) {
-            $share = $total ? (float)$c['total_amount'] / $total : 0;
-            $dash = $share * 301.6;
-            $pie .= '<circle cx="78" cy="80" r="48" fill="none" stroke="' . $colors[$i] . '" stroke-width="24" stroke-dasharray="' . $dash . ' ' . (301.6 - $dash) . '" stroke-dashoffset="' . (-$offset) . '" transform="rotate(-90 78 80)"/>';
-            $offset += $dash;
-            $pie .= '<text x="125" y="' . (36 + $i * 18) . '" font-size="9" fill="#334155">' . htmlspecialchars($chartLabel($c['category_name'] ?? '', 16), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . ' ' . number_format($share * 100, 1) . '%</text>';
-        }
-        $pie .= '</svg>';
-        $bar = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 160">';
-        foreach ($cats as $i => $c) {
-            $y = 15 + $i * 23;
-            $w = (float)$c['total_amount'] / $maxCat * 220;
-            $bar .= '<text x="2" y="' . ($y + 9) . '" font-size="9" fill="#334155">' . htmlspecialchars($chartLabel($c['category_name'] ?? '', 16), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</text><rect x="140" y="' . $y . '" width="220" height="11" fill="#e7edf5"/><rect x="140" y="' . $y . '" width="' . $w . '" height="11" fill="' . $colors[$i] . '"/><text x="365" y="' . ($y + 9) . '" font-size="8" fill="#334155">' . number_format((float)$c['total_amount'], 0) . '</text>';
-        }
-        $bar .= '</svg>';
-        $comparison = $categoryCostingComparison ?? [];
-        $months = array_slice($comparison['months'] ?? [], -6);
-        $lines = array_slice($comparison['categories'] ?? [], 0, 3);
-        $line = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 160"><line x1="34" y1="15" x2="34" y2="130" stroke="#94a3b8"/><line x1="34" y1="130" x2="405" y2="130" stroke="#94a3b8"/>';
-        $lineMax = max(1, ...array_map(fn($c) => max(array_map('floatval', array_slice($c['amounts'] ?? [], -6))), $lines ?: [['amounts' => [1]]]));
-        foreach ($lines as $i => $c) {
-            $pts = [];
-            foreach ($months as $j => $m) {
-                $v = (float)($c['amounts'][count($c['amounts']) - count($months) + $j] ?? 0);
-                $pts[] = (34 + $j * max(1, 371 / max(count($months) - 1, 1))) . ',' . (130 - $v / $lineMax * 105);
-            }
-            $line .= '<polyline points="' . implode(' ', $pts) . '" fill="none" stroke="' . $colors[$i] . '" stroke-width="2"/><text x="' . (45 + $i * 115) . '" y="150" font-size="8" fill="' . $colors[$i] . '">' . htmlspecialchars($chartLabel($c['category_name'] ?? '', 14), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</text>';
-        }
-        $line .= '</svg>';
-        $weekly = $fi['weekly_spending']['rows'] ?? [];
-        $weeklyMax = max(1, ...array_map(fn($r) => (float)$r['total_expenses'], $weekly ?: [['total_expenses' => 1]]));
-        ?>
-    <div class="head">
-        <div class="period"><b>REPORTING PERIOD</b><br><?= e($fromDate->format('d M Y')) ?> — <?= e($toDate->format('d M Y')) ?><br><?= $partial ? 'Partial period / month-to-date' : 'Complete period' ?></div><small>EXPENSE TRACKING SYSTEM</small>
-        <h1>Financial Analysis Report</h1><span>Recorded performance, spending intelligence, and outlook</span>
+    $money = static fn ($value): string => 'BDT '.number_format((float) $value, 2);
+    $summary = $summary ?? [];
+    $ai = $analysis['sections'] ?? [];
+    $fi = $financialIntelligence ?? [];
+    $metrics = $fi['metrics'] ?? [];
+    $forecast = $fi['forecast'] ?? [];
+    $categoryRows = array_slice($periodCategoryCosting ?? [], 0, 8);
+    $monthlyRows = collect($rows ?? [])->values()->take(-6);
+    $weeklyRows = array_slice($fi['weekly_spending']['rows'] ?? [], 0, 6);
+    $totalExpense = max(0.0, (float) ($summary['total_costing'] ?? 0));
+    $categoryMax = max(1.0, ...array_map(static fn ($row): float => (float) ($row['total_amount'] ?? 0), $categoryRows ?: [['total_amount' => 1]]));
+    $monthlyMax = max(1.0, ...(array_map(static fn ($row): float => max((float) ($row['total_income'] ?? 0), (float) ($row['total_costing'] ?? 0)), $monthlyRows->all() ?: [['total_income' => 1, 'total_costing' => 1]])));
+    $weeklyMax = max(1.0, ...array_map(static fn ($row): float => (float) ($row['total_expenses'] ?? 0), $weeklyRows ?: [['total_expenses' => 1]]));
+    $partial = ! $fromDate->isStartOfMonth() || ! $toDate->isEndOfMonth();
+    $netCashFlow = (float) ($summary['net_income'] ?? 0);
+    $safeList = static fn ($items): array => array_values(array_filter(is_array($items) ? $items : [], static fn ($item): bool => trim((string) $item) !== ''));
+?>
+    <div class="hero">
+        <div class="period"><b>REPORTING PERIOD</b><br><?= e($fromDate->format('d M Y')) ?> to <?= e($toDate->format('d M Y')) ?><br><span class="hero-meta"><?= $partial ? 'Partial period / month-to-date' : 'Complete period' ?></span></div>
+        <div class="hero-meta">EXPENSE TRACKING SYSTEM</div>
+        <h1>Financial Intelligence Report</h1>
+        <div>Actual ledger performance, category analytics, and OpenAI-assisted observations.</div>
+        <div class="clear"></div>
     </div>
-    <h2>Category analysis charts</h2>
-    <table class="chart-grid">
-        <tr>
-            <td>
-                <h3>Expense share</h3><img src="<?= e($svgUri($pie)) ?>" alt="Category expense share pie chart">
-            </td>
-            <td>
-                <h3>Category ranking</h3><img src="<?= e($svgUri($bar)) ?>" alt="Category expense ranking bar chart">
-            </td>
-        </tr>
+    <?php if ($partial): ?><div class="notice"><b>Period note:</b> figures for a partial month are actual recorded values only. They are not treated as a full-month forecast or permanent spending change.</div><?php endif; ?>
+    <table class="cards"><tr>
+        <?php foreach ([['Opening balance', 'opening_balance', ''], ['Closing balance', 'closing_balance', ''], ['Income', 'total_income', 'positive'], ['Expenses', 'total_costing', 'negative'], ['Net cash flow', 'net_income', $netCashFlow >= 0 ? 'positive' : 'negative'], ['Transfers out', 'total_bank_transfers', '']] as [$label, $key, $class]): ?>
+            <td><span class="label"><?= e($label) ?></span><span class="metric <?= e($class) ?>"><?= $key === 'net_income' && $netCashFlow > 0 ? '+' : '' ?><?= $money($summary[$key] ?? 0) ?></span></td>
+        <?php endforeach; ?>
+    </tr></table>
+    <h2>OpenAI executive summary</h2>
+    <div class="ai-card"><span class="tag"><?= !empty($analysis['available']) ? 'OPENAI ANALYSIS' : 'DATA-BASED FALLBACK' ?></span><p><?= e($ai['executive_summary'] ?? 'No OpenAI executive summary was available for this report. Review the recorded metrics and category analysis below.') ?></p></div>
+    <table class="two-col"><tr><td>
+        <h2>Category spending analysis</h2>
+        <table class="table"><tr><th>Category</th><th class="right">Amount</th><th class="right">Share</th><th>Distribution</th></tr>
+            <?php foreach ($categoryRows as $row): $amount = (float) ($row['total_amount'] ?? 0); $share = $totalExpense > 0 ? $amount / $totalExpense * 100 : 0; ?><tr><td><?= e($row['category_name'] ?? 'Uncategorized') ?></td><td class="right"><?= $money($amount) ?></td><td class="right"><?= e(number_format($share, 1)) ?>%</td><td><div class="bar-track"><span class="bar bar-expense" style="width:<?= e(min(100, $amount / $categoryMax * 100)) ?>%"></span></div></td></tr><?php endforeach; ?>
+            <?php if ($categoryRows === []): ?><tr><td colspan="4">No categorized expenses were recorded in this period.</td></tr><?php endif; ?>
+        </table>
+    </td><td>
+        <h2>Weekly expense pattern</h2><p class="muted"><?= e($fi['weekly_spending']['note'] ?? 'Weekly totals for the selected reporting period.') ?></p>
+        <table class="table"><tr><th>Week ending</th><th class="right">Expense</th><th>Weekly level</th></tr>
+            <?php foreach ($weeklyRows as $row): $amount = (float) ($row['total_expenses'] ?? 0); ?><tr><td><?= e(isset($row['week_end']) ? \Carbon\Carbon::parse($row['week_end'])->format('d M') : '-') ?></td><td class="right"><?= $money($amount) ?></td><td><div class="bar-track"><span class="bar bar-week" style="width:<?= e(min(100, $amount / $weeklyMax * 100)) ?>%"></span></div></td></tr><?php endforeach; ?>
+            <?php if ($weeklyRows === []): ?><tr><td colspan="3">No weekly expense data is available.</td></tr><?php endif; ?>
+        </table>
+    </td></tr></table>
+    <h2>Income and expense trend</h2>
+    <table class="table"><tr><th>Period</th><th class="right">Income</th><th class="right">Expenses</th><th class="right">Net cash flow</th><th>Visual comparison</th></tr>
+        <?php foreach ($monthlyRows as $row): $income = (float) ($row['total_income'] ?? 0); $expense = (float) ($row['total_costing'] ?? 0); ?><tr><td><?= e(\Carbon\Carbon::parse($row['date'])->format('M Y')) ?></td><td class="right"><?= $money($income) ?></td><td class="right"><?= $money($expense) ?></td><td class="right <?= (float) ($row['net_income'] ?? 0) >= 0 ? 'positive' : 'negative' ?>"><?= $money($row['net_income'] ?? 0) ?></td><td><div class="bar-track"><span class="bar bar-income" style="width:<?= e(min(100, $income / $monthlyMax * 100)) ?>%"></span></div><div class="bar-track" style="margin-top:2px"><span class="bar bar-expense" style="width:<?= e(min(100, $expense / $monthlyMax * 100)) ?>%"></span></div></td></tr><?php endforeach; ?>
+        <?php if ($monthlyRows->isEmpty()): ?><tr><td colspan="5">No income or expense trend data is available.</td></tr><?php endif; ?>
     </table>
-    <div class="box">
-        <h3>Category trend</h3><img style="width:100%" src="<?= e($svgUri($line)) ?>" alt="Top category spending line chart">
-        <p class="muted">The line chart shows top category movement across recent months<?= $partial ? '; the latest month is month-to-date.' : '' ?>.</p>
-    </div>
-    <?php if ($partial): ?><div class="notice"><b>Partial-period notice.</b> Current-month amounts are actual month-to-date values. They are not treated as full-month reductions or permanent changes.</div><?php endif; ?>
-    <h2>Weekly expense analysis</h2>
-    <p class="muted"><?= e($fi['weekly_spending']['note'] ?? 'Weekly expense totals for the selected period.') ?></p>
-    <table class="data">
-        <tr>
-            <th>Week</th>
-            <th class="num">Expenses</th>
-            <th class="num">Entries</th>
-            <th>Weekly spending</th>
-        </tr><?php foreach ($weekly as $week): $value = (float)$week['total_expenses']; ?><tr>
-                <td><?= e(\Carbon\Carbon::parse($week['week_start'])->format('d M')) ?> — <?= e(\Carbon\Carbon::parse($week['week_end'])->format('d M')) ?></td>
-                <td class="num"><?= $money($value) ?></td>
-                <td class="num"><?= e($week['transaction_count']) ?></td>
-                <td>
-                    <div class="bar expense"><span style="width:<?= e($value / $weeklyMax * 100) ?>%"></span></div>
-                </td>
-            </tr><?php endforeach; ?><?php if (empty($weekly)): ?><tr>
-                <td colspan="4">No weekly expense activity was recorded.</td>
-            </tr><?php endif; ?>
-    </table>
-    <table class="cards">
-        <tr><?php foreach (['Opening balance' => 'opening_balance', 'Closing balance' => 'closing_balance', 'Income' => 'total_income', 'Expenses' => 'total_costing', 'Net cash flow' => 'net_income', 'Account transfers' => 'total_bank_transfers'] as $l => $k): ?><td><span class="label"><?= e($l) ?></span><span class="value"><?= $money($summary[$k] ?? 0) ?></span></td><?php endforeach; ?></tr>
-    </table>
-    <h2>Executive financial summary</h2>
-    <div class="box"><?= e($ai['executive_summary'] ?? 'AI analysis was unavailable. This summary uses the recorded financial figures in this report.') ?></div>
-    <table class="grid">
-        <tr>
-            <td>
-                <h3>Three key findings</h3>
-                <ul><?php foreach (array_slice($ai['key_findings'] ?? [], 0, 3) as $x): ?><li><?= e($x) ?></li><?php endforeach; ?><?php if (empty($ai['key_findings'])): ?><li>Review income, expenses, and net cash flow for this reporting period.</li><?php endif; ?></ul>
-            </td>
-            <td>
-                <h3>Definitions</h3>
-                <p>Opening and closing balance use the same report cutoff. Net cash flow is recorded income less recorded expenses; it is not necessarily the same as balance movement because deposits, withdrawals, and account transfers can affect balances.</p>
-            </td>
-        </tr>
-    </table>
-    <div class="page"></div>
-    <h2>Income, expenses, and trends</h2>
-    <p class="muted">Actual ledger values. <?= $partial ? 'The final row is month-to-date and is not directly comparable to a full month.' : '' ?></p>
-    <table class="data">
-        <tr>
-            <th>Period</th>
-            <th class="num">Income</th>
-            <th class="num">Expenses</th>
-            <th class="num">Net cash flow</th>
-            <th>Income / expenses</th>
-        </tr><?php foreach ($rows as $r): $in = (float)$r['total_income'];
-                    $ex = (float)$r['total_costing']; ?><tr>
-                <td><?= e(\Carbon\Carbon::parse($r['date'])->format('M Y')) ?><?= $partial && \Carbon\Carbon::parse($r['date'])->isSameMonth($toDate) ? ' (MTD)' : '' ?></td>
-                <td class="num"><?= $money($in) ?></td>
-                <td class="num"><?= $money($ex) ?></td>
-                <td class="num"><?= ($r['net_income'] ?? 0) >= 0 ? '+' : '' ?><?= $money($r['net_income'] ?? 0) ?></td>
-                <td>
-                    <div class="bar income"><span style="width:<?= e($in / $max * 100) ?>%"></span></div>
-                    <div class="bar expense" style="margin-top:3px"><span style="width:<?= e($ex / $max * 100) ?>%"></span></div>
-                </td>
-            </tr><?php endforeach; ?>
-    </table>
-    <table class="grid">
-        <tr>
-            <td>
-                <h3>Trend interpretation</h3>
-                <ul><?php foreach (array_slice($ai['spending_analysis'] ?? [], 0, 3) as $x): ?><li><?= e($x) ?></li><?php endforeach; ?></ul>
-            </td>
-            <td>
-                <h3>Income stability</h3>
-                <p><?= $rows->count() >= 3 ? 'Income variability can be assessed across the displayed months. Irregular or one-off income is not assumed to recur.' : 'Insufficient monthly history is available to assess income stability reliably.' ?></p>
-            </td>
-        </tr>
-    </table>
-    <div class="page"></div>
-    <h2>Spending intelligence</h2>
-    <p class="muted">Largest categories in the selected period. A high category total is a review signal, not proof that spending should be eliminated.</p>
-    <table class="data">
-        <tr>
-            <th>Category</th>
-            <th class="num">Expenses</th>
-            <th class="num">Share</th>
-            <th class="num">Transactions</th>
-            <th>Distribution</th>
-        </tr><?php foreach ($cats as $c): $amount = (float)$c['total_amount']; ?><tr>
-                <td><?= e($c['category_name']) ?></td>
-                <td class="num"><?= $money($amount) ?></td>
-                <td class="num"><?= e(number_format($total ? ($amount / $total * 100) : 0, 1)) ?>%</td>
-                <td class="num"><?= e($c['transaction_count']) ?></td>
-                <td>
-                    <div class="bar"><span style="width:<?= e($amount / $maxCat * 100) ?>%"></span></div>
-                </td>
-            </tr><?php endforeach; ?><?php if (empty($cats)): ?><tr>
-                <td colspan="5">No categorized expenses were recorded.</td>
-            </tr><?php endif; ?>
-    </table>
-    <table class="grid">
-        <tr>
-            <td>
-                <h3>Recurring expense pattern</h3>
-                <p><?= $money($metrics['recurring_expense_total'] ?? 0) ?> across <?= e($metrics['recurring_expense_count'] ?? 0) ?> recorded recurring entry/entries. This does not imply unrecorded future obligations.</p>
-            </td>
-            <td>
-                <h3>Watchouts</h3>
-                <ul><?php foreach (array_slice($ai['watchouts'] ?? [], 0, 3) as $x): ?><li><?= e($x) ?></li><?php endforeach; ?><?php if (empty($ai['watchouts'])): ?><li>No specific watchout is supported by the recorded data.</li><?php endif; ?></ul>
-            </td>
-        </tr>
-    </table>
-    <div class="page"></div>
-    <h2>Financial intelligence and outlook</h2>
-    <table class="grid">
-        <tr>
-            <td>
-                <h3>Prioritized recommendations</h3>
-                <ol><?php foreach (array_slice($ai['recommendations'] ?? [], 0, 3) as $x): ?><li><?= e($x) ?></li><?php endforeach; ?><?php if (empty($ai['recommendations'])): ?><li>No high-confidence recommendation is available.</li><?php endif; ?></ol>
-            </td>
-            <td>
-                <h3>Evidence-based actions</h3>
-                <ul><?php foreach (array_slice($fi['recommendations'] ?? [], 0, 3) as $x): ?><li><b><?= e($x['title']) ?>.</b> <?= e($x['recommended_action']) ?></li><?php endforeach; ?><?php if (empty($fi['recommendations'])): ?><li>Review the selected-period figures before changing spending decisions.</li><?php endif; ?></ul>
-            </td>
-        </tr>
-    </table>
-    <h2>Forecast</h2><?php if (!empty($forecast['available'])): $e = $forecast['estimated_month_end'] ?? []; ?><div class="box"><b>Estimate, not actual:</b> Income <?= $money($e['income'] ?? 0) ?>; expenses <?= $money($e['expenses'] ?? 0) ?>; net cash flow <?= $money($e['net_cash_flow'] ?? 0) ?>; closing balance <?= $money($e['financial_position'] ?? 0) ?><br><span class="muted"><?= e($forecast['method'] ?? '') ?> <?= e($forecast['limitations'][0] ?? '') ?></span></div><?php else: ?><div class="box"><b>No numerical forecast.</b> <?= e($forecast['reason'] ?? 'Available history is insufficient for a reliable forecast.') ?></div><?php endif; ?><h2>Limitations</h2>
-    <ul><?php foreach (array_slice($ai['limitations'] ?? [], 0, 3) as $x): ?><li><?= e($x) ?></li><?php endforeach; ?><?php if ($partial): ?><li>This report ends before month-end; current-month values are actual month-to-date results.</li><?php endif; ?></ul>
-    <div class="foot">Financial Analysis Report · <?= e($fromDate->format('d M Y')) ?> to <?= e($toDate->format('d M Y')) ?></div>
+    <div class="page-break"></div>
+    <h2>OpenAI findings and interpretation</h2>
+    <table class="two-col"><tr><td>
+        <div class="ai-card"><div class="ai-heading">Key findings</div><ul><?php foreach ($safeList($ai['key_findings'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['key_findings'] ?? []))): ?><li>No additional OpenAI findings were returned.</li><?php endif; ?></ul></div>
+        <div class="ai-card"><div class="ai-heading">Spending analysis</div><ul><?php foreach ($safeList($ai['spending_analysis'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['spending_analysis'] ?? []))): ?><li>No detailed spending interpretation was returned.</li><?php endif; ?></ul></div>
+        <div class="ai-card"><div class="ai-heading">Watchouts</div><ul><?php foreach ($safeList($ai['watchouts'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['watchouts'] ?? []))): ?><li>No specific watchout was identified from the available data.</li><?php endif; ?></ul></div>
+    </td><td>
+        <div class="ai-card"><div class="ai-heading">Recommendations</div><ol><?php foreach ($safeList($ai['recommendations'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['recommendations'] ?? []))): ?><li>No OpenAI recommendation was returned.</li><?php endif; ?></ol></div>
+        <div class="ai-card"><div class="ai-heading">Data limitations</div><ul><?php foreach ($safeList($ai['limitations'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['limitations'] ?? []))): ?><li>Insights reflect only transactions recorded for the selected period.</li><?php endif; ?></ul></div>
+        <div class="ai-card"><div class="ai-heading">Recorded recurring spending</div><p><?= $money($metrics['recurring_expense_total'] ?? 0) ?> across <?= e($metrics['recurring_expense_count'] ?? 0) ?> recurring entries. This is based on recorded items and does not assume unrecorded obligations.</p></div>
+    </td></tr></table>
+    <h2>Forecast and practical actions</h2>
+    <table class="two-col"><tr><td>
+        <?php if (!empty($forecast['available'])): $estimate = $forecast['estimated_month_end'] ?? []; ?><div class="ai-card"><div class="ai-heading">Estimated month end - not actual</div><p>Income: <b><?= $money($estimate['income'] ?? 0) ?></b> &nbsp; Expenses: <b><?= $money($estimate['expenses'] ?? 0) ?></b> &nbsp; Net: <b><?= $money($estimate['net_cash_flow'] ?? 0) ?></b></p><p class="muted"><?= e($forecast['method'] ?? '') ?> <?= e($forecast['limitations'][0] ?? '') ?></p></div><?php else: ?><div class="ai-card"><div class="ai-heading">Forecast unavailable</div><p><?= e($forecast['reason'] ?? 'There is not enough completed history for a reliable numerical forecast.') ?></p></div><?php endif; ?>
+    </td><td><div class="ai-card"><div class="ai-heading">Evidence-based actions</div><ul><?php foreach (array_slice($fi['recommendations'] ?? [], 0, 3) as $item): ?><li><b><?= e($item['title'] ?? 'Recommendation') ?>.</b> <?= e($item['recommended_action'] ?? '') ?></li><?php endforeach; ?><?php if (empty($fi['recommendations'])): ?><li>Review category totals and cash flow before changing financial commitments.</li><?php endif; ?></ul></div></td></tr></table>
+    <h2>Transfer receipts by destination account</h2>
+    <table class="table"><tr><th>Account</th><th class="right">Total received</th></tr><?php foreach (($transferReceiptsByAccount ?? []) as $receipt): ?><tr><td><?= e($receipt['account_name'] ?? '-') ?></td><td class="right"><?= $money($receipt['total_amount'] ?? 0) ?></td></tr><?php endforeach; ?><?php if (empty($transferReceiptsByAccount)): ?><tr><td colspan="2">No transfers were received in this period.</td></tr><?php endif; ?></table>
+    <div class="footer">Financial Intelligence Report | <?= e($fromDate->format('d M Y')) ?> to <?= e($toDate->format('d M Y')) ?> | Generated from recorded transactions and configured OpenAI analysis</div>
 </body>
-
 </html>
