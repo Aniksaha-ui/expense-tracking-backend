@@ -12,7 +12,7 @@ class FinancialOverviewAnalysisService
      * Generate a short narrative from report facts only. Failure is intentionally
      * non-blocking: scheduled financial reports must still be delivered.
      */
-    public function generate(array $summary, iterable $rows, array $transferReceiptsByAccount, array $categoryCostingComparison, array $periodCategoryCosting): array
+    public function generate(array $summary, iterable $rows, array $transferReceiptsByAccount, array $categoryCostingComparison, array $periodCategoryCosting, array $singleMonthCategories = []): array
     {
         $config = config('services.financial_overview_ai');
         $apiKey = trim((string) ($config['api_key'] ?? ''));
@@ -27,6 +27,7 @@ class FinancialOverviewAnalysisService
             'transfer_receipts_by_account' => $transferReceiptsByAccount,
             'category_costing_comparison' => $categoryCostingComparison,
             'selected_period_category_costing' => $periodCategoryCosting,
+            'single_month_categories_in_last_six_months' => $singleMonthCategories,
         ];
 
         try {
@@ -35,7 +36,7 @@ class FinancialOverviewAnalysisService
                 ->timeout(45)
                 ->post('https://api.openai.com/v1/responses', [
                     'model' => $config['model'] ?? 'gpt-4o-mini',
-                    'instructions' => 'You are a careful financial-report analyst. All monetary figures are Bangladeshi Taka (BDT); always write BDT or Taka, never dollars or USD. Use only supplied figures; do not invent causes, transactions, guarantees, or regulated financial advice. Produce one concise, non-repetitive report analysis. Each list must contain at most three concise items. In spending_analysis, explain the largest category shares and only material category movement supported by the supplied category data. Clearly label partial periods and never interpret missing partial-month spending as a permanent reduction. Recommendations must say review, assess, or set a limit unless the data directly supports a stronger claim; never suggest eliminating a category solely because it is large.',
+                    'instructions' => 'You are a careful financial-report analyst. All monetary figures are Bangladeshi Taka (BDT); always write BDT or Taka, never dollars or USD. Use only supplied figures; do not invent causes, transactions, guarantees, or regulated financial advice. Produce one concise, non-repetitive report analysis. Each list must contain at most three concise items. In spending_analysis, explain the largest category shares, material category movement, and categories with positive spending in only one reporting month. Describe a single-month category as a review signal only: it may be one-off, newly started, or missing history; do not claim which without evidence. Clearly label partial periods and never interpret missing partial-month spending as a permanent reduction. Recommendations must say review, assess, or set a limit unless the data directly supports a stronger claim; never suggest eliminating a category solely because it is large.',
                     'input' => 'Analyze this financial overview data for the report recipient. Every monetary figure is in Bangladeshi Taka (BDT):\n'.json_encode($facts, JSON_THROW_ON_ERROR),
                     'text' => [
                         'format' => [

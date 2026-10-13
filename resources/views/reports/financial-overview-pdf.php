@@ -46,11 +46,17 @@
     $summary = $summary ?? [];
     $ai = $analysis['sections'] ?? [];
     $fi = $financialIntelligence ?? [];
+    $supplementary = $supplementary ?? [];
     $metrics = $fi['metrics'] ?? [];
     $forecast = $fi['forecast'] ?? [];
     $categoryRows = array_slice($periodCategoryCosting ?? [], 0, 8);
     $monthlyRows = collect($rows ?? [])->values()->take(-6);
     $weeklyRows = array_slice($fi['weekly_spending']['rows'] ?? [], 0, 6);
+    $accounts = $supplementary['accounts'] ?? [];
+    $goals = $supplementary['goals'] ?? [];
+    $topExpenses = $supplementary['top_expenses'] ?? [];
+    $dataQuality = $supplementary['data_quality'] ?? [];
+    $singleMonthCategories = $supplementary['single_month_categories'] ?? [];
     $totalExpense = max(0.0, (float) ($summary['total_costing'] ?? 0));
     $categoryMax = max(1.0, ...array_map(static fn ($row): float => (float) ($row['total_amount'] ?? 0), $categoryRows ?: [['total_amount' => 1]]));
     $monthlyMax = max(1.0, ...(array_map(static fn ($row): float => max((float) ($row['total_income'] ?? 0), (float) ($row['total_costing'] ?? 0)), $monthlyRows->all() ?: [['total_income' => 1, 'total_costing' => 1]])));
@@ -93,6 +99,12 @@
         <?php if ($monthlyRows->isEmpty()): ?><tr><td colspan="5">No income or expense trend data is available.</td></tr><?php endif; ?>
     </table>
     <div class="page-break"></div>
+    <h2>Single-month category activity</h2>
+    <p class="muted">These categories have recorded spending in only one month of the available category history. They are signals to review, not proof of a one-time expense.</p>
+    <table class="table"><tr><th>Category</th><th>Recorded month</th><th class="right">Recorded amount</th><th>Interpretation</th></tr>
+        <?php foreach ($singleMonthCategories as $category): ?><tr><td><?= e($category['category_name'] ?? 'Uncategorized') ?></td><td><?= !empty($category['month']) ? e(\Carbon\Carbon::parse($category['month'])->format('M Y')) : '-' ?></td><td class="right"><?= $money($category['amount'] ?? 0) ?></td><td><?= e($category['observation'] ?? '') ?></td></tr><?php endforeach; ?>
+        <?php if (empty($singleMonthCategories)): ?><tr><td colspan="4">No category with spending in only one reporting month was detected.</td></tr><?php endif; ?>
+    </table>
     <h2>OpenAI findings and interpretation</h2>
     <table class="two-col"><tr><td>
         <div class="ai-card"><div class="ai-heading">Key findings</div><ul><?php foreach ($safeList($ai['key_findings'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['key_findings'] ?? []))): ?><li>No additional OpenAI findings were returned.</li><?php endif; ?></ul></div>
@@ -107,8 +119,19 @@
     <table class="two-col"><tr><td>
         <?php if (!empty($forecast['available'])): $estimate = $forecast['estimated_month_end'] ?? []; ?><div class="ai-card"><div class="ai-heading">Estimated month end - not actual</div><p>Income: <b><?= $money($estimate['income'] ?? 0) ?></b> &nbsp; Expenses: <b><?= $money($estimate['expenses'] ?? 0) ?></b> &nbsp; Net: <b><?= $money($estimate['net_cash_flow'] ?? 0) ?></b></p><p class="muted"><?= e($forecast['method'] ?? '') ?> <?= e($forecast['limitations'][0] ?? '') ?></p></div><?php else: ?><div class="ai-card"><div class="ai-heading">Forecast unavailable</div><p><?= e($forecast['reason'] ?? 'There is not enough completed history for a reliable numerical forecast.') ?></p></div><?php endif; ?>
     </td><td><div class="ai-card"><div class="ai-heading">Evidence-based actions</div><ul><?php foreach (array_slice($fi['recommendations'] ?? [], 0, 3) as $item): ?><li><b><?= e($item['title'] ?? 'Recommendation') ?>.</b> <?= e($item['recommended_action'] ?? '') ?></li><?php endforeach; ?><?php if (empty($fi['recommendations'])): ?><li>Review category totals and cash flow before changing financial commitments.</li><?php endif; ?></ul></div></td></tr></table>
-    <h2>Transfer receipts by destination account</h2>
-    <table class="table"><tr><th>Account</th><th class="right">Total received</th></tr><?php foreach (($transferReceiptsByAccount ?? []) as $receipt): ?><tr><td><?= e($receipt['account_name'] ?? '-') ?></td><td class="right"><?= $money($receipt['total_amount'] ?? 0) ?></td></tr><?php endforeach; ?><?php if (empty($transferReceiptsByAccount)): ?><tr><td colspan="2">No transfers were received in this period.</td></tr><?php endif; ?></table>
+    <h2>Accounts and savings goals</h2>
+    <table class="two-col"><tr><td>
+        <table class="table"><tr><th>Active account</th><th class="right">Current balance</th></tr><?php foreach ($accounts as $account): ?><tr><td><?= e($account['name'] ?? '-') ?><?php if (!empty($account['institution_name'])): ?><br><span class="muted"><?= e($account['institution_name']) ?></span><?php endif; ?></td><td class="right"><?= $money($account['balance'] ?? 0) ?></td></tr><?php endforeach; ?><?php if (empty($accounts)): ?><tr><td colspan="2">No active accounts are available.</td></tr><?php endif; ?></table>
+    </td><td>
+        <table class="table"><tr><th>Savings goal</th><th class="right">Progress</th></tr><?php foreach ($goals as $goal): ?><tr><td><?= e($goal['name'] ?? '-') ?><br><span class="muted"><?= $money($goal['current_saved_amount'] ?? 0) ?> of <?= $money($goal['target_amount'] ?? 0) ?><?= !empty($goal['target_date']) ? ' | Target '.e(\Carbon\Carbon::parse($goal['target_date'])->format('d M Y')) : '' ?></span></td><td class="right"><?= e(number_format((float) ($goal['progress_percent'] ?? 0), 1)) ?>%<div class="bar-track"><span class="bar" style="width:<?= e((float) ($goal['progress_percent'] ?? 0)) ?>%"></span></div></td></tr><?php endforeach; ?><?php if (empty($goals)): ?><tr><td colspan="2">No savings goals are configured.</td></tr><?php endif; ?></table>
+    </td></tr></table>
+    <h2>Largest expenses and data quality</h2>
+    <table class="two-col"><tr><td>
+        <table class="table"><tr><th>Largest recorded expense</th><th class="right">Amount</th></tr><?php foreach ($topExpenses as $expense): ?><tr><td><?= e($expense['category_name'] ?? 'Uncategorized') ?><?php if (!empty($expense['note'])): ?><br><span class="muted"><?= e($expense['note']) ?></span><?php endif; ?></td><td class="right"><?= $money($expense['amount'] ?? 0) ?></td></tr><?php endforeach; ?><?php if (empty($topExpenses)): ?><tr><td colspan="2">No expenses were recorded in this period.</td></tr><?php endif; ?></table>
+    </td><td>
+        <div class="ai-card"><div class="ai-heading">Record quality</div><p><?= e($dataQuality['expense_count'] ?? 0) ?> expense entries were reviewed. <?= e($dataQuality['uncategorized_expense_count'] ?? 0) ?> (<?= e(number_format((float) ($dataQuality['uncategorized_percent'] ?? 0), 1)) ?>%) have no category.</p><p class="muted">Categorizing these entries improves the accuracy of category analytics and future OpenAI observations.</p></div>
+        <div class="ai-card"><div class="ai-heading">Transfer receipts</div><p><?php if (empty($transferReceiptsByAccount)): ?>No transfers were received in this period.<?php else: ?><?php foreach (array_slice($transferReceiptsByAccount, 0, 3) as $receipt): ?><b><?= e($receipt['account_name'] ?? '-') ?>:</b> <?= $money($receipt['total_amount'] ?? 0) ?><br><?php endforeach; ?><?php endif; ?></p></div>
+    </td></tr></table>
     <div class="footer">Financial Intelligence Report | <?= e($fromDate->format('d M Y')) ?> to <?= e($toDate->format('d M Y')) ?> | Generated from recorded transactions and configured OpenAI analysis</div>
 </body>
 </html>
