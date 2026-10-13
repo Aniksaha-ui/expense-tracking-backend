@@ -35,7 +35,7 @@ class FinancialOverviewAnalysisService
                 ->timeout(45)
                 ->post('https://api.openai.com/v1/responses', [
                     'model' => $config['model'] ?? 'gpt-4o-mini',
-                    'instructions' => 'You are a careful financial-report analyst. All monetary figures are Bangladeshi Taka (BDT); always write BDT or Taka, never dollars or USD. Use only the supplied figures; do not invent data, make guarantees, or give regulated financial advice. Each insight must be concise, factual, and understandable to a non-finance reader. For category comparison, identify the largest categories and meaningful latest-month changes. Give 2–3 specific, non-prescriptive cost-reduction suggestions using only the selected report-period category data; target high-cost or frequent categories and state the relevant figure. Mention insufficient data when applicable.',
+                    'instructions' => 'You are a careful financial-report analyst. All monetary figures are Bangladeshi Taka (BDT); always write BDT or Taka, never dollars or USD. Use only supplied figures; do not invent causes, transactions, guarantees, or regulated financial advice. Produce one concise, non-repetitive report analysis. In spending_analysis, explain the largest category shares and only material category movement supported by the supplied category data. Clearly label partial periods and never interpret missing partial-month spending as a permanent reduction. Recommendations must say review, assess, or set a limit unless the data directly supports a stronger claim; never suggest eliminating a category solely because it is large.',
                     'input' => 'Analyze this financial overview data for the report recipient. Every monetary figure is in Bangladeshi Taka (BDT):\n'.json_encode($facts, JSON_THROW_ON_ERROR),
                     'text' => [
                         'format' => [
@@ -45,14 +45,14 @@ class FinancialOverviewAnalysisService
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'snapshot' => ['type' => 'array', 'items' => ['type' => 'string']],
-                                    'trends' => ['type' => 'array', 'items' => ['type' => 'string']],
-                                    'category_comparison' => ['type' => 'array', 'items' => ['type' => 'string']],
+                                    'executive_summary' => ['type' => 'string'],
+                                    'key_findings' => ['type' => 'array', 'items' => ['type' => 'string']],
+                                    'spending_analysis' => ['type' => 'array', 'items' => ['type' => 'string']],
                                     'watchouts' => ['type' => 'array', 'items' => ['type' => 'string']],
-                                    'next_steps' => ['type' => 'array', 'items' => ['type' => 'string']],
-                                    'cost_reduction_suggestions' => ['type' => 'array', 'items' => ['type' => 'string']],
+                                    'recommendations' => ['type' => 'array', 'items' => ['type' => 'string']],
+                                    'limitations' => ['type' => 'array', 'items' => ['type' => 'string']],
                                 ],
-                                'required' => ['snapshot', 'trends', 'category_comparison', 'watchouts', 'next_steps', 'cost_reduction_suggestions'],
+                                'required' => ['executive_summary', 'key_findings', 'spending_analysis', 'watchouts', 'recommendations', 'limitations'],
                                 'additionalProperties' => false,
                             ],
                         ],
@@ -102,24 +102,25 @@ class FinancialOverviewAnalysisService
 
     private function unavailable(string $message): array
     {
-        $sections = ['category_comparison' => [$message]];
+        $sections = ['executive_summary' => $message, 'limitations' => [$message]];
 
         return ['available' => false, 'sections' => $sections, 'text' => $message];
     }
 
     private function normalizeSections(array $sections): array
     {
-        $keys = ['snapshot', 'trends', 'category_comparison', 'watchouts', 'next_steps', 'cost_reduction_suggestions'];
-
-        return collect($keys)->mapWithKeys(fn (string $key): array => [
-            $key => array_slice(array_values(array_filter(array_map('strval', $sections[$key] ?? []))), 0, 3),
-        ])->all();
+        $keys = ['key_findings', 'spending_analysis', 'watchouts', 'recommendations', 'limitations'];
+        $normalized = collect($keys)->mapWithKeys(fn (string $key): array => [$key => array_slice(array_values(array_filter(array_map('strval', $sections[$key] ?? []))), 0, 3)])->all();
+        $normalized['executive_summary'] = trim((string) ($sections['executive_summary'] ?? ''));
+        return $normalized;
     }
 
     private function toText(array $sections): string
     {
-        $labels = ['snapshot' => 'Snapshot', 'trends' => 'Trends', 'category_comparison' => 'Category costing comparison', 'watchouts' => 'Watchouts', 'next_steps' => 'Next steps', 'cost_reduction_suggestions' => 'Cost reduction suggestions'];
-
-        return collect($sections)->filter()->map(fn (array $items, string $key): string => ($labels[$key] ?? $key).":\n".implode("\n", array_map(fn (string $item): string => '• '.$item, $items)))->implode("\n\n");
+        $labels = ['key_findings' => 'Key findings', 'spending_analysis' => 'Spending analysis', 'watchouts' => 'Watchouts', 'recommendations' => 'Recommendations', 'limitations' => 'Limitations'];
+        $blocks = [];
+        if (!empty($sections['executive_summary'])) $blocks[] = 'Executive summary: '.$sections['executive_summary'];
+        foreach ($labels as $key => $label) if (!empty($sections[$key])) $blocks[] = $label.":\n".implode("\n", array_map(fn (string $item): string => '• '.$item, $sections[$key]));
+        return implode("\n\n", $blocks);
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CronReportDeliverySettingController;
 use App\Http\Controllers\Api\CronReportJobController;
 use App\Http\Controllers\Api\FileManagerController;
+use App\Http\Controllers\Api\FinancialIntelligenceController;
 use App\Http\Controllers\Api\ProviderConfigurationController;
 use App\Http\Controllers\Api\RecurringExpenseController;
 use App\Http\Controllers\Api\ReportController;
@@ -80,6 +81,16 @@ Route::middleware('auth:api')->group(function () {
         Route::get('weekly-current-month-analysis', [ReportController::class, 'currentMonthWeeklyExpenseAnalysis']);
         Route::get('current-vs-previous-month-analysis', [ReportController::class, 'currentVsPreviousMonthAnalysis']);
         Route::get('due-recurring', [ReportController::class, 'dueRecurring']);
+    });
+
+    Route::prefix('financial-intelligence')->group(function () {
+        Route::get('dashboard', [FinancialIntelligenceController::class, 'dashboard']);
+        Route::get('forecast', [FinancialIntelligenceController::class, 'forecast']);
+        Route::post('ask', [FinancialIntelligenceController::class, 'ask']);
+        Route::get('goals', [FinancialIntelligenceController::class, 'goals']);
+        Route::post('goals', [FinancialIntelligenceController::class, 'storeGoal']);
+        Route::put('goals/{goalId}', [FinancialIntelligenceController::class, 'updateGoal']);
+        Route::delete('goals/{goalId}', [FinancialIntelligenceController::class, 'destroyGoal']);
     });
 
     Route::prefix('file-manager')->group(function () {

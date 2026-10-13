@@ -11,6 +11,7 @@ class FinancialOverviewReportService
         private readonly ReportService $reportService,
         private readonly PdfService $pdfService,
         private readonly FinancialOverviewAnalysisService $analysisService,
+        private readonly FinancialIntelligenceService $financialIntelligenceService,
     ) {
     }
 
@@ -28,6 +29,14 @@ class FinancialOverviewReportService
             $report['category_costing_comparison'],
             $report['period_category_costing'],
         );
+        // The scheduled report uses the same deterministic calculations as the
+        // in-app intelligence dashboard. This keeps projections out of the LLM
+        // and makes the PDF usable even if OpenAI is unavailable.
+        $intelligence = $this->financialIntelligenceService->dashboard($user->id, [
+            'from_date' => $fromDate->toDateString(),
+            'to_date' => $toDate->toDateString(),
+            'closing_balance' => $report['summary']['closing_balance'],
+        ]);
         $viewData = [
             'user' => $user,
             'fromDate' => $fromDate,
@@ -38,6 +47,7 @@ class FinancialOverviewReportService
             'analysis' => $analysis,
             'categoryCostingComparison' => $report['category_costing_comparison'],
             'periodCategoryCosting' => $report['period_category_costing'],
+            'financialIntelligence' => $intelligence,
         ];
 
         return [
