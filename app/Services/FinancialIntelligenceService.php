@@ -145,5 +145,18 @@ class FinancialIntelligenceService
     private function sum(Collection $rows): string { return $this->money($rows->reduce(fn (BigDecimal $carry, object $row): BigDecimal => $carry->plus($row->amount), BigDecimal::zero())); }
     private function money(mixed $value): string { return (string) BigDecimal::of((string) $value)->toScale(2, RoundingMode::HALF_UP); }
     private function period(array $filters): array { $to = CarbonImmutable::parse($filters['to_date'] ?? now())->endOfDay(); return [CarbonImmutable::parse($filters['from_date'] ?? $to->startOfMonth())->startOfDay(), $to]; }
-    private function estimatedMonthlyCapacity(int $userId): string { $history = $this->monthlyHistory($userId, now()->subMonths(3)->startOfMonth(), now()); if ($history->isEmpty()) return '0.00'; return $this->money($history->reduce(fn (BigDecimal $carry, array $row): BigDecimal => $carry->plus(BigDecimal::of($row['income'])->minus($row['expenses'])), BigDecimal::zero())->dividedBy($history->count(), 2, RoundingMode::HALF_UP)->max(BigDecimal::zero())); }
+    private function estimatedMonthlyCapacity(int $userId): string
+    {
+        $asOf = CarbonImmutable::now();
+        $history = $this->monthlyHistory($userId, $asOf->subMonths(3)->startOfMonth(), $asOf);
+
+        if ($history->isEmpty()) {
+            return '0.00';
+        }
+
+        return $this->money($history
+            ->reduce(fn (BigDecimal $carry, array $row): BigDecimal => $carry->plus(BigDecimal::of($row['income'])->minus($row['expenses'])), BigDecimal::zero())
+            ->dividedBy($history->count(), 2, RoundingMode::HALF_UP)
+            ->max(BigDecimal::zero()));
+    }
 }

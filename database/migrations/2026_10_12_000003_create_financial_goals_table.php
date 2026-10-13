@@ -8,6 +8,13 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Some deployments received the table before this migration was added
+        // to the migration history. Avoid failing those deployments while still
+        // recording the migration as applied.
+        if (Schema::hasTable('financial_goals')) {
+            return;
+        }
+
         Schema::create('financial_goals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();

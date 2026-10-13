@@ -53,8 +53,8 @@ class EmailFinancialOverviewReports extends Command
                     $deliveryService->deliver(
                         $user,
                         'financial_overview_reports',
-                        new FinancialOverviewReportMail($user, $fromDate, $toDate, $summary, $report['transferReceiptsByAccount'], $report['analysis'], $report['pdf'], $report['filename'], $offersReport['pdf'] ?? null, $offersReport['filename'] ?? null),
-                        "<b>Financial overview ready</b>\nPeriod: {$fromDate->toDateString()} to {$toDate->toDateString()}\nClosing balance: {$summary['closing_balance']}",
+                        new FinancialOverviewReportMail($user, $fromDate, $toDate, $summary, $report['transferReceiptsByAccount'], $report['accountActivity'], $report['analysis'], $report['pdf'], $report['filename'], $offersReport['pdf'] ?? null, $offersReport['filename'] ?? null),
+                        $this->telegramMessage($fromDate, $toDate, $summary),
                     );
                     $sent++;
                 } catch (Throwable $exception) {
@@ -91,5 +91,26 @@ class EmailFinancialOverviewReports extends Command
         }
 
         return [$fromDate, $toDate];
+    }
+
+    /**
+     * Keep the notification self-explanatory: an opening balance is the
+     * portfolio balance immediately before the report begins, while a closing
+     * balance includes all ledger movements through the report end date.
+     */
+    private function telegramMessage(CarbonImmutable $fromDate, CarbonImmutable $toDate, array $summary): string
+    {
+        $money = static fn (mixed $amount): string => 'BDT '.number_format((float) $amount, 2);
+
+        return implode("\n", [
+            '<b>Financial overview ready</b>',
+            sprintf('From month: %s', $fromDate->format('F Y')),
+            sprintf('To month: %s', $toDate->format('F Y')),
+            sprintf('Reporting period: %s to %s', $fromDate->format('d M Y'), $toDate->format('d M Y')),
+            sprintf('Opening balance (before %s): %s', $fromDate->format('d M Y'), $money($summary['opening_balance'] ?? 0)),
+            sprintf('Income: %s | Expenses: %s', $money($summary['total_income'] ?? 0), $money($summary['total_costing'] ?? 0)),
+            sprintf('Net cash flow: %s', $money($summary['net_income'] ?? 0)),
+            sprintf('Closing balance (as at %s): %s', $toDate->format('d M Y'), $money($summary['closing_balance'] ?? 0)),
+        ]);
     }
 }

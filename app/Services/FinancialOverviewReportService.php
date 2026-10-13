@@ -7,6 +7,8 @@ use App\Models\Account;
 use App\Models\FinancialGoal;
 use App\Models\Transaction;
 use App\Models\User;
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 use Carbon\CarbonImmutable;
 
 class FinancialOverviewReportService
@@ -27,6 +29,8 @@ class FinancialOverviewReportService
             'granularity' => 'monthly',
         ]);
         $singleMonthCategories = $this->singleMonthCategories($user, $toDate);
+        $supplementary = $this->supplementaryData($user, $fromDate, $toDate);
+        $supplementary['single_month_categories'] = $singleMonthCategories;
         $analysis = $this->analysisService->generate(
             $report['summary'],
             $report['daily'],
@@ -34,6 +38,8 @@ class FinancialOverviewReportService
             $report['category_costing_comparison'],
             $report['period_category_costing'],
             $singleMonthCategories,
+            $report['period'],
+            $supplementary['account_activity'],
         );
         // The scheduled report uses the same deterministic calculations as the
         // in-app intelligence dashboard. This keeps projections out of the LLM
@@ -43,14 +49,13 @@ class FinancialOverviewReportService
             'to_date' => $toDate->toDateString(),
             'closing_balance' => $report['summary']['closing_balance'],
         ]);
-        $supplementary = $this->supplementaryData($user, $fromDate, $toDate);
-        $supplementary['single_month_categories'] = $singleMonthCategories;
         $viewData = [
             'user' => $user,
             'fromDate' => $fromDate,
             'toDate' => $toDate,
             'summary' => $report['summary'],
             'transferReceiptsByAccount' => $report['transfer_receipts_by_account'],
+            'accountActivity' => $supplementary['account_activity'],
             'rows' => $report['daily'],
             'analysis' => $analysis,
             'categoryCostingComparison' => $report['category_costing_comparison'],
@@ -128,6 +133,7 @@ class FinancialOverviewReportService
 
         return [
             'accounts' => $accounts,
+            'account_activity' => $this->accountActivity($user, $fromDate, $toDate),
             'goals' => $goals,
             'top_expenses' => $topExpenses,
             'data_quality' => [
@@ -136,6 +142,91 @@ class FinancialOverviewReportService
                 'uncategorized_percent' => $expenseCount > 0 ? round($uncategorizedCount / $expenseCount * 100, 1) : 0,
             ],
         ];
+    }
+
+    /**
+     * Report each account from its ledger at the selected historical cutoff,
+     * rather than using today's current_balance for an older report.
+     */
+    private function accountActivity(User $user, CarbonImmutable $fromDate, CarbonImmutable $toDate): array
+    {
+        $accounts = Account::query()
+            ->where('user_id', $user->id)
+            ->where('created_at', '<=', $toDate)
+            ->orderBy('name')
+            ->get(['id', 'name', 'type', 'institution_name']);
+
+        if ($accounts->isEmpty()) {
+            return [];
+        }
+
+        $activity = $accounts->mapWithKeys(function (Account $account): array {
+            return [$account->id => [
+                'account_name' => $account->name,
+                'account_type' => $account->type?->value ?? (string) $account->type,
+                'institution_name' => $account->institution_name,
+                'opening_balance' => BigDecimal::zero(),
+                'money_added' => BigDecimal::zero(),
+                'money_out' => BigDecimal::zero(),
+                'transfer_in' => BigDecimal::zero(),
+                'transfer_out' => BigDecimal::zero(),
+                'closing_balance' => BigDecimal::zero(),
+                'transaction_count' => 0,
+            ]];
+        })->all();
+
+        $transactions = Transaction::query()
+            ->where('user_id', $user->id)
+            ->whereIn('account_id', $accounts->pluck('id'))
+            ->where('transaction_date', '<=', $toDate)
+            ->orderBy('transaction_date')
+            ->orderBy('id')
+            ->get(['account_id', 'type', 'amount', 'balance_after', 'transaction_date', 'reference_type']);
+
+        foreach ($transactions as $transaction) {
+            $accountId = (int) $transaction->account_id;
+            $entry = &$activity[$accountId];
+            $balanceAfter = BigDecimal::of((string) $transaction->balance_after);
+
+            if ($transaction->transaction_date->lessThan($fromDate)) {
+                $entry['opening_balance'] = $balanceAfter;
+                $entry['closing_balance'] = $balanceAfter;
+                unset($entry);
+                continue;
+            }
+
+            $amount = BigDecimal::of((string) $transaction->amount);
+            $type = $transaction->type instanceof TransactionType
+                ? $transaction->type->value
+                : (string) $transaction->type;
+            if (in_array($type, [TransactionType::OPENING_BALANCE->value, TransactionType::INCOME->value, TransactionType::DEPOSIT->value], true)) {
+                $entry['money_added'] = $entry['money_added']->plus($amount);
+            }
+            if (in_array($type, [TransactionType::EXPENSE->value, TransactionType::RECURRING->value, TransactionType::WITHDRAW->value, TransactionType::TRANSFER->value], true)) {
+                $entry['money_out'] = $entry['money_out']->plus($amount);
+            }
+            if ($type === TransactionType::DEPOSIT->value && $transaction->reference_type === 'TRANSFER') {
+                $entry['transfer_in'] = $entry['transfer_in']->plus($amount);
+            }
+            if ($type === TransactionType::TRANSFER->value) {
+                $entry['transfer_out'] = $entry['transfer_out']->plus($amount);
+            }
+
+            $entry['closing_balance'] = $balanceAfter;
+            $entry['transaction_count']++;
+            unset($entry);
+        }
+
+        return collect($activity)->map(function (array $account): array {
+            $account['net_change'] = $account['closing_balance']->minus($account['opening_balance']);
+            $account['trend'] = $account['net_change']->isPositive() ? 'Increased' : ($account['net_change']->isNegative() ? 'Decreased' : 'No change');
+
+            foreach (['opening_balance', 'money_added', 'money_out', 'transfer_in', 'transfer_out', 'closing_balance', 'net_change'] as $key) {
+                $account[$key] = (string) $account[$key]->toScale(2, RoundingMode::HALF_UP);
+            }
+
+            return $account;
+        })->sortByDesc(fn (array $account): float => abs((float) $account['net_change']))->values()->all();
     }
 
     private function singleMonthCategories(User $user, CarbonImmutable $toDate): array

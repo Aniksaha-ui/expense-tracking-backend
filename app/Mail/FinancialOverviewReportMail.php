@@ -21,6 +21,7 @@ class FinancialOverviewReportMail extends Mailable
         public readonly CarbonImmutable $toDate,
         public readonly array $summary,
         public readonly array $transferReceiptsByAccount,
+        public readonly array $accountActivity,
         public readonly array $analysis,
         private readonly string $pdf,
         private readonly string $filename,
@@ -46,6 +47,7 @@ class FinancialOverviewReportMail extends Mailable
             'toDate' => $this->toDate,
             'summary' => $this->summary,
             'transferReceiptsByAccount' => $this->safeValues($this->transferReceiptsByAccount),
+            'accountActivity' => $this->safeValues($this->accountActivity),
             'analysis' => $this->safeValues($this->analysis),
             'appName' => $this->safeText((string) config('app.name')),
         ]);
