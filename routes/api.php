@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CronReportDeliverySettingController;
@@ -27,6 +28,10 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('budgets', [BudgetController::class, 'index']);
+    Route::post('budgets', [BudgetController::class, 'store']);
+    Route::put('budgets/{budgetId}', [BudgetController::class, 'update']);
+    Route::delete('budgets/{budgetId}', [BudgetController::class, 'destroy']);
     Route::get('provider-configurations', [ProviderConfigurationController::class, 'index']);
     Route::put('provider-configurations', [ProviderConfigurationController::class, 'update']);
     Route::get('cron-report-delivery-settings', [CronReportDeliverySettingController::class, 'index']);
