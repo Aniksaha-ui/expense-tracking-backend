@@ -3,11 +3,13 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\AccountController;
+use App\Http\Controllers\Api\AchievementController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CronReportDeliverySettingController;
 use App\Http\Controllers\Api\CronReportJobController;
 use App\Http\Controllers\Api\FileManagerController;
 use App\Http\Controllers\Api\FinancialIntelligenceController;
+use App\Http\Controllers\Api\JiraAchievementController;
 use App\Http\Controllers\Api\ProviderConfigurationController;
 use App\Http\Controllers\Api\RecurringExpenseController;
 use App\Http\Controllers\Api\ReportController;
@@ -28,6 +30,14 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware('auth:api')->group(function () {
+    Route::get('achievements', [AchievementController::class, 'index']);
+    Route::post('achievements', [AchievementController::class, 'store']);
+    Route::post('achievements/bulk', [AchievementController::class, 'storeBulk']);
+    Route::get('jira-achievements', [JiraAchievementController::class, 'show']);
+    Route::put('jira-achievements', [JiraAchievementController::class, 'save']);
+    Route::post('jira-achievements/preview', [JiraAchievementController::class, 'preview']);
+    Route::put('achievements/{achievementId}', [AchievementController::class, 'update']);
+    Route::delete('achievements/{achievementId}', [AchievementController::class, 'destroy']);
     Route::get('budgets', [BudgetController::class, 'index']);
     Route::post('budgets', [BudgetController::class, 'store']);
     Route::put('budgets/{budgetId}', [BudgetController::class, 'update']);
