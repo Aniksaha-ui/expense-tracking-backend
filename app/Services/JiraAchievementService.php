@@ -32,7 +32,19 @@ class JiraAchievementService
         $issues = $this->fetchAllIssues($connection, $jql);
         Log::info('jira achievement source', ['start_date' => $start->toDateString(), 'end_date' => $end->subDay()->toDateString(), 'jql' => $jql, 'issue_count' => count($issues)]);
         if (!$issues) return ['issues' => [], 'achievements' => [], 'diagnostics' => ['jql' => $jql, 'start_date' => $start->toDateString(), 'end_date' => $end->subDay()->toDateString(), 'issue_count' => 0]];
-        $achievements = collect($this->analyze($issues, $start->toDateString(), $end->subDay()->toDateString()))->map(fn(array $draft) => ['source_key' => implode(', ', array_column($issues, 'key')), 'type' => 'workplace', 'title' => $draft['title'], 'description' => $draft['description'], 'achieved_on' => $end->subDay()->toDateString(), 'organization' => 'Jira', 'reference_url' => rtrim($integration->base_url, '/') . '/issues/?jql=' . rawurlencode($jql)])->values()->all();
+        $achievements = collect($this->analyze($issues, $start->toDateString(), $end->subDay()->toDateString()))->map(function (array $draft) use ($issues, $integration, $jql, $end) {
+            $sourceKeys = $draft['issue_keys'] ?? array_column($issues, 'key');
+            return [
+                'source_key' => implode(', ', $sourceKeys),
+                'source_issue_keys' => $sourceKeys,
+                'type' => 'workplace',
+                'title' => $draft['title'],
+                'description' => $draft['description'],
+                'achieved_on' => $end->subDay()->toDateString(),
+                'organization' => 'Jira',
+                'reference_url' => rtrim($integration->base_url, '/') . '/issues/?jql=' . rawurlencode($jql),
+            ];
+        })->values()->all();
         return ['issues' => $issues, 'achievements' => $achievements, 'diagnostics' => ['jql' => $jql, 'start_date' => $start->toDateString(), 'end_date' => $end->subDay()->toDateString(), 'issue_count' => count($issues)]];
     }
 
@@ -159,15 +171,34 @@ class JiraAchievementService
 
     private function analyze(array $issues, string $startDate, string $endDate): array
     {
-        $rangeLabel = $startDate === $endDate ? $startDate : $startDate . ' to ' . $endDate;
-        $fallback = [['title' => 'Jira work summary — ' . $rangeLabel, 'description' => count($issues) . ' Jira work items were created or updated from ' . $rangeLabel . ":\n" . collect($issues)->map(fn($item) => '• ' . $item['key'] . ' — ' . $item['summary'])->implode("\n")]];
+        $fallback = collect($issues)
+            ->groupBy(fn (array $issue) => ($issue['projectKey'] ?? 'jira').':'.($issue['epicKey'] ? 'epic:'.$issue['epicKey'] : 'issue:'.$issue['key']))
+            ->map(function ($group) {
+                $first = $group->first();
+                return [
+                    'title' => ($first['projectName'] ?? 'Jira').' — '.($first['epicKey'] ? 'Workstream '.$first['epicKey'] : $first['summary']),
+                    'description' => $group->count() === 1
+                        ? $first['summary']
+                        : 'Related Jira work:' . "\n" . $group->map(fn ($issue) => '• '.$issue['key'].' — '.$issue['summary'])->implode("\n"),
+                    'issue_keys' => $group->pluck('key')->all(),
+                ];
+            })->values()->all();
         $key = trim((string) config('services.financial_overview_ai.api_key'));
         if ($key === '') return $fallback;
         try {
-            $response = Http::withToken($key)->acceptJson()->timeout(45)->post('https://api.openai.com/v1/responses', ['model' => config('services.financial_overview_ai.model', 'gpt-4o-mini'), 'instructions' => 'Using only the supplied Jira work items, create 1 to 5 concise factual workplace achievement drafts. Group related tasks. Do not claim work was completed unless the supplied text proves it. Do not invent impact, metrics, people, or work. Return JSON only: {"achievements":[{"title":"...","description":"summary sentence\\n• grouped work"}]}.', 'input' => json_encode(['start_date' => $startDate, 'end_date' => $endDate, 'jira_work_items_created_or_updated_in_range' => $issues], JSON_THROW_ON_ERROR), 'text' => ['format' => ['type' => 'json_schema', 'name' => 'achievement_drafts', 'strict' => true, 'schema' => ['type' => 'object', 'properties' => ['achievements' => ['type' => 'array', 'minItems' => 1, 'maxItems' => 5, 'items' => ['type' => 'object', 'properties' => ['title' => ['type' => 'string'], 'description' => ['type' => 'string']], 'required' => ['title', 'description'], 'additionalProperties' => false]]], 'required' => ['achievements'], 'additionalProperties' => false]]], 'max_output_tokens' => 1000]);
+            $response = Http::withToken($key)->acceptJson()->timeout(45)->post('https://api.openai.com/v1/responses', ['model' => config('services.financial_overview_ai.model', 'gpt-4o-mini'), 'instructions' => 'Create feature/workstream achievements from the supplied Jira evidence. Never create an overall period summary. Each achievement must represent exactly one distinct piece of work in one Jira project; never group tickets from different projectKey values. The title must start with the supplied projectName, followed by an em dash and a specific feature/workstream name, for example "SSLCOMMERZ Reseller — Report Panel Enhancement". The factual 1–3 sentence description must also name the project and synthesize the combined work represented by every grouped ticket, not describe just one ticket. Group tickets only when title, description, epic, components, labels, linked issues, or task category show they support the same feature. For example, two Report Panel tickets for different parts of the same Report Panel work become one achievement with a description covering both changes; a ticket for a different feature becomes a separate achievement. Do not merge tickets merely because they share a project, status, person, or date. Do not create duplicates, do not claim work was completed unless the evidence says so, and do not invent impact, metrics, people, or details. Each Jira key must appear in exactly one achievement. Return JSON only.', 'input' => json_encode(['start_date' => $startDate, 'end_date' => $endDate, 'jira_work_items_created_or_updated_in_range' => $issues], JSON_THROW_ON_ERROR), 'text' => ['format' => ['type' => 'json_schema', 'name' => 'unique_jira_work_summaries', 'strict' => true, 'schema' => ['type' => 'object', 'properties' => ['achievements' => ['type' => 'array', 'minItems' => 1, 'maxItems' => 10, 'items' => ['type' => 'object', 'properties' => ['title' => ['type' => 'string'], 'description' => ['type' => 'string'], 'issue_keys' => ['type' => 'array', 'minItems' => 1, 'items' => ['type' => 'string']]], 'required' => ['title', 'description', 'issue_keys'], 'additionalProperties' => false]]], 'required' => ['achievements'], 'additionalProperties' => false]]], 'max_output_tokens' => 2000]);
             if (!$response->successful()) throw new \RuntimeException('OpenAI HTTP ' . $response->status());
             $parsed = json_decode((string) ($response->json('output_text') ?? data_get($response->json(), 'output.0.content.0.text')), true, flags: JSON_THROW_ON_ERROR);
-            $drafts = collect($parsed['achievements'] ?? [])->filter(fn($item) => is_string($item['title'] ?? null) && is_string($item['description'] ?? null))->map(fn($item) => ['title' => trim($item['title']), 'description' => trim($item['description'])])->filter(fn($item) => $item['title'] && $item['description'])->values()->all();
+            $validKeys = array_flip(array_column($issues, 'key'));
+            $drafts = collect($parsed['achievements'] ?? [])->filter(fn($item) => is_string($item['title'] ?? null) && is_string($item['description'] ?? null) && is_array($item['issue_keys'] ?? null))->map(function ($item) use ($validKeys) {
+                return ['title' => trim($item['title']), 'description' => trim($item['description']), 'issue_keys' => array_values(array_unique(array_filter($item['issue_keys'], fn ($key) => is_string($key) && isset($validKeys[$key]))))];
+            })->filter(fn($item) => $item['title'] && $item['description'] && $item['issue_keys'])->values()->all();
+            $usedKeys = [];
+            $drafts = collect($drafts)->map(function (array $draft) use (&$usedKeys) {
+                $draft['issue_keys'] = array_values(array_filter($draft['issue_keys'], fn (string $key) => !isset($usedKeys[$key])));
+                foreach ($draft['issue_keys'] as $key) $usedKeys[$key] = true;
+                return $draft;
+            })->filter(fn (array $draft) => $draft['issue_keys'])->values()->all();
             if (!$drafts) throw new \RuntimeException('OpenAI returned no achievement drafts.');
             Log::info('chatgpt response', ['status' => 'success', 'issue_count' => count($issues), 'draft_count' => count($drafts), 'drafts' => $drafts]);
             return $drafts;
