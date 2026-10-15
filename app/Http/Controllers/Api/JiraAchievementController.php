@@ -27,15 +27,15 @@ class JiraAchievementController extends Controller
     }
     public function preview(Request $request, JiraAchievementService $jira): JsonResponse
     {
-        $data = $request->validate(['year' => ['required', 'integer', 'min:1900', 'max:2100'], 'month' => ['required', 'integer', 'between:1,12']]);
+        $data = $request->validate(['start_date' => ['required', 'date'], 'end_date' => ['required', 'date', 'after_or_equal:start_date']]);
         $integration = JiraIntegration::where('user_id', auth()->id())->first();
         if (!$integration) return $this->errorResponse('Save your Jira connection before fetching a preview.', status: 422);
         try {
-            $achievements = $jira->preview($integration, $data['year'], $data['month']);
-            Log::info('jira achievement preview', ['user_id' => auth()->id(), 'year' => $data['year'], 'month' => $data['month'], 'generated_count' => count($achievements)]);
-            return $this->successResponse(['achievements' => $achievements]);
+            $preview = $jira->preview($integration, $data['start_date'], $data['end_date']);
+            Log::info('jira achievement preview', ['user_id' => auth()->id(), 'start_date' => $data['start_date'], 'end_date' => $data['end_date'], 'generated_count' => count($preview['achievements'])]);
+            return $this->successResponse($preview);
         } catch (\Throwable $exception) {
-            Log::error('jira achievement preview', ['user_id' => auth()->id(), 'year' => $data['year'], 'month' => $data['month'], 'error' => $exception->getMessage()]);
+            Log::error('jira achievement preview', ['user_id' => auth()->id(), 'start_date' => $data['start_date'], 'end_date' => $data['end_date'], 'error' => $exception->getMessage()]);
             return $this->errorResponse('Unable to fetch Jira achievements: ' . $exception->getMessage(), status: 422);
         }
     }
