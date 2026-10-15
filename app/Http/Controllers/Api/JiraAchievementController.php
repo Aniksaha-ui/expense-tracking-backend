@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\JiraIntegration;
+use App\Models\JiraIssue;
+use App\Models\JiraGeneratedAchievement;
 use App\Services\JiraAchievementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class JiraAchievementController extends Controller
 {
@@ -25,6 +28,24 @@ class JiraAchievementController extends Controller
         JiraIntegration::updateOrCreate(['user_id' => auth()->id()], $data);
         return $this->successResponse([], 'Jira connection saved.');
     }
+    public function verify(JiraAchievementService $jira): JsonResponse
+    {
+        $integration = JiraIntegration::where('user_id', auth()->id())->first();
+        if (!$integration) return $this->errorResponse('Save your Jira connection before verifying it.', status: 422);
+        try { return $this->successResponse($jira->verify($integration), 'Jira connection verified.'); }
+        catch (\Throwable $exception) { Log::error('jira connection verification', ['user_id' => auth()->id(), 'error' => $exception->getMessage()]); return $this->errorResponse($exception->getMessage(), status: 422); }
+    }
+    public function syncAndGenerate(Request $request, JiraAchievementService $jira): JsonResponse
+    {
+        $data = $request->validate(['start_date'=>['required','date'], 'end_date'=>['required','date','after_or_equal:start_date'], 'organization'=>['nullable','string','max:160']]);
+        $integration = JiraIntegration::where('user_id', auth()->id())->first(); if (!$integration) return $this->errorResponse('Save your Jira connection before syncing.', status:422);
+        try { $preview=$jira->preview($integration,$data['start_date'],$data['end_date']); $issueIds=[]; foreach($preview['issues'] as $issue) { $row=JiraIssue::updateOrCreate(['user_id'=>auth()->id(),'issue_key'=>$issue['key']], ['summary'=>$issue['summary'],'payload'=>$issue,'jira_created_at'=>$issue['created']??null,'jira_updated_at'=>$issue['updated']??null,'last_synced_at'=>now()]); $issueIds[]=$row->id; }
+            $records=DB::transaction(fn()=>collect($preview['achievements'])->map(function($item) use($data,$issueIds){ $record=JiraGeneratedAchievement::create(['user_id'=>auth()->id(),'type'=>'Feature Development','title'=>$item['title'],'achievement_date'=>$item['achieved_on'],'organization'=>$data['organization']??null,'description'=>$item['description'],'reference_url'=>$item['reference_url']??null,'generated_at'=>now()]); $record->issues()->sync($issueIds); return $record->load('issues'); })); return $this->successResponse(['issues_synced'=>count($issueIds),'achievements'=>$records], 'Jira tasks synchronized and achievement drafts generated.',201);
+        } catch(\Throwable $e) { Log::error('jira sync generate',['error'=>$e->getMessage()]); return $this->errorResponse($e->getMessage(),status:422); }
+    }
+    public function generatedIndex(): JsonResponse { return $this->successResponse(JiraGeneratedAchievement::where('user_id',auth()->id())->with('issues')->latest()->paginate(10)); }
+    public function updateGenerated(Request $request, int $id): JsonResponse { $record=JiraGeneratedAchievement::where('user_id',auth()->id())->findOrFail($id); $data=$request->validate(['type'=>['sometimes','string','max:100'],'title'=>['sometimes','string','max:200'],'achievement_date'=>['sometimes','date'],'organization'=>['nullable','string','max:160'],'description'=>['sometimes','string','max:4000'],'reference_url'=>['nullable','url','max:2048'],'status'=>['sometimes','in:draft,approved']]); $record->update([...$data,'manually_edited'=>true]); return $this->successResponse($record->load('issues')); }
+    public function deleteGenerated(int $id): JsonResponse { JiraGeneratedAchievement::where('user_id',auth()->id())->findOrFail($id)->delete(); return $this->successResponse([], 'Generated achievement deleted.'); }
     public function preview(Request $request, JiraAchievementService $jira): JsonResponse
     {
         $data = $request->validate(['start_date' => ['required', 'date'], 'end_date' => ['required', 'date', 'after_or_equal:start_date']]);

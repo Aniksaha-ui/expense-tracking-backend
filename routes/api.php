@@ -35,6 +35,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('achievements/bulk', [AchievementController::class, 'storeBulk']);
     Route::get('jira-achievements', [JiraAchievementController::class, 'show']);
     Route::put('jira-achievements', [JiraAchievementController::class, 'save']);
+    Route::post('jira-achievements/verify', [JiraAchievementController::class, 'verify']);
+    Route::post('jira-achievements/sync-generate', [JiraAchievementController::class, 'syncAndGenerate']);
+    Route::get('jira-achievements/generated', [JiraAchievementController::class, 'generatedIndex']);
+    Route::put('jira-achievements/generated/{id}', [JiraAchievementController::class, 'updateGenerated']);
+    Route::delete('jira-achievements/generated/{id}', [JiraAchievementController::class, 'deleteGenerated']);
     Route::post('jira-achievements/preview', [JiraAchievementController::class, 'preview']);
     Route::put('achievements/{achievementId}', [AchievementController::class, 'update']);
     Route::delete('achievements/{achievementId}', [AchievementController::class, 'destroy']);
