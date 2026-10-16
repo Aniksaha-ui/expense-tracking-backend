@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Achievement;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Rap2hpoutre\FastExcel\FastExcel;
 
@@ -13,22 +14,15 @@ class AchievementController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $filters = $request->validate([
-            'type' => ['nullable', 'in:workplace,personal,other'],
-            'year' => ['nullable', 'integer', 'min:1900', 'max:2100'],
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:50'],
-        ]);
-        $query = Achievement::query()->where('user_id', auth()->id());
-        if (!empty($filters['type'])) $query->where('type', $filters['type']);
-        if (!empty($filters['year'])) $query->whereYear('achieved_on', $filters['year']);
+        $filters = $this->filters($request, true);
+        $query = $this->applyFilters(Achievement::query()->where('user_id', auth()->id()), $filters);
 
         return $this->successResponse($query->orderByDesc('achieved_on')->orderByDesc('id')->paginate($filters['per_page'] ?? 10)->withQueryString());
     }
 
-    public function stats(): JsonResponse
+    public function stats(Request $request): JsonResponse
     {
-        $counts = Achievement::query()
-            ->where('user_id', auth()->id())
+        $counts = $this->applyFilters(Achievement::query()->where('user_id', auth()->id()), $this->filters($request))
             ->selectRaw('type, count(*) as total')
             ->groupBy('type')
             ->pluck('total', 'type');
@@ -70,10 +64,9 @@ class AchievementController extends Controller
         return $this->successResponse($achievements, $achievements->count().' achievements added successfully.', 201);
     }
 
-    public function export()
+    public function export(Request $request)
     {
-        $achievements = Achievement::query()
-            ->where('user_id', auth()->id())
+        $achievements = $this->applyFilters(Achievement::query()->where('user_id', auth()->id()), $this->filters($request))
             ->orderByDesc('achieved_on')
             ->orderByDesc('id')
             ->cursor();
@@ -114,5 +107,26 @@ class AchievementController extends Controller
             'organization' => ['nullable', 'string', 'max:160'],
             'reference_url' => ['nullable', 'string', 'max:2048'],
         ]);
+    }
+
+    private function filters(Request $request, bool $includePerPage = false): array
+    {
+        return $request->validate([
+            'type' => ['nullable', 'in:workplace,personal,other'],
+            'year' => ['nullable', 'integer', 'min:1900', 'max:2100'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'per_page' => $includePerPage ? ['nullable', 'integer', 'min:1', 'max:50'] : ['nullable'],
+        ]);
+    }
+
+    private function applyFilters(Builder $query, array $filters): Builder
+    {
+        if (!empty($filters['type'])) $query->where('type', $filters['type']);
+        if (!empty($filters['year'])) $query->whereYear('achieved_on', $filters['year']);
+        if (!empty($filters['start_date'])) $query->whereDate('achieved_on', '>=', $filters['start_date']);
+        if (!empty($filters['end_date'])) $query->whereDate('achieved_on', '<=', $filters['end_date']);
+
+        return $query;
     }
 }
