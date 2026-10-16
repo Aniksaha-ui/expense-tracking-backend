@@ -31,6 +31,8 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware('auth:api')->group(function () {
     Route::get('achievements', [AchievementController::class, 'index']);
+    Route::get('achievements/stats', [AchievementController::class, 'stats']);
+    Route::get('achievements/export', [AchievementController::class, 'export']);
     Route::post('achievements', [AchievementController::class, 'store']);
     Route::post('achievements/bulk', [AchievementController::class, 'storeBulk']);
     Route::get('jira-achievements', [JiraAchievementController::class, 'show']);
