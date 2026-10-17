@@ -18,6 +18,7 @@ class Account extends Model
         'type',
         'institution_name',
         'current_balance',
+        'low_balance_threshold',
         'is_active',
     ];
 
@@ -26,6 +27,7 @@ class Account extends Model
         return [
             'type' => AccountType::class,
             'current_balance' => 'decimal:2',
+            'low_balance_threshold' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }

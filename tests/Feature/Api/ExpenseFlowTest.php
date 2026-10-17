@@ -161,6 +161,30 @@ class ExpenseFlowTest extends TestCase
         $this->assertSame('750.00', $accounts[$cashAccountId]['current_balance']);
     }
 
+    public function test_updating_a_backdated_expense_uses_the_resulting_balance_not_a_temporary_historical_deficit(): void
+    {
+        $token = $this->postJson('/api/auth/register', [
+            'name' => 'Backdated Update', 'email' => 'backdated-update@example.com',
+            'password' => 'password123', 'password_confirmation' => 'password123',
+        ])->assertCreated()->json('data.token');
+        $accountId = $this->withHeader('Authorization', 'Bearer '.$token)->postJson('/api/accounts', [
+            'name' => 'Backdated Cash', 'type' => 'CASH', 'opening_balance' => '0.00',
+        ])->assertCreated()->json('data.id');
+        $categoryId = collect($this->withHeader('Authorization', 'Bearer '.$token)->getJson('/api/categories')->assertOk()->json('data'))->firstWhere('name', 'Food')['id'];
+
+        $this->withHeader('Authorization', 'Bearer '.$token)->postJson('/api/transactions/income', [
+            'account_id' => $accountId, 'amount' => '100.00', 'transaction_date' => '2026-01-03',
+        ])->assertCreated();
+        $expenseId = $this->withHeader('Authorization', 'Bearer '.$token)->postJson('/api/transactions/expense', [
+            'account_id' => $accountId, 'category_id' => $categoryId, 'amount' => '50.00', 'transaction_date' => '2026-01-02',
+        ])->assertCreated()->json('data.id');
+
+        $this->withHeader('Authorization', 'Bearer '.$token)->putJson('/api/transactions/'.$expenseId, [
+            'account_id' => $accountId, 'category_id' => $categoryId, 'amount' => '60.00', 'transaction_date' => '2026-01-02',
+        ])->assertOk()->assertJsonPath('data.amount', '60.00');
+        $this->withHeader('Authorization', 'Bearer '.$token)->getJson('/api/accounts')->assertOk()->assertJsonPath('data.0.current_balance', '40.00');
+    }
+
     public function test_transactions_can_be_filtered_by_backend_search_query(): void
     {
         $registerResponse = $this->postJson('/api/auth/register', [

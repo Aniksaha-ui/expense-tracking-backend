@@ -86,7 +86,14 @@ abstract class BaseFinanceService
         return $transfer;
     }
 
-    protected function recalculateAccountBalances(int $userId, array $accountIds): void
+    /**
+     * Rebuild account balances after an edit. Transaction creation keeps the
+     * strict chronological balance check, while an edit can validly move an
+     * existing entry to an earlier date. In that case, a temporary historical
+     * deficit is allowed as long as the resulting account balance is not below
+     * zero.
+     */
+    protected function recalculateAccountBalances(int $userId, array $accountIds, bool $allowHistoricalDeficit = false): void
     {
         $normalizedAccountIds = array_values(array_unique(array_map(
             static fn (mixed $accountId): int => (int) $accountId,
@@ -99,7 +106,7 @@ abstract class BaseFinanceService
         sort($normalizedAccountIds);
 
         foreach ($normalizedAccountIds as $accountId) {
-            $this->recalculateAccountBalance($userId, $accountId);
+            $this->recalculateAccountBalance($userId, $accountId, $allowHistoricalDeficit);
         }
     }
 
@@ -203,7 +210,7 @@ abstract class BaseFinanceService
         return $recurringExpense;
     }
 
-    private function recalculateAccountBalance(int $userId, int $accountId): void
+    private function recalculateAccountBalance(int $userId, int $accountId, bool $allowHistoricalDeficit = false): void
     {
         $this->getOwnedAccount($userId, $accountId, true);
 
@@ -223,7 +230,8 @@ abstract class BaseFinanceService
             $balanceAfter = $this->calculateBalanceAfter(
                 $balanceBefore,
                 $this->normalizeMoney($transaction->amount),
-                (string) $transaction->type
+                (string) $transaction->type,
+                $allowHistoricalDeficit
             );
 
             DB::table('transactions')
@@ -237,6 +245,10 @@ abstract class BaseFinanceService
             $runningBalance = $balanceAfter;
         }
 
+        if (MoneyHelper::lessThan($runningBalance, '0.00')) {
+            throw new RuntimeException('Insufficient account balance.');
+        }
+
         DB::table('accounts')
             ->where('user_id', $userId)
             ->where('id', $accountId)
@@ -246,13 +258,13 @@ abstract class BaseFinanceService
             ]);
     }
 
-    private function calculateBalanceAfter(string $balanceBefore, string $amount, string $type): string
+    private function calculateBalanceAfter(string $balanceBefore, string $amount, string $type, bool $allowHistoricalDeficit = false): string
     {
         if ($this->isCreditTransactionType($type)) {
             return MoneyHelper::add($balanceBefore, $amount);
         }
 
-        if (MoneyHelper::greaterThan($amount, $balanceBefore)) {
+        if (! $allowHistoricalDeficit && MoneyHelper::greaterThan($amount, $balanceBefore)) {
             throw new RuntimeException('Insufficient account balance.');
         }
 

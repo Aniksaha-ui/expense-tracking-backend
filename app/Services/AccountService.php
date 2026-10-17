@@ -32,6 +32,7 @@ class AccountService extends BaseFinanceService
                 'type' => $data['type'],
                 'institution_name' => $data['institution_name'] ?? null,
                 'current_balance' => $openingBalance,
+                'low_balance_threshold' => $data['low_balance_threshold'] ?? null,
                 'is_active' => $data['is_active'] ?? true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -66,7 +67,7 @@ class AccountService extends BaseFinanceService
 
         $updateData = ['updated_at' => now()];
 
-        foreach (['name', 'type', 'institution_name', 'is_active'] as $field) {
+        foreach (['name', 'type', 'institution_name', 'is_active', 'low_balance_threshold'] as $field) {
             if (array_key_exists($field, $data)) {
                 $updateData[$field] = $data[$field];
             }

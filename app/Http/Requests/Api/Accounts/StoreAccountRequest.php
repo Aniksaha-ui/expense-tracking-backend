@@ -16,6 +16,7 @@ class StoreAccountRequest extends ApiFormRequest
             'institution_name' => ['nullable', 'string', 'max:255'],
             'opening_balance' => ['nullable', 'regex:/^\d+(\.\d{1,2})?$/'],
             'opening_balance_date' => ['nullable', 'date'],
+            'low_balance_threshold' => ['nullable', 'regex:/^\d+(\.\d{1,2})?$/'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

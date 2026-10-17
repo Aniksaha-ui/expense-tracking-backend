@@ -15,6 +15,7 @@ class UpdateAccountRequest extends ApiFormRequest
             'type' => ['sometimes', Rule::in(AccountType::values())],
             'institution_name' => ['sometimes', 'nullable', 'string', 'max:255'],
             'is_active' => ['sometimes', 'boolean'],
+            'low_balance_threshold' => ['sometimes', 'nullable', 'regex:/^\d+(\.\d{1,2})?$/'],
         ];
     }
 }

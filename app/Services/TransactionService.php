@@ -147,15 +147,12 @@ class TransactionService extends BaseFinanceService
         return DB::transaction(function () use ($transactionId, $data, $userId) {
             $existingTransaction = $this->getOwnedTransaction($userId, $transactionId, true);
 
-            if (
-                $existingTransaction->reference_type !== null
-                || ! in_array($existingTransaction->type, [
+            if (! in_array($existingTransaction->type, [
                     TransactionType::INCOME->value,
                     TransactionType::EXPENSE->value,
                     TransactionType::DEPOSIT->value,
-                ], true)
-            ) {
-                throw new RuntimeException('Only manual income, expense, and deposit transactions can be updated.');
+                ], true)) {
+                throw new RuntimeException('Only income, expense, and deposit transactions can be updated.');
             }
 
             $accountId = (int) ($data['account_id'] ?? $existingTransaction->account_id);
@@ -178,7 +175,7 @@ class TransactionService extends BaseFinanceService
             $this->recalculateAccountBalances($userId, [
                 (int) $existingTransaction->account_id,
                 $account->id,
-            ]);
+            ], true);
 
             return $this->fetchTransactionRecord($userId, $transactionId);
         });

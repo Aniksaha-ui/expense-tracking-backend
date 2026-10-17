@@ -23,6 +23,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+Schedule::command('notifications:check')->hourly()->timezone(config('app.timezone'))->withoutOverlapping()->onOneServer();
+
 if (config('expense_reports.enabled', true)) {
     Schedule::command('expense-reports:email')
         ->dailyAt(config('expense_reports.send_time', '08:00'))

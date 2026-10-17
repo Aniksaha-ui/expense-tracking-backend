@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BudgetController;
+use App\Http\Controllers\Api\BillController;
+use App\Http\Controllers\Api\FinancialAnomalyController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\AchievementController;
 use App\Http\Controllers\Api\CategoryController;
@@ -10,6 +12,7 @@ use App\Http\Controllers\Api\CronReportJobController;
 use App\Http\Controllers\Api\FileManagerController;
 use App\Http\Controllers\Api\FinancialIntelligenceController;
 use App\Http\Controllers\Api\JiraAchievementController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProviderConfigurationController;
 use App\Http\Controllers\Api\RecurringExpenseController;
 use App\Http\Controllers\Api\ReportController;
@@ -29,7 +32,16 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:api', 'activity.notification'])->group(function () {
+    Route::get('bills',[BillController::class,'index']); Route::post('bills',[BillController::class,'store']); Route::put('bills/{id}',[BillController::class,'update']); Route::delete('bills/{id}',[BillController::class,'destroy']); Route::post('bills/{id}/paid',[BillController::class,'markPaid']);
+    Route::get('financial-anomalies',[FinancialAnomalyController::class,'index']); Route::put('financial-anomalies/{id}/review',[FinancialAnomalyController::class,'review']);
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::put('notifications/read-all', [NotificationController::class, 'markAllRead']);
+    Route::get('notification-preferences', [NotificationController::class, 'preferences']);
+    Route::put('notification-preferences', [NotificationController::class, 'updatePreferences']);
+    Route::put('notifications/{notificationId}/read', [NotificationController::class, 'markRead']);
+    Route::delete('notifications/{notificationId}', [NotificationController::class, 'destroy']);
     Route::get('achievements', [AchievementController::class, 'index']);
     Route::get('achievements/stats', [AchievementController::class, 'stats']);
     Route::get('achievements/export', [AchievementController::class, 'export']);
