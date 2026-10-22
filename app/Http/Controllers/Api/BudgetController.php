@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Budget;
+use App\Enums\TransactionType;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -77,6 +78,11 @@ class BudgetController extends Controller
 
     private function spending(Budget $budget, CarbonImmutable $start, CarbonImmutable $end): float
     {
-        return (float) DB::table('transactions')->where('user_id', auth()->id())->where('category_id', $budget->category_id)->whereIn('type', ['EXPENSE', 'RECURRING'])->whereBetween('transaction_date', [$start->toDateString(), $end->toDateString()])->sum('amount');
+        return (float) DB::table('transactions')
+            ->where('user_id', auth()->id())
+            ->where('category_id', $budget->category_id)
+            ->whereIn('type', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
+            ->whereBetween('transaction_date', [$start->startOfDay(), $end->endOfDay()])
+            ->sum('amount');
     }
 }
