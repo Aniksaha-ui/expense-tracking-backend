@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\BillController;
+use App\Http\Controllers\Api\BlogController;
 use App\Http\Controllers\Api\FinancialAnomalyController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\AchievementController;
@@ -33,6 +34,7 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware(['auth:api', 'activity.notification'])->group(function () {
+    Route::apiResource('blogs', BlogController::class)->parameters(['blogs' => 'blogId']);
     Route::get('bills',[BillController::class,'index']); Route::post('bills',[BillController::class,'store']); Route::put('bills/{id}',[BillController::class,'update']); Route::delete('bills/{id}',[BillController::class,'destroy']); Route::post('bills/{id}/paid',[BillController::class,'markPaid']);
     Route::get('financial-anomalies',[FinancialAnomalyController::class,'index']); Route::put('financial-anomalies/{id}/review',[FinancialAnomalyController::class,'review']);
     Route::get('notifications', [NotificationController::class, 'index']);
