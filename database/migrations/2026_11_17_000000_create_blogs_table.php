@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('title', 191)->charset('utf8mb4')->collation('utf8mb4_unicode_ci');
             $table->text('content')->charset('utf8mb4')->collation('utf8mb4_unicode_ci');
+            $table->json('components_json')->nullable();
             $table->text('short_description')->charset('utf8mb4')->collation('utf8mb4_unicode_ci');
             $table->string('category', 191)->charset('utf8mb4')->collation('utf8mb4_unicode_ci')->default('react');
             $table->string('fa_icon', 191)->charset('utf8mb4')->collation('utf8mb4_unicode_ci');

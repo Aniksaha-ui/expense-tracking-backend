@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\AchievementController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CronReportDeliverySettingController;
 use App\Http\Controllers\Api\CronReportJobController;
+use App\Http\Controllers\Api\ExperienceController;
 use App\Http\Controllers\Api\FileManagerController;
 use App\Http\Controllers\Api\FinancialIntelligenceController;
 use App\Http\Controllers\Api\JiraAchievementController;
@@ -35,6 +36,9 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware(['auth:api', 'activity.notification'])->group(function () {
     Route::apiResource('blogs', BlogController::class)->parameters(['blogs' => 'blogId']);
+    Route::apiResource('experiences', ExperienceController::class)->parameters(['experiences' => 'experienceId']);
+    // Keep the public API compatible with the existing `expriences` table spelling.
+    Route::apiResource('expriences', ExperienceController::class)->parameters(['expriences' => 'experienceId']);
     Route::get('bills',[BillController::class,'index']); Route::post('bills',[BillController::class,'store']); Route::put('bills/{id}',[BillController::class,'update']); Route::delete('bills/{id}',[BillController::class,'destroy']); Route::post('bills/{id}/paid',[BillController::class,'markPaid']);
     Route::get('financial-anomalies',[FinancialAnomalyController::class,'index']); Route::put('financial-anomalies/{id}/review',[FinancialAnomalyController::class,'review']);
     Route::get('notifications', [NotificationController::class, 'index']);
