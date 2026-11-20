@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 class BlogService
@@ -30,6 +32,8 @@ class BlogService
 
     public function createBlog(array $data): object
     {
+        $data = $this->storeCoverImage($data);
+
         $blogId = DB::table('blogs')->insertGetId([
             'title' => $data['title'],
             'content' => $data['content'],
@@ -49,7 +53,8 @@ class BlogService
 
     public function updateBlog(int $blogId, array $data): object
     {
-        $this->findBlog($blogId);
+        $blog = $this->findBlog($blogId);
+        $data = $this->storeCoverImage($data, $blog->image);
 
         if ($data !== []) {
             DB::table('blogs')->where('id', $blogId)->update($data);
@@ -60,9 +65,13 @@ class BlogService
 
     public function deleteBlog(int $blogId): void
     {
+        $blog = $this->findBlog($blogId);
+
         if (DB::table('blogs')->where('id', $blogId)->delete() === 0) {
             throw new RuntimeException('Blog not found.');
         }
+
+        $this->deleteCoverImage($blog->image);
     }
 
     private function findBlog(int $blogId): object
@@ -74,5 +83,24 @@ class BlogService
         }
 
         return $blog;
+    }
+
+    private function storeCoverImage(array $data, ?string $previousImage = null): array
+    {
+        if (! isset($data['image']) || ! $data['image'] instanceof UploadedFile) {
+            return $data;
+        }
+
+        $data['image'] = $data['image']->store('blogs/covers', 'public');
+        $this->deleteCoverImage($previousImage);
+
+        return $data;
+    }
+
+    private function deleteCoverImage(?string $image): void
+    {
+        if ($image && str_starts_with($image, 'blogs/covers/')) {
+            Storage::disk('public')->delete($image);
+        }
     }
 }

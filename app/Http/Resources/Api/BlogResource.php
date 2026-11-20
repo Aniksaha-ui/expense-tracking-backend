@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class BlogResource extends JsonResource
 {
@@ -23,7 +24,9 @@ class BlogResource extends JsonResource
             'author_name' => $this->author_name,
             'published_date' => $this->published_date,
             'isPublished' => (bool) $this->isPublished,
-            'image' => $this->image,
+            'image' => $this->image && ! preg_match('/^(https?:)?\/\//', $this->image)
+                ? Storage::disk('public')->url($this->image)
+                : $this->image,
         ];
     }
 }

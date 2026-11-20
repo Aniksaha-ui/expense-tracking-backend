@@ -19,7 +19,7 @@ class UpdateBlogRequest extends ApiFormRequest
             'author_name' => ['sometimes', 'required', 'string', 'max:191'],
             'published_date' => ['sometimes', 'nullable', 'string', 'max:191'],
             'isPublished' => ['sometimes', 'boolean'],
-            'image' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'image' => ['sometimes', 'nullable', 'image', 'max:5120'],
         ];
     }
 }

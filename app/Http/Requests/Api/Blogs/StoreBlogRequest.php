@@ -19,7 +19,7 @@ class StoreBlogRequest extends ApiFormRequest
             'author_name' => ['required', 'string', 'max:191'],
             'published_date' => ['nullable', 'string', 'max:191'],
             'isPublished' => ['sometimes', 'boolean'],
-            'image' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'image', 'max:5120'],
         ];
     }
 }
