@@ -13,7 +13,7 @@ class StoreTestimonialRequest extends ApiFormRequest
             'designation' => ['required', 'string', 'max:191'],
             'feedback' => ['required', 'string', 'max:191'],
             'rating' => ['required', 'string', 'max:191'],
-            'image_url' => ['nullable', 'string', 'max:191'],
+            'image' => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,bmp,svg,avif,heic,heif', 'max:5120'],
             'status' => ['required', 'integer', 'in:0,1'],
         ];
     }

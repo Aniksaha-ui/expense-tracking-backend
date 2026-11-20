@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
 class TestimonialService
@@ -31,6 +33,8 @@ class TestimonialService
 
     public function createTestimonial(array $data): object
     {
+        $data = $this->storeUploadedImage($data);
+
         $testimonialId = DB::table('testimonials')->insertGetId([
             ...$data,
             'image_url' => $data['image_url'] ?? null,
@@ -44,7 +48,8 @@ class TestimonialService
 
     public function updateTestimonial(int $testimonialId, array $data): object
     {
-        $this->findTestimonial($testimonialId);
+        $testimonial = $this->findTestimonial($testimonialId);
+        $data = $this->storeUploadedImage($data, $testimonial->image_url);
 
         if ($data !== []) {
             DB::table('testimonials')->where('id', $testimonialId)->update([
@@ -58,8 +63,34 @@ class TestimonialService
 
     public function deleteTestimonial(int $testimonialId): void
     {
+        $testimonial = $this->findTestimonial($testimonialId);
+
         if (DB::table('testimonials')->where('id', $testimonialId)->delete() === 0) {
             throw new RuntimeException('Testimonial not found.');
+        }
+
+        $this->deleteStoredImage($testimonial->image_url);
+    }
+
+    private function storeUploadedImage(array $data, ?string $previousImage = null): array
+    {
+        $image = $data['image'] ?? null;
+        unset($data['image']);
+
+        if (! $image instanceof UploadedFile) {
+            return $data;
+        }
+
+        $data['image_url'] = $image->store('testimonials/images', 'public');
+        $this->deleteStoredImage($previousImage);
+
+        return $data;
+    }
+
+    private function deleteStoredImage(?string $image): void
+    {
+        if ($image && str_starts_with($image, 'testimonials/images/')) {
+            Storage::disk('public')->delete($image);
         }
     }
 

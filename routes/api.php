@@ -18,7 +18,9 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProviderConfigurationController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\PublicationController;
+use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\TestimonialController;
+use App\Http\Controllers\Api\TrainingController;
 use App\Http\Controllers\Api\RecurringExpenseController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\TransactionController;
@@ -40,11 +42,15 @@ Route::prefix('auth')->group(function () {
 Route::middleware(['auth:api', 'activity.notification'])->group(function () {
     // Multipart form uploads cannot reliably be parsed on PUT requests by PHP.
     Route::post('blogs/{blogId}', [BlogController::class, 'update']);
+    Route::post('testimonials/{testimonialId}', [TestimonialController::class, 'update']);
+    Route::post('trainings/{trainingId}', [TrainingController::class, 'update']);
     Route::apiResource('blogs', BlogController::class)->parameters(['blogs' => 'blogId']);
     Route::apiResource('experiences', ExperienceController::class)->parameters(['experiences' => 'experienceId']);
     Route::apiResource('projects', ProjectController::class)->parameters(['projects' => 'projectId']);
     Route::apiResource('publications', PublicationController::class)->parameters(['publications' => 'publicationId']);
     Route::apiResource('testimonials', TestimonialController::class)->parameters(['testimonials' => 'testimonialId']);
+    Route::apiResource('trainings', TrainingController::class)->parameters(['trainings' => 'trainingId']);
+    Route::apiResource('services', ServiceController::class)->parameters(['services' => 'serviceId']);
     // Keep the public API compatible with the existing `expriences` table spelling.
     Route::apiResource('expriences', ExperienceController::class)->parameters(['expriences' => 'experienceId']);
     Route::get('bills',[BillController::class,'index']); Route::post('bills',[BillController::class,'store']); Route::put('bills/{id}',[BillController::class,'update']); Route::delete('bills/{id}',[BillController::class,'destroy']); Route::post('bills/{id}/paid',[BillController::class,'markPaid']);
