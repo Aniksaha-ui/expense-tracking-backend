@@ -30,6 +30,37 @@ class BlogService
         return $this->findBlog($blogId);
     }
 
+    public function listPublishedBlogs(int $perPage = 15, ?string $search = null): LengthAwarePaginator
+    {
+        return DB::table('blogs')
+            ->where('isPublished', true)
+            ->when($search, function ($query, string $value) {
+                $query->where(function ($searchQuery) use ($value) {
+                    $searchQuery->where('title', 'like', "%{$value}%")
+                        ->orWhere('author_name', 'like', "%{$value}%")
+                        ->orWhere('category', 'like', "%{$value}%")
+                        ->orWhere('short_description', 'like', "%{$value}%");
+                });
+            })
+            ->orderByDesc('published_date')
+            ->orderByDesc('id')
+            ->paginate($perPage);
+    }
+
+    public function getPublishedBlog(int $blogId): object
+    {
+        $blog = DB::table('blogs')
+            ->where('id', $blogId)
+            ->where('isPublished', true)
+            ->first();
+
+        if (! $blog) {
+            throw new RuntimeException('Blog not found.');
+        }
+
+        return $blog;
+    }
+
     public function createBlog(array $data): object
     {
         $data = $this->storeCoverImage($data);

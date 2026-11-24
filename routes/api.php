@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\BillController;
 use App\Http\Controllers\Api\BlogController;
+use App\Http\Controllers\Api\PublicBlogController;
 use App\Http\Controllers\Api\FinancialAnomalyController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\AchievementController;
@@ -28,6 +29,13 @@ use App\Http\Controllers\Api\TransactionReceiptOcrController;
 use App\Http\Controllers\Api\TransferController;
 use App\Http\Controllers\Admin\Menu\MenuController as AdminMenuController;
 use Illuminate\Support\Facades\Route;
+
+// Read-only blog feed for the portfolio website. Configure PORTFOLIO_BLOG_API_TOKEN
+// and send it in the X-Portfolio-Token request header.
+Route::prefix('public')->middleware('portfolio.token')->group(function () {
+    Route::get('blogs', [PublicBlogController::class, 'index']);
+    Route::get('blogs/{blogId}', [PublicBlogController::class, 'show'])->whereNumber('blogId');
+});
 
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);

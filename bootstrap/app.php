@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'activity.notification' => \App\Http\Middleware\RecordInAppActivity::class,
+            'portfolio.token' => \App\Http\Middleware\EnsurePortfolioToken::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
