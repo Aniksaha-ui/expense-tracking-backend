@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class MenuItem extends Model
 {
     protected $fillable = [
+        'user_id',
         'title',
         'path',
         'icon',
@@ -21,6 +22,11 @@ class MenuItem extends Model
     protected $casts = [
         'roles' => 'array',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function children(): HasMany
     {

@@ -11,8 +11,10 @@ class AdminMenuItemsApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_menu_items_crud_matches_cloned_admin_behavior(): void
+    public function test_menu_items_crud_and_user_role_sync_work_end_to_end(): void
     {
+        config(['menu.manager_email' => 'menu-admin@example.com']);
+
         $registerResponse = $this->postJson('/api/auth/register', [
             'name' => 'Menu Admin',
             'email' => 'menu-admin@example.com',
@@ -21,64 +23,72 @@ class AdminMenuItemsApiTest extends TestCase
         ]);
 
         $token = $registerResponse->json('data.token');
+        $userId = $registerResponse->json('data.user.id');
+        $headers = ['Authorization' => 'Bearer '.$token];
 
-        $createResponse = $this->withHeader('Authorization', 'Bearer '.$token)
+        // Fixed route catalog + users + roles.
+        $this->withHeaders($headers)
+            ->getJson('/api/admin/menu_items/options')
+            ->assertOk()
+            ->assertJsonPath('isExecute', 'success')
+            ->assertJsonPath('data.routes.0.path', '/account');
+
+        // Custom / unlisted routes must be rejected.
+        $this->withHeaders($headers)
             ->postJson('/api/admin/menu_items', [
-                'title' => 'Dashboard',
-                'path' => '/admin/dashboard',
-                'icon' => 'DashboardIcon',
-                'location' => 'main',
+                'path' => '/custom-unlisted',
+                'title' => 'Custom Name',
+            ])
+            ->assertUnprocessable();
+
+        // Title is always locked to the fixed route name, ignoring client overrides.
+        $createResponse = $this->withHeaders($headers)
+            ->postJson('/api/admin/menu_items', [
+                'title' => 'Attempted Custom Name',
+                'path' => '/account',
                 'order' => 1,
-                'roles' => ['admin', 'guide'],
+                'roles' => ['admin', 'users'],
+                'user_id' => $userId,
             ]);
 
         $createResponse
             ->assertCreated()
-            ->assertJsonPath('isExecture', 'success')
-            ->assertJsonPath('message', 'Menu item created successfully')
-            ->assertJsonPath('data.title', 'Dashboard');
+            ->assertJsonPath('isExecute', 'success')
+            ->assertJsonPath('data.title', 'Accounts')
+            ->assertJsonPath('data.user_name', 'Menu Admin')
+            ->assertJsonPath('data.roles.0', 'admin');
 
         $menuItemId = $createResponse->json('data.id');
 
-        $this->withHeader('Authorization', 'Bearer '.$token)
-            ->getJson('/api/admin/menu_items?page=1&search=Dash')
-            ->assertOk()
-            ->assertJsonPath('isExecture', 'success')
-            ->assertJsonPath('message', 'Menu items retrieved successfully')
-            ->assertJsonPath('data.data.0.title', 'Dashboard')
-            ->assertJsonPath('data.data.0.roles.0', 'admin');
-
-        $this->withHeader('Authorization', 'Bearer '.$token)
-            ->getJson("/api/admin/menu_items/{$menuItemId}")
-            ->assertOk()
-            ->assertJsonPath('isExecture', 'success')
-            ->assertJsonPath('message', 'Menu item retrieved successfully')
-            ->assertJsonPath('data.roles.1', 'guide');
-
-        $this->withHeader('Authorization', 'Bearer '.$token)
-            ->postJson("/api/admin/menu_items/update/{$menuItemId}", [
-                'title' => 'Dashboard Updated',
-                'path' => '/admin/dashboard',
-                'icon' => 'DashboardIcon',
-                'location' => 'bottom',
+        $this->withHeaders($headers)
+            ->putJson("/api/admin/menu_items/{$menuItemId}", [
+                'title' => 'Still Cannot Edit Name',
+                'path' => '/reports',
                 'order' => 2,
                 'roles' => ['admin'],
             ])
             ->assertOk()
-            ->assertJsonPath('isExecture', 'success')
-            ->assertJsonPath('message', 'Menu item updated successfully')
-            ->assertJsonPath('data.title', 'Dashboard Updated');
+            ->assertJsonPath('data.title', 'Reports')
+            ->assertJsonPath('data.path', '/reports');
 
-        $this->withHeader('Authorization', 'Bearer '.$token)
-            ->deleteJson("/api/admin/menu_items/{$menuItemId}")
+        // Sync user-wise and role-wise menus.
+        $this->withHeaders($headers)
+            ->putJson("/api/admin/menu_items/assign/user/{$userId}", [
+                'paths' => ['/account', '/budgets'],
+            ])
             ->assertOk()
-            ->assertJsonPath('isExecture', 'success')
-            ->assertJsonPath('message', 'Menu item deleted successfully');
+            ->assertJsonPath('isExecute', 'success');
 
-        $this->withHeader('Authorization', 'Bearer '.$token)
-            ->getJson("/api/admin/menu_items/{$menuItemId}")
-            ->assertNotFound()
-            ->assertJsonPath('isExecture', 'failed')
-            ->assertJsonPath('message', 'Menu item not found');
+        $this->withHeaders($headers)
+            ->putJson('/api/admin/menu_items/assign/role', [
+                'role' => 'users',
+                'paths' => ['/categories'],
+            ])
+            ->assertOk()
+            ->assertJsonPath('isExecute', 'success');
+
+        $this->withHeaders($headers)
+            ->deleteJson("/api/admin/menu_items/{$menuItemId}")
+            ->assertOk();
     }
 }

@@ -1,33 +1,36 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\BudgetController;
-use App\Http\Controllers\Api\BillController;
-use App\Http\Controllers\Api\BlogController;
-use App\Http\Controllers\Api\PublicBlogController;
-use App\Http\Controllers\Api\FinancialAnomalyController;
+use App\Http\Controllers\Admin\Menu\MenuController as AdminMenuController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\AchievementController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BillController;
+use App\Http\Controllers\Api\BlogController;
+use App\Http\Controllers\Api\BudgetController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CronReportDeliverySettingController;
 use App\Http\Controllers\Api\CronReportJobController;
 use App\Http\Controllers\Api\ExperienceController;
 use App\Http\Controllers\Api\FileManagerController;
+use App\Http\Controllers\Api\FinancialAnomalyController;
 use App\Http\Controllers\Api\FinancialIntelligenceController;
 use App\Http\Controllers\Api\JiraAchievementController;
 use App\Http\Controllers\Api\NotificationController;
-use App\Http\Controllers\Api\ProviderConfigurationController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\ProviderConfigurationController;
 use App\Http\Controllers\Api\PublicationController;
+use App\Http\Controllers\Api\PublicBlogController;
+use App\Http\Controllers\Api\RecurringExpenseController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\TestimonialController;
 use App\Http\Controllers\Api\TrainingController;
-use App\Http\Controllers\Api\RecurringExpenseController;
-use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\TransactionReceiptOcrController;
 use App\Http\Controllers\Api\TransferController;
-use App\Http\Controllers\Admin\Menu\MenuController as AdminMenuController;
+use App\Http\Middleware\EnsureMenuManager;
+use App\Repository\Services\Menu\MenuPermissionService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Read-only blog feed for the portfolio website. Configure PORTFOLIO_BLOG_API_TOKEN
@@ -48,7 +51,7 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware(['auth:api', 'activity.notification'])->group(function () {
-    Route::get('my-menu-items', function (\Illuminate\Http\Request $request, \App\Repository\Services\Menu\MenuPermissionService $permissions) {
+    Route::get('my-menu-items', function (Request $request, MenuPermissionService $permissions) {
         return response()->json(['isExecute' => 'success', 'data' => $permissions->forUser($request->user('api')), 'msg' => 'Menu items retrieved successfully']);
     });
     // Multipart form uploads cannot reliably be parsed on PUT requests by PHP.
@@ -64,8 +67,13 @@ Route::middleware(['auth:api', 'activity.notification'])->group(function () {
     Route::apiResource('services', ServiceController::class)->parameters(['services' => 'serviceId']);
     // Keep the public API compatible with the existing `expriences` table spelling.
     Route::apiResource('expriences', ExperienceController::class)->parameters(['expriences' => 'experienceId']);
-    Route::get('bills',[BillController::class,'index']); Route::post('bills',[BillController::class,'store']); Route::put('bills/{id}',[BillController::class,'update']); Route::delete('bills/{id}',[BillController::class,'destroy']); Route::post('bills/{id}/paid',[BillController::class,'markPaid']);
-    Route::get('financial-anomalies',[FinancialAnomalyController::class,'index']); Route::put('financial-anomalies/{id}/review',[FinancialAnomalyController::class,'review']);
+    Route::get('bills', [BillController::class, 'index']);
+    Route::post('bills', [BillController::class, 'store']);
+    Route::put('bills/{id}', [BillController::class, 'update']);
+    Route::delete('bills/{id}', [BillController::class, 'destroy']);
+    Route::post('bills/{id}/paid', [BillController::class, 'markPaid']);
+    Route::get('financial-anomalies', [FinancialAnomalyController::class, 'index']);
+    Route::put('financial-anomalies/{id}/review', [FinancialAnomalyController::class, 'review']);
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::put('notifications/read-all', [NotificationController::class, 'markAllRead']);
@@ -101,12 +109,17 @@ Route::middleware(['auth:api', 'activity.notification'])->group(function () {
     Route::get('categories', [CategoryController::class, 'index']);
     Route::post('categories', [CategoryController::class, 'store']);
     Route::put('categories/{categoryId}', [CategoryController::class, 'update']);
-    Route::middleware(\App\Http\Middleware\EnsureMenuManager::class)->group(function () {
-    Route::get('admin/menu_items', [AdminMenuController::class, 'index']);
-    Route::post('admin/menu_items', [AdminMenuController::class, 'store']);
-    Route::get('admin/menu_items/{id}', [AdminMenuController::class, 'show']);
-    Route::post('admin/menu_items/update/{id}', [AdminMenuController::class, 'update']);
-    Route::delete('admin/menu_items/{id}', [AdminMenuController::class, 'destroy']);
+    Route::middleware(EnsureMenuManager::class)->group(function () {
+        Route::get('admin/menu_items', [AdminMenuController::class, 'index']);
+        Route::get('admin/menu_items/options', [AdminMenuController::class, 'options']);
+        Route::get('admin/menu_items/users', [AdminMenuController::class, 'users']);
+        Route::put('admin/menu_items/assign/user/{userId}', [AdminMenuController::class, 'syncUserMenus'])->whereNumber('userId');
+        Route::put('admin/menu_items/assign/role', [AdminMenuController::class, 'syncRoleMenus']);
+        Route::post('admin/menu_items', [AdminMenuController::class, 'store']);
+        Route::get('admin/menu_items/{id}', [AdminMenuController::class, 'show'])->whereNumber('id');
+        Route::post('admin/menu_items/update/{id}', [AdminMenuController::class, 'update'])->whereNumber('id');
+        Route::put('admin/menu_items/{id}', [AdminMenuController::class, 'update'])->whereNumber('id');
+        Route::delete('admin/menu_items/{id}', [AdminMenuController::class, 'destroy'])->whereNumber('id');
     });
 
     Route::prefix('transactions')->group(function () {
