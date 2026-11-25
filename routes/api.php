@@ -48,6 +48,9 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware(['auth:api', 'activity.notification'])->group(function () {
+    Route::get('my-menu-items', function (\Illuminate\Http\Request $request, \App\Repository\Services\Menu\MenuPermissionService $permissions) {
+        return response()->json(['isExecute' => 'success', 'data' => $permissions->forUser($request->user('api')), 'msg' => 'Menu items retrieved successfully']);
+    });
     // Multipart form uploads cannot reliably be parsed on PUT requests by PHP.
     Route::post('blogs/{blogId}', [BlogController::class, 'update']);
     Route::post('testimonials/{testimonialId}', [TestimonialController::class, 'update']);
@@ -98,11 +101,13 @@ Route::middleware(['auth:api', 'activity.notification'])->group(function () {
     Route::get('categories', [CategoryController::class, 'index']);
     Route::post('categories', [CategoryController::class, 'store']);
     Route::put('categories/{categoryId}', [CategoryController::class, 'update']);
+    Route::middleware(\App\Http\Middleware\EnsureMenuManager::class)->group(function () {
     Route::get('admin/menu_items', [AdminMenuController::class, 'index']);
     Route::post('admin/menu_items', [AdminMenuController::class, 'store']);
     Route::get('admin/menu_items/{id}', [AdminMenuController::class, 'show']);
     Route::post('admin/menu_items/update/{id}', [AdminMenuController::class, 'update']);
     Route::delete('admin/menu_items/{id}', [AdminMenuController::class, 'destroy']);
+    });
 
     Route::prefix('transactions')->group(function () {
         Route::get('/', [TransactionController::class, 'index']);

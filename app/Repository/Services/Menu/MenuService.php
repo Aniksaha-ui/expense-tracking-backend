@@ -48,6 +48,7 @@ class MenuService
     {
         try {
             $id = DB::table('menu_items')->insertGetId([
+                'user_id' => $data['user_id'] ?? null,
                 'title' => $data['title'],
                 'path' => $data['path'] ?? null,
                 'icon' => $data['icon'] ?? null,
@@ -103,8 +104,12 @@ class MenuService
                 'updated_at' => now(),
             ];
 
-            if (isset($data['roles'])) {
-                $updateData['roles'] = json_encode($data['roles']);
+            if (array_key_exists('user_id', $data)) {
+                $updateData['user_id'] = $data['user_id'];
+            }
+
+            if (array_key_exists('roles', $data)) {
+                $updateData['roles'] = $data['roles'] === null ? null : json_encode($data['roles']);
             }
 
             DB::table('menu_items')->where('id', $id)->update($updateData);

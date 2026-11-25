@@ -45,6 +45,8 @@ class MenuController extends Controller
                 'parent_id' => 'nullable|exists:menu_items,id',
                 'order' => 'integer',
                 'roles' => 'nullable|array',
+                'roles.*' => 'string|max:191',
+                'user_id' => 'nullable|exists:users,id',
             ]);
 
             if ($validator->fails()) {
@@ -87,6 +89,8 @@ class MenuController extends Controller
                 'parent_id' => 'nullable|exists:menu_items,id',
                 'order' => 'integer',
                 'roles' => 'nullable|array',
+                'roles.*' => 'string|max:191',
+                'user_id' => 'nullable|exists:users,id',
             ]);
 
             if ($validator->fails()) {
