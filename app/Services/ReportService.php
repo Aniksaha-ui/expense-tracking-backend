@@ -7,11 +7,11 @@ use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ReportService extends BaseFinanceService
 {
-
     /**
      * A ledger-based, portfolio-wide report. Transfers have an equal debit and
      * credit entry and therefore correctly leave the portfolio balance unchanged.
@@ -48,7 +48,7 @@ class ReportService extends BaseFinanceService
             ->orderBy('accounts.name')
             ->selectRaw('accounts.name as account_name, SUM(transfers.amount) as total_amount')
             ->get()
-            ->map(fn(object $row): array => [
+            ->map(fn (object $row): array => [
                 'account_name' => $row->account_name,
                 'total_amount' => $this->formatAggregate($row->total_amount ?? '0'),
             ])
@@ -60,9 +60,9 @@ class ReportService extends BaseFinanceService
 
         $dailyRows = (clone $inRange)
             ->selectRaw("{$periodExpression} as report_date")
-            ->selectRaw("SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as total_income", [TransactionType::INCOME->value])
-            ->selectRaw("SUM(CASE WHEN type IN (?, ?) THEN amount ELSE 0 END) as total_costing", [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
-            ->selectRaw("SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as total_bank_transfers", [TransactionType::TRANSFER->value])
+            ->selectRaw('SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as total_income', [TransactionType::INCOME->value])
+            ->selectRaw('SUM(CASE WHEN type IN (?, ?) THEN amount ELSE 0 END) as total_costing', [TransactionType::EXPENSE->value, TransactionType::RECURRING->value])
+            ->selectRaw('SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as total_bank_transfers', [TransactionType::TRANSFER->value])
             ->selectRaw('COUNT(*) as transaction_count')
             ->groupByRaw($periodExpression)
             ->orderBy('report_date')
@@ -145,7 +145,7 @@ class ReportService extends BaseFinanceService
             ->orderByDesc('total_amount')
             ->limit(10)
             ->get()
-            ->map(fn(object $row): array => [
+            ->map(fn (object $row): array => [
                 'category_name' => $row->category_name,
                 'total_amount' => $this->formatAggregate($row->total_amount ?? '0'),
                 'average_transaction_amount' => (string) BigDecimal::of((string) ($row->average_transaction_amount ?? '0'))
@@ -159,9 +159,9 @@ class ReportService extends BaseFinanceService
         $months = $rows->pluck('report_month')->unique()->values()->all();
         $categories = $rows->groupBy('category_name')->map(function ($categoryRows, string $categoryName) use ($months): array {
             $amountsByMonth = $categoryRows
-                ->mapWithKeys(fn(object $row): array => [$row->report_month => $this->formatAggregate($row->total_amount ?? '0')])
+                ->mapWithKeys(fn (object $row): array => [$row->report_month => $this->formatAggregate($row->total_amount ?? '0')])
                 ->all();
-            $amounts = array_map(fn(string $month): string => $amountsByMonth[$month] ?? '0.00', $months);
+            $amounts = array_map(fn (string $month): string => $amountsByMonth[$month] ?? '0.00', $months);
             $latest = (float) ($amounts[count($amounts) - 1] ?? 0);
             $previous = (float) ($amounts[count($amounts) - 2] ?? 0);
 
@@ -174,7 +174,7 @@ class ReportService extends BaseFinanceService
                 'change_amount' => number_format($latest - $previous, 2, '.', ''),
                 'change_percentage' => $previous == 0.0 ? null : round((($latest - $previous) / $previous) * 100, 1),
             ];
-        })->sortByDesc(fn(array $row): float => (float) $row['total_amount'])->values()->all();
+        })->sortByDesc(fn (array $row): float => (float) $row['total_amount'])->values()->all();
 
         return [
             'months' => $months,
@@ -208,9 +208,9 @@ class ReportService extends BaseFinanceService
 
         return 1;
     }
+
     public function summary(int $userId, array $filters): array
     {
-
 
         $baseQuery = DB::table('transactions')->where('user_id', $userId);
         $this->applyTransactionDateFilters($baseQuery, $filters);
@@ -220,7 +220,6 @@ class ReportService extends BaseFinanceService
             ->sum('current_balance');
         $msg = "I am telegram bot and here is the summary of your transactions:\n\n";
         $this->send(app(TelegramService::class), $msg);
-
 
         return [
             'from_date' => $filters['from_date'] ?? null,
@@ -234,7 +233,7 @@ class ReportService extends BaseFinanceService
         ];
     }
 
-    public function accountBalances(int $userId): \Illuminate\Support\Collection
+    public function accountBalances(int $userId): Collection
     {
         return DB::table('accounts')
             ->where('user_id', $userId)
@@ -243,7 +242,7 @@ class ReportService extends BaseFinanceService
             ->get();
     }
 
-    public function categoryBreakdown(int $userId, array $filters): \Illuminate\Support\Collection
+    public function categoryBreakdown(int $userId, array $filters): Collection
     {
         $query = DB::table('transactions')
             ->join('categories', 'categories.id', '=', 'transactions.category_id')
@@ -264,7 +263,7 @@ class ReportService extends BaseFinanceService
         return $query->get();
     }
 
-    public function daywiseExpenses(int $userId, array $filters): \Illuminate\Support\Collection
+    public function daywiseExpenses(int $userId, array $filters): Collection
     {
         $query = DB::table('transactions')
             ->join('categories', 'categories.id', '=', 'transactions.category_id')
@@ -289,7 +288,7 @@ class ReportService extends BaseFinanceService
 
         $this->applyTransactionDateFilters($query, $filters);
 
-        return $query->get()->map(fn(object $item): array => [
+        return $query->get()->map(fn (object $item): array => [
             'expense_date' => $item->expense_date,
             'category_id' => $item->category_id,
             'category_name' => $item->category_name,
@@ -319,10 +318,10 @@ class ReportService extends BaseFinanceService
         $rows = $rows->get();
 
         $totalAmount = $rows->reduce(
-            fn(string $carry, object $row): string => $this->addAggregate($carry, $row->total_amount ?? '0'),
+            fn (string $carry, object $row): string => $this->addAggregate($carry, $row->total_amount ?? '0'),
             '0.00'
         );
-        $totalUsageCount = $rows->sum(fn(object $row): int => (int) ($row->usage_count ?? 0));
+        $totalUsageCount = $rows->sum(fn (object $row): int => (int) ($row->usage_count ?? 0));
 
         $table = $rows->map(function (object $row) use ($totalAmount): array {
             $categoryTotalAmount = $this->formatAggregate($row->total_amount ?? '0');
@@ -350,17 +349,17 @@ class ReportService extends BaseFinanceService
                 'total_usage_count' => $totalUsageCount,
             ],
             'graph' => [
-                'labels' => array_map(static fn(array $row): string => $row['category_name'], $table),
+                'labels' => array_map(static fn (array $row): string => $row['category_name'], $table),
                 'datasets' => [
                     [
                         'label' => 'Usage Count',
                         'color' => '#4f83ff',
-                        'data' => array_map(static fn(array $row): int => $row['usage_count'], $table),
+                        'data' => array_map(static fn (array $row): int => $row['usage_count'], $table),
                     ],
                     [
                         'label' => 'Total Amount',
                         'color' => '#f5a623',
-                        'data' => array_map(static fn(array $row): float => (float) $row['total_amount'], $table),
+                        'data' => array_map(static fn (array $row): float => (float) $row['total_amount'], $table),
                     ],
                 ],
             ],
@@ -402,7 +401,7 @@ class ReportService extends BaseFinanceService
 
         $totalExpense = array_reduce(
             $table,
-            fn(string $carry, array $row): string => $this->addAggregate($carry, $row['total_expense']),
+            fn (string $carry, array $row): string => $this->addAggregate($carry, $row['total_expense']),
             '0.00'
         );
 
@@ -410,7 +409,7 @@ class ReportService extends BaseFinanceService
             ? (string) BigDecimal::of(
                 array_reduce(
                     $table,
-                    fn(string $carry, array $row): string => $this->addAggregate($carry, $row['avg_daily_burn_rate']),
+                    fn (string $carry, array $row): string => $this->addAggregate($carry, $row['avg_daily_burn_rate']),
                     '0.00'
                 )
             )->dividedBy((string) count($table), 2, RoundingMode::HALF_UP)
@@ -426,17 +425,17 @@ class ReportService extends BaseFinanceService
                 'peak_month' => $peakMonth['month_label'] ?? 'No data',
             ],
             'graph' => [
-                'labels' => array_map(static fn(array $row): string => $row['month_label'], $table),
+                'labels' => array_map(static fn (array $row): string => $row['month_label'], $table),
                 'datasets' => [
                     [
                         'label' => 'Total Expense',
                         'color' => '#f59e0b',
-                        'data' => array_map(static fn(array $row): float => (float) $row['total_expense'], $table),
+                        'data' => array_map(static fn (array $row): float => (float) $row['total_expense'], $table),
                     ],
                     [
                         'label' => 'Avg Daily Burn Rate',
                         'color' => '#4f83ff',
-                        'data' => array_map(static fn(array $row): float => (float) $row['avg_daily_burn_rate'], $table),
+                        'data' => array_map(static fn (array $row): float => (float) $row['avg_daily_burn_rate'], $table),
                     ],
                 ],
             ],
@@ -444,13 +443,13 @@ class ReportService extends BaseFinanceService
         ];
     }
 
-    public function cashFlow(int $userId, array $filters): \Illuminate\Support\Collection
+    public function cashFlow(int $userId, array $filters): Collection
     {
         $query = DB::table('transactions')
             ->select([
                 DB::raw('DATE(transaction_date) as date'),
-                DB::raw("SUM(CASE WHEN type = '" . TransactionType::INCOME->value . "' THEN amount ELSE 0 END) as income_total"),
-                DB::raw("SUM(CASE WHEN type IN ('" . TransactionType::EXPENSE->value . "', '" . TransactionType::RECURRING->value . "') THEN amount ELSE 0 END) as expense_total"),
+                DB::raw("SUM(CASE WHEN type = '".TransactionType::INCOME->value."' THEN amount ELSE 0 END) as income_total"),
+                DB::raw("SUM(CASE WHEN type IN ('".TransactionType::EXPENSE->value."', '".TransactionType::RECURRING->value."') THEN amount ELSE 0 END) as expense_total"),
             ])
             ->where('user_id', $userId)
             ->groupBy(DB::raw('DATE(transaction_date)'))
@@ -478,30 +477,31 @@ class ReportService extends BaseFinanceService
             : now()->startOfMonth();
         $monthEnd = ! empty($filters['to_date'])
             ? Carbon::parse($filters['to_date'])->endOfDay()
-            : now()->endOfDay();
+            : now()->endOfMonth();
 
-        $weeklyExpenseRows = DB::table('transactions')
+        if ($monthEnd->lessThan($monthStart)) {
+            [$monthStart, $monthEnd] = [$monthEnd->copy()->startOfDay(), $monthStart->copy()->endOfDay()];
+        }
+
+        // Group by calendar date so cross-month and year-boundary weeks never drop transactions.
+        $dailyExpenseRows = DB::table('transactions')
             ->select([
-                DB::raw('YEAR(transaction_date) as year'),
-                DB::raw('MONTH(transaction_date) as month'),
-                DB::raw('WEEK(transaction_date, 1) as week'),
+                DB::raw('DATE(transaction_date) as expense_date'),
+                DB::raw("SUM(CASE WHEN type = '".TransactionType::EXPENSE->value."' THEN amount ELSE 0 END) as regular_expense"),
+                DB::raw("SUM(CASE WHEN type = '".TransactionType::RECURRING->value."' THEN amount ELSE 0 END) as recurring_expense"),
                 DB::raw('SUM(amount) as total_expense'),
                 DB::raw('COUNT(*) as transaction_count'),
             ])
             ->where('user_id', $userId)
-            ->where('type', TransactionType::EXPENSE->value)
+            ->whereIn('type', [
+                TransactionType::EXPENSE->value,
+                TransactionType::RECURRING->value,
+            ])
             ->whereDate('transaction_date', '>=', $monthStart->toDateString())
             ->whereDate('transaction_date', '<=', $monthEnd->toDateString())
-            ->groupBy(
-                DB::raw('YEAR(transaction_date)'),
-                DB::raw('MONTH(transaction_date)'),
-                DB::raw('WEEK(transaction_date, 1)')
-            )
-            ->orderBy(DB::raw('YEAR(transaction_date)'))
-            ->orderBy(DB::raw('MONTH(transaction_date)'))
-            ->orderBy(DB::raw('WEEK(transaction_date, 1)'))
-            ->get()
-            ->keyBy(fn(object $row): string => $this->makeWeeklyExpenseRowKey((int) $row->year, (int) $row->month, (int) $row->week));
+            ->groupBy(DB::raw('DATE(transaction_date)'))
+            ->orderBy(DB::raw('DATE(transaction_date)'))
+            ->get();
 
         $weeks = [];
         $cursor = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
@@ -512,28 +512,46 @@ class ReportService extends BaseFinanceService
             $calendarWeekEnd = $cursor->copy()->endOfWeek(Carbon::SUNDAY);
             $weekStart = $calendarWeekStart->greaterThan($monthStart) ? $calendarWeekStart : $monthStart->copy();
             $weekEnd = $calendarWeekEnd->lessThan($monthEnd) ? $calendarWeekEnd : $monthEnd->copy();
+            $weekStartString = $weekStart->toDateString();
+            $weekEndString = $weekEnd->toDateString();
+
+            $regularExpense = '0.00';
+            $recurringExpense = '0.00';
+            $totalExpense = '0.00';
+            $transactionCount = 0;
+
+            foreach ($dailyExpenseRows as $dayRow) {
+                $day = (string) $dayRow->expense_date;
+                if ($day >= $weekStartString && $day <= $weekEndString) {
+                    $regularExpense = $this->addAggregate($regularExpense, $this->formatAggregate($dayRow->regular_expense ?? '0'));
+                    $recurringExpense = $this->addAggregate($recurringExpense, $this->formatAggregate($dayRow->recurring_expense ?? '0'));
+                    $totalExpense = $this->addAggregate($totalExpense, $this->formatAggregate($dayRow->total_expense ?? '0'));
+                    $transactionCount += (int) ($dayRow->transaction_count ?? 0);
+                }
+            }
+
             $year = (int) $weekStart->format('Y');
             $month = (int) $weekStart->format('n');
             $week = (int) $weekStart->format('W');
-            $row = $weeklyExpenseRows->get($this->makeWeeklyExpenseRowKey($year, $month, $week));
-            $totalExpense = $this->formatAggregate($row->total_expense ?? '0');
-            $transactionCount = (int) ($row->transaction_count ?? 0);
 
             $weeks[] = [
                 'week_sequence' => $sequence,
                 'year' => $year,
                 'month' => $month,
                 'week' => $week,
-                'week_label' => 'Week ' . $sequence,
-                'calendar_week_label' => 'Week ' . $week,
-                'week_start' => $weekStart->toDateString(),
-                'week_end' => $weekEnd->toDateString(),
-                'range_label' => $weekStart->format('d M') . ' - ' . $weekEnd->format('d M'),
+                'week_label' => 'Week '.$sequence,
+                'calendar_week_label' => 'Week '.$week,
+                'week_start' => $weekStartString,
+                'week_end' => $weekEndString,
+                'range_label' => $weekStart->format('d M').' - '.$weekEnd->format('d M'),
+                'expense_total' => $regularExpense,
+                'recurring_total' => $recurringExpense,
                 'total_expense' => $totalExpense,
                 'transaction_count' => $transactionCount,
                 'average_expense' => $transactionCount > 0
                     ? (string) BigDecimal::of($totalExpense)->dividedBy((string) $transactionCount, 2, RoundingMode::HALF_UP)
                     : '0.00',
+                'recurring_included' => true,
             ];
 
             $cursor->addWeek();
@@ -541,9 +559,11 @@ class ReportService extends BaseFinanceService
         }
 
         $totalExpense = collect($weeks)->reduce(
-            fn(string $carry, array $week): string => $this->addAggregate($carry, $week['total_expense']),
+            fn (string $carry, array $week): string => $this->addAggregate($carry, $week['total_expense']),
             '0.00'
         );
+
+        $activeWeeks = collect($weeks)->where('transaction_count', '>', 0)->count();
 
         return [
             'month' => [
@@ -554,10 +574,13 @@ class ReportService extends BaseFinanceService
                 'to_date' => $monthEnd->toDateString(),
             ],
             'summary' => [
-                'active_weeks' => collect($weeks)->where('transaction_count', '>', 0)->count(),
+                'active_weeks' => $activeWeeks,
                 'total_expense' => $totalExpense,
                 'total_transactions' => collect($weeks)->sum('transaction_count'),
                 'weeks_in_month' => count($weeks),
+                'average_weekly_expense' => count($weeks) > 0
+                    ? (string) BigDecimal::of($totalExpense)->dividedBy((string) count($weeks), 2, RoundingMode::HALF_UP)
+                    : '0.00',
             ],
             'weeks' => $weeks,
         ];
@@ -586,15 +609,15 @@ class ReportService extends BaseFinanceService
                 [$currentMonthStart->toDateString()]
             )
             ->selectRaw(
-                "SUM(CASE WHEN type = ? THEN amount ELSE 0 END) AS income",
+                'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) AS income',
                 [TransactionType::INCOME->value]
             )
             ->selectRaw(
-                "SUM(CASE WHEN type = ? THEN amount ELSE 0 END) AS expense",
+                'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) AS expense',
                 [TransactionType::EXPENSE->value]
             )
             ->selectRaw(
-                "SUM(CASE WHEN type = ? THEN amount ELSE 0 END) AS recurring",
+                'SUM(CASE WHEN type = ? THEN amount ELSE 0 END) AS recurring',
                 [TransactionType::RECURRING->value]
             )
             ->where('user_id', $userId)
@@ -646,7 +669,7 @@ class ReportService extends BaseFinanceService
         ];
     }
 
-    public function dueRecurringExpenses(int $userId, ?string $throughDate = null): \Illuminate\Support\Collection
+    public function dueRecurringExpenses(int $userId, ?string $throughDate = null): Collection
     {
         $date = $throughDate ?? now()->toDateString();
 
@@ -728,7 +751,7 @@ class ReportService extends BaseFinanceService
             'label' => $label,
             'color' => $color,
             'data' => array_map(
-                static fn(array $row): float => (float) $row[$field],
+                static fn (array $row): float => (float) $row[$field],
                 $table
             ),
         ];
@@ -736,7 +759,7 @@ class ReportService extends BaseFinanceService
 
     private function makeWeeklyExpenseRowKey(int $year, int $month, int $week): string
     {
-        return $year . '-' . $month . '-' . $week;
+        return $year.'-'.$month.'-'.$week;
     }
 
     private function formatMonthLabel(?string $monthKey): string

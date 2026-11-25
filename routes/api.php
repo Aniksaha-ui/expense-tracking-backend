@@ -166,6 +166,7 @@ Route::middleware(['auth:api', 'activity.notification'])->group(function () {
     Route::prefix('financial-intelligence')->group(function () {
         Route::get('dashboard', [FinancialIntelligenceController::class, 'dashboard']);
         Route::get('forecast', [FinancialIntelligenceController::class, 'forecast']);
+        Route::get('monthly-week-comparison', [FinancialIntelligenceController::class, 'monthlyWeekComparison']);
         Route::post('ask', [FinancialIntelligenceController::class, 'ask']);
         Route::get('goals', [FinancialIntelligenceController::class, 'goals']);
         Route::post('goals', [FinancialIntelligenceController::class, 'storeGoal']);

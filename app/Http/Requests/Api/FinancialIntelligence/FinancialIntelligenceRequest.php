@@ -11,6 +11,7 @@ class FinancialIntelligenceRequest extends ApiFormRequest
         return [
             'from_date' => ['nullable', 'date'],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
+            'months' => ['nullable', 'integer', 'min:1', 'max:24'],
             'expense_change_percent' => ['nullable', 'numeric', 'min:-100', 'max:500'],
             'income_change_percent' => ['nullable', 'numeric', 'min:-100', 'max:500'],
         ];
