@@ -27,6 +27,7 @@ class EmailFinancialOverviewReports extends Command
             [$fromDate, $toDate] = $this->resolveDateRange();
         } catch (Throwable $exception) {
             $this->error($exception->getMessage());
+
             return self::FAILURE;
         }
 
@@ -53,7 +54,20 @@ class EmailFinancialOverviewReports extends Command
                     $deliveryService->deliver(
                         $user,
                         'financial_overview_reports',
-                        new FinancialOverviewReportMail($user, $fromDate, $toDate, $summary, $report['transferReceiptsByAccount'], $report['accountActivity'], $report['analysis'], $report['pdf'], $report['filename'], $offersReport['pdf'] ?? null, $offersReport['filename'] ?? null),
+                        new FinancialOverviewReportMail(
+                            $user,
+                            $fromDate,
+                            $toDate,
+                            $summary,
+                            $report['transferReceiptsByAccount'],
+                            $report['accountActivity'],
+                            $report['analysis'],
+                            $report['pdf'],
+                            $report['filename'],
+                            $offersReport['pdf'] ?? null,
+                            $offersReport['filename'] ?? null,
+                            $report['monthlyWeekComparison'] ?? [],
+                        ),
                         $this->telegramMessage($fromDate, $toDate, $summary),
                     );
                     $sent++;
@@ -72,6 +86,7 @@ class EmailFinancialOverviewReports extends Command
         });
 
         $this->info("Financial overview reports finished. Sent: {$sent}; failed: {$failed}.");
+
         return $failed > 0 ? self::FAILURE : self::SUCCESS;
     }
 

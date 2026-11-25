@@ -18,8 +18,7 @@ class FinancialOverviewReportService
         private readonly PdfService $pdfService,
         private readonly FinancialOverviewAnalysisService $analysisService,
         private readonly FinancialIntelligenceService $financialIntelligenceService,
-    ) {
-    }
+    ) {}
 
     public function generate(User $user, CarbonImmutable $fromDate, CarbonImmutable $toDate): array
     {
@@ -61,6 +60,7 @@ class FinancialOverviewReportService
             'categoryCostingComparison' => $report['category_costing_comparison'],
             'periodCategoryCosting' => $report['period_category_costing'],
             'financialIntelligence' => $intelligence,
+            'monthlyWeekComparison' => $intelligence['monthly_week_comparison'] ?? [],
             'supplementary' => $supplementary,
         ];
 
@@ -192,6 +192,7 @@ class FinancialOverviewReportService
                 $entry['opening_balance'] = $balanceAfter;
                 $entry['closing_balance'] = $balanceAfter;
                 unset($entry);
+
                 continue;
             }
 

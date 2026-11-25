@@ -219,6 +219,11 @@
         $categoryRows = array_slice($periodCategoryCosting ?? [], 0, 8);
         $monthlyRows = collect($rows ?? [])->values()->take(-6);
         $weeklyRows = array_slice($fi['weekly_spending']['rows'] ?? [], 0, 6);
+        $monthlyWeekComparison = $monthlyWeekComparison ?? ($fi['monthly_week_comparison'] ?? []);
+        $comparisonColumns = $monthlyWeekComparison['week_columns'] ?? [];
+        $comparisonMonths = $monthlyWeekComparison['months'] ?? [];
+        $comparisonWeekSummaries = $monthlyWeekComparison['week_summaries'] ?? [];
+        $comparisonSummary = $monthlyWeekComparison['summary'] ?? [];
         $accounts = $supplementary['accounts'] ?? [];
         $accountActivity = $supplementary['account_activity'] ?? [];
         $goals = $supplementary['goals'] ?? [];
@@ -324,6 +329,61 @@
                 <td colspan="5">No income or expense trend data is available.</td>
             </tr><?php endif; ?>
     </table>
+    <?php if (! empty($comparisonColumns) && ! empty($comparisonMonths)): ?>
+    <div class="page-break"></div>
+    <h2>Monthly week-by-week comparison (last <?= e($comparisonSummary['months_count'] ?? count($comparisonMonths)) ?> months)</h2>
+    <p class="muted">
+        Regular and recurring expenses grouped into Week 1 to Week <?= e(count($comparisonColumns)) ?> for each month.
+        Total: <b><?= $money($comparisonSummary['total_expense'] ?? 0) ?></b>
+        | Monthly avg: <b><?= $money($comparisonSummary['average_monthly_expense'] ?? 0) ?></b>
+        <?php if (! empty($comparisonSummary['peak_week_label'])): ?>| Heaviest week: <b><?= e($comparisonSummary['peak_week_label']) ?></b> (<?= $money($comparisonSummary['peak_week_expense'] ?? 0) ?>)<?php endif; ?>
+        <?php if (! empty($comparisonSummary['highest_month_label'])): ?>| Highest month: <b><?= e($comparisonSummary['highest_month_label']) ?></b> (<?= $money($comparisonSummary['highest_month_expense'] ?? 0) ?>)<?php endif; ?>
+    </p>
+    <table class="table">
+        <tr>
+            <th>Month</th>
+            <?php foreach ($comparisonColumns as $column): ?>
+                <th class="right"><?= e($column['label']) ?></th>
+            <?php endforeach; ?>
+            <th class="right">Total</th>
+        </tr>
+        <?php foreach ($comparisonMonths as $monthRow): ?>
+            <tr>
+                <td><b><?= e($monthRow['month_label']) ?></b><br><span class="muted"><?= e($monthRow['transaction_count'] ?? 0) ?> txns</span></td>
+                <?php foreach ($comparisonColumns as $column): ?>
+                    <?php
+                    $cell = $monthRow['weeks'][$column['sequence'] - 1] ?? null;
+                    $cellAmount = $cell ? (float) ($cell['total_expense'] ?? 0) : 0.0;
+                    $isPeak = $cell && $cellAmount > 0 && ($monthRow['peak_week_sequence'] ?? null) === $cell['week_sequence'];
+                    ?>
+                    <td class="right" style="<?= $isPeak ? 'background:#fff1f2;color:#be123c;font-weight:bold;' : '' ?>">
+                        <?php if (! $cell || $cellAmount <= 0): ?>
+                            <span class="muted">—</span>
+                        <?php else: ?>
+                            <?= $money($cellAmount) ?><br><span class="muted"><?= e($cell['range_label'] ?? '') ?></span>
+                        <?php endif; ?>
+                    </td>
+                <?php endforeach; ?>
+                <td class="right" style="background:#f8fafc;"><b><?= (float) ($monthRow['total_expense'] ?? 0) > 0 ? $money($monthRow['total_expense']) : '—' ?></b></td>
+            </tr>
+        <?php endforeach; ?>
+        <?php if (! empty($comparisonWeekSummaries)): ?>
+            <tr style="background:#f1f5f9;">
+                <td><b>Week avg</b><br><span class="muted">Cumulative</span></td>
+                <?php foreach ($comparisonWeekSummaries as $colSummary): ?>
+                    <td class="right">
+                        <b><?= (float) ($colSummary['average_expense'] ?? 0) > 0 ? $money($colSummary['average_expense']) : '—' ?></b><br>
+                        <span class="muted"><?= (float) ($colSummary['total_expense'] ?? 0) > 0 ? $money($colSummary['total_expense']) : '—' ?></span>
+                    </td>
+                <?php endforeach; ?>
+                <td class="right">
+                    <b><?= $money($comparisonSummary['total_expense'] ?? 0) ?></b><br>
+                    <span class="muted">Avg <?= $money($comparisonSummary['average_monthly_expense'] ?? 0) ?></span>
+                </td>
+            </tr>
+        <?php endif; ?>
+    </table>
+    <?php endif; ?>
     <div class="page-break"></div>
     <h2>Single-month category activity</h2>
     <p class="muted">These categories have recorded spending in only one month of the available category history. They are signals to review, not proof of a one-time expense.</p>

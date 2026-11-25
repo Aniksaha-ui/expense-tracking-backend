@@ -27,8 +27,8 @@ class FinancialOverviewReportMail extends Mailable
         private readonly string $filename,
         private readonly ?string $offersPdf,
         private readonly ?string $offersFilename,
-    ) {
-    }
+        public readonly array $monthlyWeekComparison = [],
+    ) {}
 
     public function envelope(): Envelope
     {
@@ -49,6 +49,7 @@ class FinancialOverviewReportMail extends Mailable
             'transferReceiptsByAccount' => $this->safeValues($this->transferReceiptsByAccount),
             'accountActivity' => $this->safeValues($this->accountActivity),
             'analysis' => $this->safeValues($this->analysis),
+            'monthlyWeekComparison' => $this->safeValues($this->monthlyWeekComparison),
             'appName' => $this->safeText((string) config('app.name')),
         ]);
     }

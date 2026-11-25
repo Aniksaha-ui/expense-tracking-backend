@@ -34,4 +34,59 @@
     <?php foreach ($accountActivity as $account): ?><tr><td><?= e($account['account_name']) ?><?php if (!empty($account['institution_name'])): ?> (<?= e($account['institution_name']) ?>)<?php endif; ?></td><td>BDT <?= e(number_format((float) $account['opening_balance'], 2)) ?></td><td>BDT <?= e(number_format((float) $account['money_added'], 2)) ?></td><td>BDT <?= e(number_format((float) $account['money_out'], 2)) ?></td><td><strong><?= e($account['trend']) ?> (<?= (float) $account['net_change'] >= 0 ? '+' : '-' ?>BDT <?= e(number_format(abs((float) $account['net_change']), 2)) ?>)</strong></td><td><strong>BDT <?= e(number_format((float) $account['closing_balance'], 2)) ?></strong></td></tr><?php endforeach; ?>
 </table>
 
+<?php
+$comparison = $monthlyWeekComparison ?? [];
+$weekColumns = $comparison['week_columns'] ?? [];
+$comparisonMonths = $comparison['months'] ?? [];
+$weekSummaries = $comparison['week_summaries'] ?? [];
+$comparisonSummary = $comparison['summary'] ?? [];
+?>
+<?php if (! empty($weekColumns) && ! empty($comparisonMonths)): ?>
+<p style="margin-top: 16px;"><strong>Monthly Week-by-Week Comparison (Last <?= e($comparisonSummary['months_count'] ?? count($comparisonMonths)) ?> Months)</strong></p>
+<p style="color: #475569; margin: 4px 0 8px;">
+    Total spend: <strong>BDT <?= e(number_format((float) ($comparisonSummary['total_expense'] ?? 0), 2)) ?></strong>
+    | Monthly avg: <strong>BDT <?= e(number_format((float) ($comparisonSummary['average_monthly_expense'] ?? 0), 2)) ?></strong>
+    <?php if (! empty($comparisonSummary['peak_week_label'])): ?>| Heaviest week: <strong><?= e($comparisonSummary['peak_week_label']) ?></strong><?php endif; ?>
+    <?php if (! empty($comparisonSummary['highest_month_label'])): ?>| Highest month: <strong><?= e($comparisonSummary['highest_month_label']) ?></strong><?php endif; ?>
+</p>
+<table cellpadding="6" cellspacing="0" border="1" style="border-collapse: collapse; border-color: #d1d5db; font-size: 12px;">
+    <tr style="background: #eaf2ff; color: #1d4ed8;">
+        <th align="left">Month</th>
+        <?php foreach ($weekColumns as $column): ?>
+            <th align="right"><?= e($column['label']) ?></th>
+        <?php endforeach; ?>
+        <th align="right" style="background: #dbeafe;">Total</th>
+    </tr>
+    <?php foreach ($comparisonMonths as $monthRow): ?>
+        <tr>
+            <td><strong><?= e($monthRow['month_label']) ?></strong></td>
+            <?php foreach ($weekColumns as $column): ?>
+                <?php
+                $cell = $monthRow['weeks'][$column['sequence'] - 1] ?? null;
+                $cellAmount = $cell ? (float) ($cell['total_expense'] ?? 0) : 0.0;
+                $isPeak = $cell && $cellAmount > 0 && ($monthRow['peak_week_sequence'] ?? null) === $cell['week_sequence'];
+                ?>
+                <td align="right" style="<?= $isPeak ? 'background: #fff1f2; color: #be123c; font-weight: bold;' : '' ?>">
+                    <?php if (! $cell || $cellAmount <= 0): ?>
+                        —
+                    <?php else: ?>
+                        BDT <?= e(number_format($cellAmount, 2)) ?>
+                    <?php endif; ?>
+                </td>
+            <?php endforeach; ?>
+            <td align="right" style="background: #f8fafc;"><strong><?= (float) ($monthRow['total_expense'] ?? 0) > 0 ? 'BDT '.e(number_format((float) $monthRow['total_expense'], 2)) : '—' ?></strong></td>
+        </tr>
+    <?php endforeach; ?>
+    <?php if (! empty($weekSummaries)): ?>
+        <tr style="background: #f1f5f9;">
+            <td><strong>Week Avg</strong></td>
+            <?php foreach ($weekSummaries as $colSummary): ?>
+                <td align="right"><strong><?= (float) ($colSummary['average_expense'] ?? 0) > 0 ? 'BDT '.e(number_format((float) $colSummary['average_expense'], 2)) : '—' ?></strong></td>
+            <?php endforeach; ?>
+            <td align="right"><strong>BDT <?= e(number_format((float) ($comparisonSummary['total_expense'] ?? 0), 2)) ?></strong></td>
+        </tr>
+    <?php endif; ?>
+</table>
+<?php endif; ?>
+
 <p>Regards,<br><?= e($appName) ?></p>
