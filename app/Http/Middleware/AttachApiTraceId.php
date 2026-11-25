@@ -141,9 +141,11 @@ class AttachApiTraceId
                 $durationMs
             );
 
-            Log::channel('api_trace')->log($level, $message, $context);
+            if (config('logging.channels.api_trace')) {
+                Log::channel('api_trace')->log($level, $message, $context);
+            }
 
-            if ($status >= 400) {
+            if ($status >= 400 || ! config('logging.channels.api_trace')) {
                 Log::log($level, $message, $context);
             }
         } catch (Throwable) {
