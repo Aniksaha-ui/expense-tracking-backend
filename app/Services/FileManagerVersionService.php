@@ -59,7 +59,7 @@ class FileManagerVersionService
         $version = DB::table('file_manager_file_versions')
             ->where('id', $versionId)->where('file_id', $fileId)->where('user_id', $userId)->first();
 
-        if (!$version || !Storage::disk(self::DISK)->exists($version->path)) {
+        if (! $version || ! Storage::disk(self::DISK)->exists($version->path)) {
             throw new RuntimeException('Version not found or unavailable.');
         }
 
@@ -110,7 +110,7 @@ class FileManagerVersionService
     private function ownedFile(int $userId, int $fileId): object
     {
         $file = DB::table('file_manager_files')->where('id', $fileId)->where('user_id', $userId)->first();
-        if (!$file) {
+        if (! $file) {
             throw new RuntimeException('File not found.');
         }
 

@@ -20,5 +20,8 @@ return new class extends Migration
         });
     }
 
-    public function down(): void { Schema::dropIfExists('budgets'); }
+    public function down(): void
+    {
+        Schema::dropIfExists('budgets');
+    }
 };

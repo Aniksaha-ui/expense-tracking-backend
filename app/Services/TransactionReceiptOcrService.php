@@ -10,6 +10,7 @@ use RuntimeException;
 class TransactionReceiptOcrService
 {
     public function __construct(private readonly ProviderConfigurationService $providerConfigurations) {}
+
     public function scan(UploadedFile $receipt, array $expenseCategories = []): array
     {
         $provider = $this->providerConfigurations->ocr();

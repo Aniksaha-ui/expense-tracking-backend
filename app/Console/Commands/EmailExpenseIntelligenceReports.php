@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use App\Mail\ExpenseIntelligenceReportMail;
 use App\Models\User;
-use App\Services\ExpenseIntelligenceReportService;
 use App\Services\CronReportDeliveryService;
+use App\Services\ExpenseIntelligenceReportService;
 use Brick\Math\BigDecimal;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
@@ -54,7 +54,7 @@ class EmailExpenseIntelligenceReports extends Command
             $query->whereKey((int) $this->option('user'));
         }
 
-        $query->chunkById(100, function ($users) use ($reportService, $notificationService, $frequency, $fromDate, $toDate, $recipient, $cc, $bcc, &$sent, &$skipped, &$failed): void {
+        $query->chunkById(100, function ($users) use ($reportService, $notificationService, $frequency, $fromDate, $toDate, &$sent, &$skipped, &$failed): void {
             foreach ($users as $user) {
                 try {
                     $report = $reportService->generate($user, $frequency, $fromDate, $toDate);
@@ -65,6 +65,7 @@ class EmailExpenseIntelligenceReports extends Command
                         && ! $this->option('include-empty')
                     ) {
                         $skipped++;
+
                         continue;
                     }
 

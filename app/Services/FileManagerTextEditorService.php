@@ -10,13 +10,14 @@ use RuntimeException;
 class FileManagerTextEditorService
 {
     private const DISK = 'local';
+
     private const MAX_BYTES = 1024 * 1024;
 
     public function read(int $userId, int $fileId): array
     {
         $file = $this->ownedTextFile($userId, $fileId);
 
-        if (!Storage::disk($file->disk)->exists($file->path)) {
+        if (! Storage::disk($file->disk)->exists($file->path)) {
             throw new RuntimeException('The stored file is unavailable.');
         }
 
@@ -54,10 +55,10 @@ class FileManagerTextEditorService
     private function ownedTextFile(int $userId, int $fileId): object
     {
         $file = DB::table('file_manager_files')->where('id', $fileId)->where('user_id', $userId)->first();
-        if (!$file) {
+        if (! $file) {
             throw new RuntimeException('File not found.');
         }
-        if (!$this->isTextFile($file)) {
+        if (! $this->isTextFile($file)) {
             throw new RuntimeException('Only text-based documents can be edited in the browser.');
         }
         if ($file->size > self::MAX_BYTES) {
@@ -70,6 +71,7 @@ class FileManagerTextEditorService
     private function isTextFile(object $file): bool
     {
         $extension = strtolower(pathinfo($file->original_name, PATHINFO_EXTENSION));
+
         return str_starts_with((string) $file->mime_type, 'text/')
             || in_array($extension, ['txt', 'md', 'csv', 'json', 'xml', 'html', 'css', 'js'], true);
     }

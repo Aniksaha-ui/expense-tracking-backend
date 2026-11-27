@@ -209,35 +209,38 @@
 </head>
 
 <body><?php
-        $money = static fn($value): string => 'BDT ' . number_format((float) $value, 2);
-        $summary = $summary ?? [];
-        $ai = $analysis['sections'] ?? [];
-        $fi = $financialIntelligence ?? [];
-        $supplementary = $supplementary ?? [];
-        $metrics = $fi['metrics'] ?? [];
-        $forecast = $fi['forecast'] ?? [];
-        $categoryRows = array_slice($periodCategoryCosting ?? [], 0, 8);
-        $monthlyRows = collect($rows ?? [])->values()->take(-6);
-        $weeklyRows = array_slice($fi['weekly_spending']['rows'] ?? [], 0, 6);
-        $monthlyWeekComparison = $monthlyWeekComparison ?? ($fi['monthly_week_comparison'] ?? []);
-        $comparisonColumns = $monthlyWeekComparison['week_columns'] ?? [];
-        $comparisonMonths = $monthlyWeekComparison['months'] ?? [];
-        $comparisonWeekSummaries = $monthlyWeekComparison['week_summaries'] ?? [];
-        $comparisonSummary = $monthlyWeekComparison['summary'] ?? [];
-        $accounts = $supplementary['accounts'] ?? [];
-        $accountActivity = $supplementary['account_activity'] ?? [];
-        $goals = $supplementary['goals'] ?? [];
-        $topExpenses = $supplementary['top_expenses'] ?? [];
-        $dataQuality = $supplementary['data_quality'] ?? [];
-        $singleMonthCategories = $supplementary['single_month_categories'] ?? [];
-        $totalExpense = max(0.0, (float) ($summary['total_costing'] ?? 0));
-        $categoryMax = max(1.0, ...array_map(static fn($row): float => (float) ($row['total_amount'] ?? 0), $categoryRows ?: [['total_amount' => 1]]));
-        $monthlyMax = max(1.0, ...(array_map(static fn($row): float => max((float) ($row['total_income'] ?? 0), (float) ($row['total_costing'] ?? 0)), $monthlyRows->all() ?: [['total_income' => 1, 'total_costing' => 1]])));
-        $weeklyMax = max(1.0, ...array_map(static fn($row): float => (float) ($row['total_expenses'] ?? 0), $weeklyRows ?: [['total_expenses' => 1]]));
-        $partial = ! $fromDate->isStartOfMonth() || ! $toDate->isEndOfMonth();
-        $netCashFlow = (float) ($summary['net_income'] ?? 0);
-        $safeList = static fn($items): array => array_values(array_filter(is_array($items) ? $items : [], static fn($item): bool => trim((string) $item) !== ''));
-        ?>
+
+use Carbon\Carbon;
+
+        $money = static fn ($value): string => 'BDT '.number_format((float) $value, 2);
+$summary = $summary ?? [];
+$ai = $analysis['sections'] ?? [];
+$fi = $financialIntelligence ?? [];
+$supplementary = $supplementary ?? [];
+$metrics = $fi['metrics'] ?? [];
+$forecast = $fi['forecast'] ?? [];
+$categoryRows = array_slice($periodCategoryCosting ?? [], 0, 8);
+$monthlyRows = collect($rows ?? [])->values()->take(-6);
+$weeklyRows = array_slice($fi['weekly_spending']['rows'] ?? [], 0, 6);
+$monthlyWeekComparison = $monthlyWeekComparison ?? ($fi['monthly_week_comparison'] ?? []);
+$comparisonColumns = $monthlyWeekComparison['week_columns'] ?? [];
+$comparisonMonths = $monthlyWeekComparison['months'] ?? [];
+$comparisonWeekSummaries = $monthlyWeekComparison['week_summaries'] ?? [];
+$comparisonSummary = $monthlyWeekComparison['summary'] ?? [];
+$accounts = $supplementary['accounts'] ?? [];
+$accountActivity = $supplementary['account_activity'] ?? [];
+$goals = $supplementary['goals'] ?? [];
+$topExpenses = $supplementary['top_expenses'] ?? [];
+$dataQuality = $supplementary['data_quality'] ?? [];
+$singleMonthCategories = $supplementary['single_month_categories'] ?? [];
+$totalExpense = max(0.0, (float) ($summary['total_costing'] ?? 0));
+$categoryMax = max(1.0, ...array_map(static fn ($row): float => (float) ($row['total_amount'] ?? 0), $categoryRows ?: [['total_amount' => 1]]));
+$monthlyMax = max(1.0, ...(array_map(static fn ($row): float => max((float) ($row['total_income'] ?? 0), (float) ($row['total_costing'] ?? 0)), $monthlyRows->all() ?: [['total_income' => 1, 'total_costing' => 1]])));
+$weeklyMax = max(1.0, ...array_map(static fn ($row): float => (float) ($row['total_expenses'] ?? 0), $weeklyRows ?: [['total_expenses' => 1]]));
+$partial = ! $fromDate->isStartOfMonth() || ! $toDate->isEndOfMonth();
+$netCashFlow = (float) ($summary['net_income'] ?? 0);
+$safeList = static fn ($items): array => array_values(array_filter(is_array($items) ? $items : [], static fn ($item): bool => trim((string) $item) !== ''));
+?>
     <div class="hero">
         <div class="period"><b>REPORTING PERIOD</b><br><?= e($fromDate->format('d M Y')) ?> to <?= e($toDate->format('d M Y')) ?><br><span class="hero-meta"><?= $partial ? 'Partial period / month-to-date' : 'Complete period' ?></span></div>
         <div class="hero-meta">EXPENSE TRACKING SYSTEM</div>
@@ -245,16 +248,16 @@
         <div>Actual ledger performance, category analytics, and OpenAI-assisted observations.</div>
         <div class="clear"></div>
     </div>
-    <?php if ($partial): ?><div class="notice"><b>Period note:</b> figures for a partial month are actual recorded values only. They are not treated as a full-month forecast or permanent spending change.</div><?php endif; ?>
+    <?php if ($partial) { ?><div class="notice"><b>Period note:</b> figures for a partial month are actual recorded values only. They are not treated as a full-month forecast or permanent spending change.</div><?php } ?>
     <table class="cards">
         <tr>
-            <?php foreach ([['Opening balance', 'opening_balance', ''], ['Closing balance', 'closing_balance', ''], ['Income', 'total_income', 'positive'], ['Expenses', 'total_costing', 'negative'], ['Net cash flow', 'net_income', $netCashFlow >= 0 ? 'positive' : 'negative'], ['Transfers out', 'total_bank_transfers', '']] as [$label, $key, $class]): ?>
+            <?php foreach ([['Opening balance', 'opening_balance', ''], ['Closing balance', 'closing_balance', ''], ['Income', 'total_income', 'positive'], ['Expenses', 'total_costing', 'negative'], ['Net cash flow', 'net_income', $netCashFlow >= 0 ? 'positive' : 'negative'], ['Transfers out', 'total_bank_transfers', '']] as [$label, $key, $class]) { ?>
                 <td><span class="label"><?= e($label) ?></span><span class="metric <?= e($class) ?>"><?= $key === 'net_income' && $netCashFlow > 0 ? '+' : '' ?><?= $money($summary[$key] ?? 0) ?></span></td>
-            <?php endforeach; ?>
+            <?php } ?>
         </tr>
     </table>
     <h2>OpenAI executive summary</h2>
-    <div class="ai-card"><span class="tag"><?= !empty($analysis['available']) ? 'OPENAI ANALYSIS' : 'DATA-BASED FALLBACK' ?></span>
+    <div class="ai-card"><span class="tag"><?= ! empty($analysis['available']) ? 'OPENAI ANALYSIS' : 'DATA-BASED FALLBACK' ?></span>
         <p><?= e($ai['executive_summary'] ?? 'No OpenAI executive summary was available for this report. Review the recorded metrics and category analysis below.') ?></p>
     </div>
     <table class="two-col">
@@ -268,7 +271,8 @@
                         <th class="right">Share</th>
                         <th>Distribution</th>
                     </tr>
-                    <?php foreach ($categoryRows as $row): $amount = (float) ($row['total_amount'] ?? 0);
+                    <?php foreach ($categoryRows as $row) {
+                        $amount = (float) ($row['total_amount'] ?? 0);
                         $share = $totalExpense > 0 ? $amount / $totalExpense * 100 : 0; ?><tr>
                             <td><?= e($row['category_name'] ?? 'Uncategorized') ?></td>
                             <td class="right"><?= $money($amount) ?></td>
@@ -276,10 +280,10 @@
                             <td>
                                 <div class="bar-track"><span class="bar bar-expense" style="width:<?= e(min(100, $amount / $categoryMax * 100)) ?>%"></span></div>
                             </td>
-                        </tr><?php endforeach; ?>
-                    <?php if ($categoryRows === []): ?><tr>
+                        </tr><?php } ?>
+                    <?php if ($categoryRows === []) { ?><tr>
                             <td colspan="4">No categorized expenses were recorded in this period.</td>
-                        </tr><?php endif; ?>
+                        </tr><?php } ?>
                 </table>
             </td>
             <td>
@@ -291,16 +295,17 @@
                         <th class="right">Expense</th>
                         <th>Weekly level</th>
                     </tr>
-                    <?php foreach ($weeklyRows as $row): $amount = (float) ($row['total_expenses'] ?? 0); ?><tr>
-                            <td><?= e(isset($row['week_end']) ? \Carbon\Carbon::parse($row['week_end'])->format('d M') : '-') ?></td>
+                    <?php foreach ($weeklyRows as $row) {
+                        $amount = (float) ($row['total_expenses'] ?? 0); ?><tr>
+                            <td><?= e(isset($row['week_end']) ? Carbon::parse($row['week_end'])->format('d M') : '-') ?></td>
                             <td class="right"><?= $money($amount) ?></td>
                             <td>
                                 <div class="bar-track"><span class="bar bar-week" style="width:<?= e(min(100, $amount / $weeklyMax * 100)) ?>%"></span></div>
                             </td>
-                        </tr><?php endforeach; ?>
-                    <?php if ($weeklyRows === []): ?><tr>
+                        </tr><?php } ?>
+                    <?php if ($weeklyRows === []) { ?><tr>
                             <td colspan="3">No weekly expense data is available.</td>
-                        </tr><?php endif; ?>
+                        </tr><?php } ?>
                 </table>
             </td>
         </tr>
@@ -314,9 +319,10 @@
             <th class="right">Net cash flow</th>
             <th>Visual comparison</th>
         </tr>
-        <?php foreach ($monthlyRows as $row): $income = (float) ($row['total_income'] ?? 0);
+        <?php foreach ($monthlyRows as $row) {
+            $income = (float) ($row['total_income'] ?? 0);
             $expense = (float) ($row['total_costing'] ?? 0); ?><tr>
-                <td><?= e(\Carbon\Carbon::parse($row['date'])->format('M Y')) ?></td>
+                <td><?= e(Carbon::parse($row['date'])->format('M Y')) ?></td>
                 <td class="right"><?= $money($income) ?></td>
                 <td class="right"><?= $money($expense) ?></td>
                 <td class="right <?= (float) ($row['net_income'] ?? 0) >= 0 ? 'positive' : 'negative' ?>"><?= $money($row['net_income'] ?? 0) ?></td>
@@ -324,66 +330,66 @@
                     <div class="bar-track"><span class="bar bar-income" style="width:<?= e(min(100, $income / $monthlyMax * 100)) ?>%"></span></div>
                     <div class="bar-track" style="margin-top:2px"><span class="bar bar-expense" style="width:<?= e(min(100, $expense / $monthlyMax * 100)) ?>%"></span></div>
                 </td>
-            </tr><?php endforeach; ?>
-        <?php if ($monthlyRows->isEmpty()): ?><tr>
+            </tr><?php } ?>
+        <?php if ($monthlyRows->isEmpty()) { ?><tr>
                 <td colspan="5">No income or expense trend data is available.</td>
-            </tr><?php endif; ?>
+            </tr><?php } ?>
     </table>
-    <?php if (! empty($comparisonColumns) && ! empty($comparisonMonths)): ?>
+    <?php if (! empty($comparisonColumns) && ! empty($comparisonMonths)) { ?>
     <div class="page-break"></div>
     <h2>Monthly week-by-week comparison (last <?= e($comparisonSummary['months_count'] ?? count($comparisonMonths)) ?> months)</h2>
     <p class="muted">
         Regular and recurring expenses grouped into Week 1 to Week <?= e(count($comparisonColumns)) ?> for each month.
         Total: <b><?= $money($comparisonSummary['total_expense'] ?? 0) ?></b>
         | Monthly avg: <b><?= $money($comparisonSummary['average_monthly_expense'] ?? 0) ?></b>
-        <?php if (! empty($comparisonSummary['peak_week_label'])): ?>| Heaviest week: <b><?= e($comparisonSummary['peak_week_label']) ?></b> (<?= $money($comparisonSummary['peak_week_expense'] ?? 0) ?>)<?php endif; ?>
-        <?php if (! empty($comparisonSummary['highest_month_label'])): ?>| Highest month: <b><?= e($comparisonSummary['highest_month_label']) ?></b> (<?= $money($comparisonSummary['highest_month_expense'] ?? 0) ?>)<?php endif; ?>
+        <?php if (! empty($comparisonSummary['peak_week_label'])) { ?>| Heaviest week: <b><?= e($comparisonSummary['peak_week_label']) ?></b> (<?= $money($comparisonSummary['peak_week_expense'] ?? 0) ?>)<?php } ?>
+        <?php if (! empty($comparisonSummary['highest_month_label'])) { ?>| Highest month: <b><?= e($comparisonSummary['highest_month_label']) ?></b> (<?= $money($comparisonSummary['highest_month_expense'] ?? 0) ?>)<?php } ?>
     </p>
     <table class="table">
         <tr>
             <th>Month</th>
-            <?php foreach ($comparisonColumns as $column): ?>
+            <?php foreach ($comparisonColumns as $column) { ?>
                 <th class="right"><?= e($column['label']) ?></th>
-            <?php endforeach; ?>
+            <?php } ?>
             <th class="right">Total</th>
         </tr>
-        <?php foreach ($comparisonMonths as $monthRow): ?>
+        <?php foreach ($comparisonMonths as $monthRow) { ?>
             <tr>
                 <td><b><?= e($monthRow['month_label']) ?></b><br><span class="muted"><?= e($monthRow['transaction_count'] ?? 0) ?> txns</span></td>
-                <?php foreach ($comparisonColumns as $column): ?>
+                <?php foreach ($comparisonColumns as $column) { ?>
                     <?php
                     $cell = $monthRow['weeks'][$column['sequence'] - 1] ?? null;
                     $cellAmount = $cell ? (float) ($cell['total_expense'] ?? 0) : 0.0;
                     $isPeak = $cell && $cellAmount > 0 && ($monthRow['peak_week_sequence'] ?? null) === $cell['week_sequence'];
                     ?>
                     <td class="right" style="<?= $isPeak ? 'background:#fff1f2;color:#be123c;font-weight:bold;' : '' ?>">
-                        <?php if (! $cell || $cellAmount <= 0): ?>
+                        <?php if (! $cell || $cellAmount <= 0) { ?>
                             <span class="muted">—</span>
-                        <?php else: ?>
+                        <?php } else { ?>
                             <?= $money($cellAmount) ?><br><span class="muted"><?= e($cell['range_label'] ?? '') ?></span>
-                        <?php endif; ?>
+                        <?php } ?>
                     </td>
-                <?php endforeach; ?>
+                <?php } ?>
                 <td class="right" style="background:#f8fafc;"><b><?= (float) ($monthRow['total_expense'] ?? 0) > 0 ? $money($monthRow['total_expense']) : '—' ?></b></td>
             </tr>
-        <?php endforeach; ?>
-        <?php if (! empty($comparisonWeekSummaries)): ?>
+        <?php } ?>
+        <?php if (! empty($comparisonWeekSummaries)) { ?>
             <tr style="background:#f1f5f9;">
                 <td><b>Week avg</b><br><span class="muted">Cumulative</span></td>
-                <?php foreach ($comparisonWeekSummaries as $colSummary): ?>
+                <?php foreach ($comparisonWeekSummaries as $colSummary) { ?>
                     <td class="right">
                         <b><?= (float) ($colSummary['average_expense'] ?? 0) > 0 ? $money($colSummary['average_expense']) : '—' ?></b><br>
                         <span class="muted"><?= (float) ($colSummary['total_expense'] ?? 0) > 0 ? $money($colSummary['total_expense']) : '—' ?></span>
                     </td>
-                <?php endforeach; ?>
+                <?php } ?>
                 <td class="right">
                     <b><?= $money($comparisonSummary['total_expense'] ?? 0) ?></b><br>
                     <span class="muted">Avg <?= $money($comparisonSummary['average_monthly_expense'] ?? 0) ?></span>
                 </td>
             </tr>
-        <?php endif; ?>
+        <?php } ?>
     </table>
-    <?php endif; ?>
+    <?php } ?>
     <div class="page-break"></div>
     <h2>Single-month category activity</h2>
     <p class="muted">These categories have recorded spending in only one month of the available category history. They are signals to review, not proof of a one-time expense.</p>
@@ -394,15 +400,15 @@
             <th class="right">Recorded amount</th>
             <th>Interpretation</th>
         </tr>
-        <?php foreach ($singleMonthCategories as $category): ?><tr>
+        <?php foreach ($singleMonthCategories as $category) { ?><tr>
                 <td><?= e($category['category_name'] ?? 'Uncategorized') ?></td>
-                <td><?= !empty($category['month']) ? e(\Carbon\Carbon::parse($category['month'])->format('M Y')) : '-' ?></td>
+                <td><?= ! empty($category['month']) ? e(Carbon::parse($category['month'])->format('M Y')) : '-' ?></td>
                 <td class="right"><?= $money($category['amount'] ?? 0) ?></td>
                 <td><?= e($category['observation'] ?? '') ?></td>
-            </tr><?php endforeach; ?>
-        <?php if (empty($singleMonthCategories)): ?><tr>
+            </tr><?php } ?>
+        <?php if (empty($singleMonthCategories)) { ?><tr>
                 <td colspan="4">No category with spending in only one reporting month was detected.</td>
-            </tr><?php endif; ?>
+            </tr><?php } ?>
     </table>
     <h2>OpenAI findings and interpretation</h2>
     <table class="two-col">
@@ -410,33 +416,33 @@
             <td>
                 <div class="ai-card">
                     <div class="ai-heading">Key findings</div>
-                    <ul><?php foreach ($safeList($ai['key_findings'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['key_findings'] ?? []))): ?><li>No additional OpenAI findings were returned.</li><?php endif; ?></ul>
+                    <ul><?php foreach ($safeList($ai['key_findings'] ?? []) as $item) { ?><li><?= e($item) ?></li><?php } ?><?php if (empty($safeList($ai['key_findings'] ?? []))) { ?><li>No additional OpenAI findings were returned.</li><?php } ?></ul>
                 </div>
                 <div class="ai-card">
                     <div class="ai-heading">Spending analysis</div>
-                    <ul><?php foreach ($safeList($ai['spending_analysis'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['spending_analysis'] ?? []))): ?><li>No detailed spending interpretation was returned.</li><?php endif; ?></ul>
+                    <ul><?php foreach ($safeList($ai['spending_analysis'] ?? []) as $item) { ?><li><?= e($item) ?></li><?php } ?><?php if (empty($safeList($ai['spending_analysis'] ?? []))) { ?><li>No detailed spending interpretation was returned.</li><?php } ?></ul>
                 </div>
                 <div class="ai-card">
                     <div class="ai-heading">Spending pressure and replenishment risk</div>
-                    <ul><?php foreach ($safeList($ai['spending_pressure_analysis'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['spending_pressure_analysis'] ?? []))): ?><li>No spending-pressure interpretation was returned.</li><?php endif; ?></ul>
+                    <ul><?php foreach ($safeList($ai['spending_pressure_analysis'] ?? []) as $item) { ?><li><?= e($item) ?></li><?php } ?><?php if (empty($safeList($ai['spending_pressure_analysis'] ?? []))) { ?><li>No spending-pressure interpretation was returned.</li><?php } ?></ul>
                 </div>
                 <div class="ai-card">
                     <div class="ai-heading">Account movement analysis</div>
-                    <ul><?php foreach ($safeList($ai['account_analysis'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['account_analysis'] ?? []))): ?><li>No account-level interpretation was returned.</li><?php endif; ?></ul>
+                    <ul><?php foreach ($safeList($ai['account_analysis'] ?? []) as $item) { ?><li><?= e($item) ?></li><?php } ?><?php if (empty($safeList($ai['account_analysis'] ?? []))) { ?><li>No account-level interpretation was returned.</li><?php } ?></ul>
                 </div>
                 <div class="ai-card">
                     <div class="ai-heading">Watchouts</div>
-                    <ul><?php foreach ($safeList($ai['watchouts'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['watchouts'] ?? []))): ?><li>No specific watchout was identified from the available data.</li><?php endif; ?></ul>
+                    <ul><?php foreach ($safeList($ai['watchouts'] ?? []) as $item) { ?><li><?= e($item) ?></li><?php } ?><?php if (empty($safeList($ai['watchouts'] ?? []))) { ?><li>No specific watchout was identified from the available data.</li><?php } ?></ul>
                 </div>
             </td>
             <td>
                 <div class="ai-card">
                     <div class="ai-heading">Recommendations</div>
-                    <ol><?php foreach ($safeList($ai['recommendations'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['recommendations'] ?? []))): ?><li>No OpenAI recommendation was returned.</li><?php endif; ?></ol>
+                    <ol><?php foreach ($safeList($ai['recommendations'] ?? []) as $item) { ?><li><?= e($item) ?></li><?php } ?><?php if (empty($safeList($ai['recommendations'] ?? []))) { ?><li>No OpenAI recommendation was returned.</li><?php } ?></ol>
                 </div>
                 <div class="ai-card">
                     <div class="ai-heading">Data limitations</div>
-                    <ul><?php foreach ($safeList($ai['limitations'] ?? []) as $item): ?><li><?= e($item) ?></li><?php endforeach; ?><?php if (empty($safeList($ai['limitations'] ?? []))): ?><li>Insights reflect only transactions recorded for the selected period.</li><?php endif; ?></ul>
+                    <ul><?php foreach ($safeList($ai['limitations'] ?? []) as $item) { ?><li><?= e($item) ?></li><?php } ?><?php if (empty($safeList($ai['limitations'] ?? []))) { ?><li>Insights reflect only transactions recorded for the selected period.</li><?php } ?></ul>
                 </div>
                 <div class="ai-card">
                     <div class="ai-heading">Recorded recurring spending</div>
@@ -449,19 +455,20 @@
     <table class="two-col">
         <tr>
             <td>
-                <?php if (!empty($forecast['available'])): $estimate = $forecast['estimated_month_end'] ?? []; ?><div class="ai-card">
+                <?php if (! empty($forecast['available'])) {
+                    $estimate = $forecast['estimated_month_end'] ?? []; ?><div class="ai-card">
                         <div class="ai-heading">Estimated month end - not actual</div>
                         <p>Income: <b><?= $money($estimate['income'] ?? 0) ?></b> &nbsp; Expenses: <b><?= $money($estimate['expenses'] ?? 0) ?></b> &nbsp; Net: <b><?= $money($estimate['net_cash_flow'] ?? 0) ?></b></p>
                         <p class="muted"><?= e($forecast['method'] ?? '') ?> <?= e($forecast['limitations'][0] ?? '') ?></p>
-                    </div><?php else: ?><div class="ai-card">
+                    </div><?php } else { ?><div class="ai-card">
                         <div class="ai-heading">Forecast unavailable</div>
                         <p><?= e($forecast['reason'] ?? 'There is not enough completed history for a reliable numerical forecast.') ?></p>
-                    </div><?php endif; ?>
+                    </div><?php } ?>
             </td>
             <td>
                 <div class="ai-card">
                     <div class="ai-heading">Evidence-based actions</div>
-                    <ul><?php foreach (array_slice($fi['recommendations'] ?? [], 0, 3) as $item): ?><li><b><?= e($item['title'] ?? 'Recommendation') ?>.</b> <?= e($item['recommended_action'] ?? '') ?></li><?php endforeach; ?><?php if (empty($fi['recommendations'])): ?><li>Review category totals and cash flow before changing financial commitments.</li><?php endif; ?></ul>
+                    <ul><?php foreach (array_slice($fi['recommendations'] ?? [], 0, 3) as $item) { ?><li><b><?= e($item['title'] ?? 'Recommendation') ?>.</b> <?= e($item['recommended_action'] ?? '') ?></li><?php } ?><?php if (empty($fi['recommendations'])) { ?><li>Review category totals and cash flow before changing financial commitments.</li><?php } ?></ul>
                 </div>
             </td>
         </tr>
@@ -478,16 +485,16 @@
                         <th class="right">Out</th>
                         <th class="right">Trend</th>
                         <th class="right">Closing</th>
-                    </tr><?php foreach ($accountActivity as $account): ?><tr>
-                            <td><?= e($account['account_name'] ?? '-') ?><?php if (!empty($account['institution_name'])): ?><br><span class="muted"><?= e($account['institution_name']) ?></span><?php endif; ?></td>
+                    </tr><?php foreach ($accountActivity as $account) { ?><tr>
+                            <td><?= e($account['account_name'] ?? '-') ?><?php if (! empty($account['institution_name'])) { ?><br><span class="muted"><?= e($account['institution_name']) ?></span><?php } ?></td>
                             <td class="right"><?= $money($account['opening_balance'] ?? 0) ?></td>
                             <td class="right positive"><?= $money($account['money_added'] ?? 0) ?></td>
                             <td class="right negative"><?= $money($account['money_out'] ?? 0) ?></td>
                             <td class="right <?= (float) ($account['net_change'] ?? 0) >= 0 ? 'positive' : 'negative' ?>"><?= e($account['trend'] ?? 'No change') ?><br><?= (float) ($account['net_change'] ?? 0) >= 0 ? '+' : '-' ?><?= $money(abs((float) ($account['net_change'] ?? 0))) ?></td>
                             <td class="right"><b><?= $money($account['closing_balance'] ?? 0) ?></b></td>
-                        </tr><?php endforeach; ?><?php if (empty($accountActivity)): ?><tr>
+                        </tr><?php } ?><?php if (empty($accountActivity)) { ?><tr>
                             <td colspan="6">No account ledger is available at this report cutoff.</td>
-                        </tr><?php endif; ?>
+                        </tr><?php } ?>
                 </table>
                 <p class="muted">Added and out include all recorded account movement. Transfers are included in these figures because they change an individual account, but do not by themselves change the total portfolio balance.</p>
             </td>
@@ -496,13 +503,13 @@
                     <tr>
                         <th>Savings goal</th>
                         <th class="right">Progress</th>
-                    </tr><?php foreach ($goals as $goal): ?><tr>
-                            <td><?= e($goal['name'] ?? '-') ?><br><span class="muted"><?= $money($goal['current_saved_amount'] ?? 0) ?> of <?= $money($goal['target_amount'] ?? 0) ?><?= !empty($goal['target_date']) ? ' | Target ' . e(\Carbon\Carbon::parse($goal['target_date'])->format('d M Y')) : '' ?></span></td>
+                    </tr><?php foreach ($goals as $goal) { ?><tr>
+                            <td><?= e($goal['name'] ?? '-') ?><br><span class="muted"><?= $money($goal['current_saved_amount'] ?? 0) ?> of <?= $money($goal['target_amount'] ?? 0) ?><?= ! empty($goal['target_date']) ? ' | Target '.e(Carbon::parse($goal['target_date'])->format('d M Y')) : '' ?></span></td>
                             <td class="right"><?= e(number_format((float) ($goal['progress_percent'] ?? 0), 1)) ?>%<div class="bar-track"><span class="bar" style="width:<?= e((float) ($goal['progress_percent'] ?? 0)) ?>%"></span></div>
                             </td>
-                        </tr><?php endforeach; ?><?php if (empty($goals)): ?><tr>
+                        </tr><?php } ?><?php if (empty($goals)) { ?><tr>
                             <td colspan="2">No savings goals are configured.</td>
-                        </tr><?php endif; ?>
+                        </tr><?php } ?>
                 </table>
             </td>
         </tr>
@@ -515,12 +522,12 @@
                     <tr>
                         <th>Largest recorded expense</th>
                         <th class="right">Amount</th>
-                    </tr><?php foreach ($topExpenses as $expense): ?><tr>
-                            <td><?= e($expense['category_name'] ?? 'Uncategorized') ?><?php if (!empty($expense['note'])): ?><br><span class="muted"><?= e($expense['note']) ?></span><?php endif; ?></td>
+                    </tr><?php foreach ($topExpenses as $expense) { ?><tr>
+                            <td><?= e($expense['category_name'] ?? 'Uncategorized') ?><?php if (! empty($expense['note'])) { ?><br><span class="muted"><?= e($expense['note']) ?></span><?php } ?></td>
                             <td class="right"><?= $money($expense['amount'] ?? 0) ?></td>
-                        </tr><?php endforeach; ?><?php if (empty($topExpenses)): ?><tr>
+                        </tr><?php } ?><?php if (empty($topExpenses)) { ?><tr>
                             <td colspan="2">No expenses were recorded in this period.</td>
-                        </tr><?php endif; ?>
+                        </tr><?php } ?>
                 </table>
             </td>
             <td>
@@ -531,7 +538,7 @@
                 </div>
                 <div class="ai-card">
                     <div class="ai-heading">Transfer receipts</div>
-                    <p><?php if (empty($transferReceiptsByAccount)): ?>No transfers were received in this period.<?php else: ?><?php foreach (array_slice($transferReceiptsByAccount, 0, 3) as $receipt): ?><b><?= e($receipt['account_name'] ?? '-') ?>:</b> <?= $money($receipt['total_amount'] ?? 0) ?><br><?php endforeach; ?><?php endif; ?></p>
+                    <p><?php if (empty($transferReceiptsByAccount)) { ?>No transfers were received in this period.<?php } else { ?><?php foreach (array_slice($transferReceiptsByAccount, 0, 3) as $receipt) { ?><b><?= e($receipt['account_name'] ?? '-') ?>:</b> <?= $money($receipt['total_amount'] ?? 0) ?><br><?php } ?><?php } ?></p>
                 </div>
             </td>
         </tr>

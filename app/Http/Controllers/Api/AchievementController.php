@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Achievement;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Rap2hpoutre\FastExcel\FastExcel;
 
@@ -42,6 +42,7 @@ class AchievementController extends Controller
     public function store(Request $request): JsonResponse
     {
         $achievement = Achievement::create([...$this->validated($request), 'user_id' => auth()->id()]);
+
         return $this->successResponse($achievement, 'Achievement added successfully.', 201);
     }
 
@@ -88,12 +89,14 @@ class AchievementController extends Controller
     {
         $achievement = Achievement::query()->where('user_id', auth()->id())->findOrFail($achievementId);
         $achievement->update($this->validated($request, false));
+
         return $this->successResponse($achievement, 'Achievement updated successfully.');
     }
 
     public function destroy(int $achievementId): JsonResponse
     {
         Achievement::query()->where('user_id', auth()->id())->findOrFail($achievementId)->delete();
+
         return $this->successResponse([], 'Achievement deleted successfully.');
     }
 
@@ -122,10 +125,18 @@ class AchievementController extends Controller
 
     private function applyFilters(Builder $query, array $filters): Builder
     {
-        if (!empty($filters['type'])) $query->where('type', $filters['type']);
-        if (!empty($filters['year'])) $query->whereYear('achieved_on', $filters['year']);
-        if (!empty($filters['start_date'])) $query->whereDate('achieved_on', '>=', $filters['start_date']);
-        if (!empty($filters['end_date'])) $query->whereDate('achieved_on', '<=', $filters['end_date']);
+        if (! empty($filters['type'])) {
+            $query->where('type', $filters['type']);
+        }
+        if (! empty($filters['year'])) {
+            $query->whereYear('achieved_on', $filters['year']);
+        }
+        if (! empty($filters['start_date'])) {
+            $query->whereDate('achieved_on', '>=', $filters['start_date']);
+        }
+        if (! empty($filters['end_date'])) {
+            $query->whereDate('achieved_on', '<=', $filters['end_date']);
+        }
 
         return $query;
     }

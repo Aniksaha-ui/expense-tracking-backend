@@ -12,8 +12,7 @@ class AuthService
     public function __construct(
         private readonly JwtService $jwtService,
         private readonly CategoryService $categoryService,
-    ) {
-    }
+    ) {}
 
     public function register(array $data): array
     {

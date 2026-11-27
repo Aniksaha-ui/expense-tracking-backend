@@ -30,10 +30,11 @@ class BlogService
         return $this->findBlog($blogId);
     }
 
-    public function listPublishedBlogs(int $perPage = 15, ?string $search = null): LengthAwarePaginator
+    public function listPublishedBlogs(int $perPage = 15, ?string $search = null, ?string $category = null): LengthAwarePaginator
     {
         return DB::table('blogs')
             ->where('isPublished', true)
+            ->when($category, fn ($query, string $value) => $query->where('category', $value))
             ->when($search, function ($query, string $value) {
                 $query->where(function ($searchQuery) use ($value) {
                     $searchQuery->where('title', 'like', "%{$value}%")
@@ -47,7 +48,25 @@ class BlogService
             ->paginate($perPage);
     }
 
-    public function getPublishedBlog(int $blogId): object
+    public function listPublishedCategories(): array
+    {
+        return DB::table('blogs')
+            ->select('category', DB::raw('COUNT(*) as count'))
+            ->where('isPublished', true)
+            ->whereNotNull('category')
+            ->where('category', '!=', '')
+            ->groupBy('category')
+            ->orderByDesc('count')
+            ->orderBy('category')
+            ->get()
+            ->map(fn (object $row): array => [
+                'category' => $row->category,
+                'count' => (int) $row->count,
+            ])
+            ->all();
+    }
+
+    public function getPublishedBlog(int $blogId, bool $incrementViews = false): object
     {
         $blog = DB::table('blogs')
             ->where('id', $blogId)
@@ -56,6 +75,11 @@ class BlogService
 
         if (! $blog) {
             throw new RuntimeException('Blog not found.');
+        }
+
+        if ($incrementViews) {
+            DB::table('blogs')->where('id', $blogId)->increment('view_count');
+            $blog->view_count = ((int) $blog->view_count) + 1;
         }
 
         return $blog;

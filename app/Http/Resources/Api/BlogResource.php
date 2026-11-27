@@ -2,16 +2,16 @@
 
 namespace App\Http\Resources\Api;
 
+use App\Support\PublicStorageUrl;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class BlogResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'id' => (int) $this->id,
             'title' => $this->title,
             'content' => $this->content,
             'components_json' => is_string($this->components_json)
@@ -24,9 +24,7 @@ class BlogResource extends JsonResource
             'author_name' => $this->author_name,
             'published_date' => $this->published_date,
             'isPublished' => (bool) $this->isPublished,
-            'image' => $this->image && ! preg_match('/^(https?:)?\/\//', $this->image)
-                ? Storage::disk('public')->url($this->image)
-                : $this->image,
+            'image' => PublicStorageUrl::resolve($this->image),
         ];
     }
 }

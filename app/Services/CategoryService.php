@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
@@ -21,7 +22,7 @@ class CategoryService extends BaseFinanceService
         ['name' => 'Other Income', 'type' => 'INCOME'],
     ];
 
-    public function listCategories(int $userId): \Illuminate\Support\Collection
+    public function listCategories(int $userId): Collection
     {
         return DB::table('categories')
             ->where('user_id', $userId)

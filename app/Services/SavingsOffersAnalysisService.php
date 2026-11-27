@@ -14,7 +14,9 @@ class SavingsOffersAnalysisService
         $config = config('services.financial_overview_ai');
         $apiKey = trim((string) ($config['api_key'] ?? ''));
 
-        if ($apiKey === '' || $offers === []) return $this->englishOnly($fallback);
+        if ($apiKey === '' || $offers === []) {
+            return $this->englishOnly($fallback);
+        }
 
         try {
             $response = Http::withToken($apiKey)->acceptJson()->timeout(45)->post('https://api.openai.com/v1/responses', [
@@ -29,7 +31,9 @@ class SavingsOffersAnalysisService
                 ]]],
                 'max_output_tokens' => 1200,
             ]);
-            if (! $response->successful()) throw new \RuntimeException('OpenAI returned HTTP '.$response->status().'.');
+            if (! $response->successful()) {
+                throw new \RuntimeException('OpenAI returned HTTP '.$response->status().'.');
+            }
             $decoded = json_decode($this->extractText($response->json()), true, flags: JSON_THROW_ON_ERROR);
             foreach ($decoded['recommendations'] ?? [] as $recommendation) {
                 $index = $recommendation['index'] ?? null;
@@ -43,6 +47,7 @@ class SavingsOffersAnalysisService
         } catch (Throwable $exception) {
             Log::warning('Savings-offers OpenAI analysis was unavailable.', ['exception' => $exception->getMessage()]);
         }
+
         return $this->englishOnly($fallback);
     }
 
@@ -54,10 +59,11 @@ class SavingsOffersAnalysisService
         $saving = $this->explicitSaving(trim(($offer['focus'] ?? '').' '.($offer['source'] ?? '')), $average);
         $lead = $average === null
             ? "This offer may be relevant to your {$category} spending."
-            : "You spend about ৳".number_format($average, 0)." per month on {$category}.";
+            : 'You spend about ৳'.number_format($average, 0)." per month on {$category}.";
         $savingText = $saving === null
             ? ' Check the offer terms, minimum order, and expiry before using it.'
             : ' If eligible, this offer could reduce your cost by up to ৳'.number_format($saving, 0).'.';
+
         return $offer + ['matched_category' => $match['category'] ?? null, 'monthly_average' => $average, 'estimated_saving' => $saving, 'recommendation' => $lead.$savingText, 'analysis_source' => 'calculated'];
     }
 
@@ -88,21 +94,39 @@ class SavingsOffersAnalysisService
     private function matchSpending(array $offer, array $spending): ?array
     {
         $haystack = strtolower(($offer['focus'] ?? '').' '.($offer['source'] ?? ''));
-        foreach ($spending as $row) if (($category = strtolower((string) $row['category'])) !== '' && str_contains($haystack, $category)) return $row;
+        foreach ($spending as $row) {
+            if (($category = strtolower((string) $row['category'])) !== '' && str_contains($haystack, $category)) {
+                return $row;
+            }
+        }
+
         return $spending[0] ?? null;
     }
 
     private function explicitSaving(string $text, ?float $average): ?float
     {
-        if (preg_match('/(?:৳|bdt|taka|tk\\.?)[\\s]*([0-9,]+)|([0-9,]+)[\\s]*(?:৳|bdt|taka|tk\\.?)/iu', $text, $match)) return min($average ?? INF, (float) str_replace(',', '', $match[1] ?: $match[2]));
-        if ($average !== null && preg_match('/([0-9]{1,2})\\s*%\\s*(?:off|discount|ছাড়)/iu', $text, $match)) return $average * ((float) $match[1] / 100);
+        if (preg_match('/(?:৳|bdt|taka|tk\\.?)[\\s]*([0-9,]+)|([0-9,]+)[\\s]*(?:৳|bdt|taka|tk\\.?)/iu', $text, $match)) {
+            return min($average ?? INF, (float) str_replace(',', '', $match[1] ?: $match[2]));
+        }
+        if ($average !== null && preg_match('/([0-9]{1,2})\\s*%\\s*(?:off|discount|ছাড়)/iu', $text, $match)) {
+            return $average * ((float) $match[1] / 100);
+        }
+
         return null;
     }
 
     private function extractText(array $response): string
     {
-        if (is_string($response['output_text'] ?? null)) return trim($response['output_text']);
-        foreach ($response['output'] ?? [] as $output) foreach ($output['content'] ?? [] as $content) if (is_string($content['text'] ?? null)) return trim($content['text']);
+        if (is_string($response['output_text'] ?? null)) {
+            return trim($response['output_text']);
+        }
+        foreach ($response['output'] ?? [] as $output) {
+            foreach ($output['content'] ?? [] as $content) {
+                if (is_string($content['text'] ?? null)) {
+                    return trim($content['text']);
+                }
+            }
+        }
         throw new \RuntimeException('OpenAI returned no analysis text.');
     }
 }

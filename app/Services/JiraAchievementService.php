@@ -13,7 +13,10 @@ class JiraAchievementService
     {
         $connection = $this->resolveConnection($integration);
         $projects = $connection['client']->get($connection['api_base'].'/rest/api/3/project/search', ['maxResults' => 50]);
-        if (!$projects->successful()) throw new \RuntimeException('Jira project access check failed: '.($projects->json('errorMessages.0') ?: $projects->status()));
+        if (! $projects->successful()) {
+            throw new \RuntimeException('Jira project access check failed: '.($projects->json('errorMessages.0') ?: $projects->status()));
+        }
+
         return ['account_id' => data_get($connection, 'me.accountId'), 'display_name' => data_get($connection, 'me.displayName'), 'email' => data_get($connection, 'me.emailAddress') ?? $integration->email, 'auth_method' => $connection['auth_method'], 'visible_project_count' => count($projects->json('values', [])), 'projects' => collect($projects->json('values', []))->take(10)->map(fn ($project) => ['key' => $project['key'] ?? '', 'name' => $project['name'] ?? ''])->values()];
     }
 
@@ -27,16 +30,19 @@ class JiraAchievementService
         // Achievements must only reflect delivered work. statusCategory is Jira's
         // portable completed-state classification, unlike site-specific status names.
         $completed = '(statusCategory = Done)';
-        $period = '((created >= "' . $start->toDateString() . '" AND created < "' . $end->toDateString() . '") OR (updated >= "' . $start->toDateString() . '" AND updated < "' . $end->toDateString() . '"))';
+        $period = '((created >= "'.$start->toDateString().'" AND created < "'.$end->toDateString().'") OR (updated >= "'.$start->toDateString().'" AND updated < "'.$end->toDateString().'"))';
         $jql = trim($integration->jql ?? '')
-            ? '(' . $integration->jql . ') AND ' . $owner . ' AND ' . $completed . ' AND ' . $period
-            : $owner . ' AND ' . $completed . ' AND ' . $period;
+            ? '('.$integration->jql.') AND '.$owner.' AND '.$completed.' AND '.$period
+            : $owner.' AND '.$completed.' AND '.$period;
         $connection = $this->resolveConnection($integration);
         $issues = $this->fetchAllIssues($connection, $jql);
         Log::info('jira achievement source', ['start_date' => $start->toDateString(), 'end_date' => $end->subDay()->toDateString(), 'jql' => $jql, 'issue_count' => count($issues)]);
-        if (!$issues) return ['issues' => [], 'achievements' => [], 'diagnostics' => ['jql' => $jql, 'start_date' => $start->toDateString(), 'end_date' => $end->subDay()->toDateString(), 'issue_count' => 0]];
+        if (! $issues) {
+            return ['issues' => [], 'achievements' => [], 'diagnostics' => ['jql' => $jql, 'start_date' => $start->toDateString(), 'end_date' => $end->subDay()->toDateString(), 'issue_count' => 0]];
+        }
         $achievements = collect($this->analyze($issues, $start->toDateString(), $end->subDay()->toDateString()))->map(function (array $draft) use ($issues, $integration, $jql, $end) {
             $sourceKeys = $draft['issue_keys'] ?? array_column($issues, 'key');
+
             return [
                 'source_key' => implode(', ', $sourceKeys),
                 'source_issue_keys' => $sourceKeys,
@@ -45,22 +51,27 @@ class JiraAchievementService
                 'description' => $draft['description'],
                 'achieved_on' => $end->subDay()->toDateString(),
                 'organization' => 'Jira',
-                'reference_url' => rtrim($integration->base_url, '/') . '/issues/?jql=' . rawurlencode($jql),
+                'reference_url' => rtrim($integration->base_url, '/').'/issues/?jql='.rawurlencode($jql),
             ];
         })->values()->all();
+
         return ['issues' => $issues, 'achievements' => $achievements, 'diagnostics' => ['jql' => $jql, 'start_date' => $start->toDateString(), 'end_date' => $end->subDay()->toDateString(), 'issue_count' => count($issues)]];
     }
 
     private function fetchAllIssues(array $connection, string $jql): array
     {
-        $url = $connection['api_base'] . '/rest/api/3/search/jql';
+        $url = $connection['api_base'].'/rest/api/3/search/jql';
         $token = null;
         $all = [];
         for ($page = 0; $page < 100; $page++) {
             $body = ['jql' => $jql, 'maxResults' => 100, 'expand' => 'names', 'fields' => ['summary', 'description', 'comment', 'labels', 'issuelinks', 'assignee', 'reporter', 'components', 'created', 'updated', 'duedate', 'project', 'issuetype', 'status', 'parent', 'timetracking', 'timeoriginalestimate', 'timespent']];
-            if ($token) $body['nextPageToken'] = $token;
+            if ($token) {
+                $body['nextPageToken'] = $token;
+            }
             $response = $connection['client']->post($url, $body);
-            if (!$response->successful()) throw new \RuntimeException('Jira request failed: ' . ($response->json('errorMessages.0') ?: $response->body() ?: $response->status()));
+            if (! $response->successful()) {
+                throw new \RuntimeException('Jira request failed: '.($response->json('errorMessages.0') ?: $response->body() ?: $response->status()));
+            }
             $names = $response->json('names', []);
             foreach ($response->json('issues', []) as $issue) {
                 $fields = $issue['fields'] ?? [];
@@ -96,25 +107,41 @@ class JiraAchievementService
                 ];
             }
             $token = $response->json('nextPageToken');
-            if (!$token || $response->json('isLast', false)) break;
+            if (! $token || $response->json('isLast', false)) {
+                break;
+            }
         }
-        return collect($all)->filter(fn($item) => $item['key'] && $item['summary'])->unique('key')->values()->all();
+
+        return collect($all)->filter(fn ($item) => $item['key'] && $item['summary'])->unique('key')->values()->all();
     }
 
     /** Convert Jira's Atlassian Document Format to safe, analysis-ready plain text. */
     private function adfToText(mixed $value): string
     {
-        if (is_string($value)) return trim($value);
-        if (!is_array($value)) return '';
+        if (is_string($value)) {
+            return trim($value);
+        }
+        if (! is_array($value)) {
+            return '';
+        }
 
         $parts = [];
         $walk = function (mixed $node) use (&$walk, &$parts): void {
-            if (!is_array($node)) return;
-            if (($node['type'] ?? null) === 'text' && is_string($node['text'] ?? null)) $parts[] = $node['text'];
-            foreach ($node['content'] ?? [] as $child) $walk($child);
-            if (in_array($node['type'] ?? null, ['paragraph', 'heading', 'listItem', 'blockquote'], true)) $parts[] = "\n";
+            if (! is_array($node)) {
+                return;
+            }
+            if (($node['type'] ?? null) === 'text' && is_string($node['text'] ?? null)) {
+                $parts[] = $node['text'];
+            }
+            foreach ($node['content'] ?? [] as $child) {
+                $walk($child);
+            }
+            if (in_array($node['type'] ?? null, ['paragraph', 'heading', 'listItem', 'blockquote'], true)) {
+                $parts[] = "\n";
+            }
         };
         $walk($value);
+
         return trim(preg_replace('/[ \t]+\n/', "\n", preg_replace('/\n{3,}/', "\n\n", implode('', $parts))));
     }
 
@@ -122,6 +149,7 @@ class JiraAchievementService
     {
         return collect($links)->map(function (array $link) {
             $issue = $link['outwardIssue'] ?? $link['inwardIssue'] ?? [];
+
             return [
                 'relationship' => data_get($link, 'type.outward') ?? data_get($link, 'type.inward'),
                 'key' => $issue['key'] ?? null,
@@ -141,22 +169,30 @@ class JiraAchievementService
         $basicClient = Http::acceptJson()->withBasicAuth(trim($integration->email), $token)->timeout(30);
         $me = $basicClient->get($siteUrl.'/rest/api/3/myself');
 
-        if ($me->successful()) return ['client' => $basicClient, 'api_base' => $siteUrl, 'me' => $me->json(), 'auth_method' => 'basic'];
-        if ($me->status() !== 401) throw new \RuntimeException('Jira authentication failed: '.($me->json('errorMessages.0') ?: $me->status()));
+        if ($me->successful()) {
+            return ['client' => $basicClient, 'api_base' => $siteUrl, 'me' => $me->json(), 'auth_method' => 'basic'];
+        }
+        if ($me->status() !== 401) {
+            throw new \RuntimeException('Jira authentication failed: '.($me->json('errorMessages.0') ?: $me->status()));
+        }
 
         $scopedClient = Http::acceptJson()->withToken($token)->timeout(30);
         $resources = $scopedClient->get('https://api.atlassian.com/oauth/token/accessible-resources');
-        if (!$resources->successful()) {
+        if (! $resources->successful()) {
             throw new \RuntimeException('Jira rejected the saved credentials with both classic and scoped authentication. Save a newly copied Atlassian API token created for the same Atlassian account email.');
         }
 
         $expectedHost = parse_url($siteUrl, PHP_URL_HOST);
         $resource = collect($resources->json())->first(fn (array $item) => parse_url($item['url'] ?? '', PHP_URL_HOST) === $expectedHost);
-        if (!$resource || empty($resource['id'])) throw new \RuntimeException('The scoped API token does not have access to this Jira site. Create it for this Jira site with Jira read access.');
+        if (! $resource || empty($resource['id'])) {
+            throw new \RuntimeException('The scoped API token does not have access to this Jira site. Create it for this Jira site with Jira read access.');
+        }
 
         $apiBase = 'https://api.atlassian.com/ex/jira/'.$resource['id'];
         $scopedMe = $scopedClient->get($apiBase.'/rest/api/3/myself');
-        if (!$scopedMe->successful()) throw new \RuntimeException('Jira authentication failed: '.($scopedMe->json('errorMessages.0') ?: $scopedMe->json('error') ?: $scopedMe->status()));
+        if (! $scopedMe->successful()) {
+            throw new \RuntimeException('Jira authentication failed: '.($scopedMe->json('errorMessages.0') ?: $scopedMe->json('error') ?: $scopedMe->status()));
+        }
 
         return ['client' => $scopedClient, 'api_base' => $apiBase, 'me' => $scopedMe->json(), 'auth_method' => 'scoped'];
     }
@@ -166,9 +202,11 @@ class JiraAchievementService
         foreach ($names as $fieldId => $name) {
             if (in_array($name, $wantedNames, true) && array_key_exists($fieldId, $fields)) {
                 $value = $fields[$fieldId];
+
                 return is_array($value) ? ($value['value'] ?? $value['name'] ?? $value['key'] ?? json_encode($value)) : $value;
             }
         }
+
         return null;
     }
 
@@ -178,35 +216,47 @@ class JiraAchievementService
             ->groupBy(fn (array $issue) => ($issue['projectKey'] ?? 'jira').':'.($issue['epicKey'] ? 'epic:'.$issue['epicKey'] : 'issue:'.$issue['key']))
             ->map(function ($group) {
                 $first = $group->first();
+
                 return [
                     'title' => ($first['epicKey'] ? 'Epic '.$first['epicKey'] : ($first['projectName'] ?? 'Jira')).' - '.($first['projectName'] ?? 'Jira').' - '.$first['summary'],
                     'description' => $group->count() === 1
                         ? $first['summary']
-                        : 'Related Jira work:' . "\n" . $group->map(fn ($issue) => '• '.$issue['key'].' — '.$issue['summary'])->implode("\n"),
+                        : 'Related Jira work:'."\n".$group->map(fn ($issue) => '• '.$issue['key'].' — '.$issue['summary'])->implode("\n"),
                     'issue_keys' => $group->pluck('key')->all(),
                 ];
             })->values()->all();
         $key = trim((string) config('services.financial_overview_ai.api_key'));
-        if ($key === '') return $fallback;
+        if ($key === '') {
+            return $fallback;
+        }
         try {
             $response = Http::withToken($key)->acceptJson()->timeout(45)->post('https://api.openai.com/v1/responses', ['model' => config('services.financial_overview_ai.model', 'gpt-4o-mini'), 'instructions' => 'Create achievement drafts only from the supplied completed Jira work. Never create an overall period summary. Each achievement must represent exactly one distinct delivered feature or workstream in one Jira project; never group tickets from different projectKey values. Group related completed tickets only when their epic, title, description, components, labels, linked issues, or task category show they are the same feature. Do not merge tickets merely because they share a project, status, person, or date. Write each title in exactly this hyphen-separated pattern: "Epic or workstream - Project, page, or feature area - Concise completed work summary". Example: "Report panel revamp - Bank page - Added and refined the bank reporting interface". Use the actual epic name when provided; otherwise use a clear workstream name. The factual 1–3 sentence description must name the project and synthesize all grouped tickets, explaining what was completed without inventing impact, metrics, people, or details. Every source ticket is already completed, so write in completed tense. Do not create duplicates. Each Jira key must appear in exactly one achievement. Return JSON only.', 'input' => json_encode(['start_date' => $startDate, 'end_date' => $endDate, 'completed_jira_work_items_created_or_updated_in_range' => $issues], JSON_THROW_ON_ERROR), 'text' => ['format' => ['type' => 'json_schema', 'name' => 'unique_jira_work_summaries', 'strict' => true, 'schema' => ['type' => 'object', 'properties' => ['achievements' => ['type' => 'array', 'minItems' => 1, 'maxItems' => 10, 'items' => ['type' => 'object', 'properties' => ['title' => ['type' => 'string'], 'description' => ['type' => 'string'], 'issue_keys' => ['type' => 'array', 'minItems' => 1, 'items' => ['type' => 'string']]], 'required' => ['title', 'description', 'issue_keys'], 'additionalProperties' => false]]], 'required' => ['achievements'], 'additionalProperties' => false]]], 'max_output_tokens' => 2000]);
-            if (!$response->successful()) throw new \RuntimeException('OpenAI HTTP ' . $response->status());
+            if (! $response->successful()) {
+                throw new \RuntimeException('OpenAI HTTP '.$response->status());
+            }
             $parsed = json_decode((string) ($response->json('output_text') ?? data_get($response->json(), 'output.0.content.0.text')), true, flags: JSON_THROW_ON_ERROR);
             $validKeys = array_flip(array_column($issues, 'key'));
-            $drafts = collect($parsed['achievements'] ?? [])->filter(fn($item) => is_string($item['title'] ?? null) && is_string($item['description'] ?? null) && is_array($item['issue_keys'] ?? null))->map(function ($item) use ($validKeys) {
+            $drafts = collect($parsed['achievements'] ?? [])->filter(fn ($item) => is_string($item['title'] ?? null) && is_string($item['description'] ?? null) && is_array($item['issue_keys'] ?? null))->map(function ($item) use ($validKeys) {
                 return ['title' => trim($item['title']), 'description' => trim($item['description']), 'issue_keys' => array_values(array_unique(array_filter($item['issue_keys'], fn ($key) => is_string($key) && isset($validKeys[$key]))))];
-            })->filter(fn($item) => $item['title'] && $item['description'] && $item['issue_keys'])->values()->all();
+            })->filter(fn ($item) => $item['title'] && $item['description'] && $item['issue_keys'])->values()->all();
             $usedKeys = [];
             $drafts = collect($drafts)->map(function (array $draft) use (&$usedKeys) {
-                $draft['issue_keys'] = array_values(array_filter($draft['issue_keys'], fn (string $key) => !isset($usedKeys[$key])));
-                foreach ($draft['issue_keys'] as $key) $usedKeys[$key] = true;
+                $draft['issue_keys'] = array_values(array_filter($draft['issue_keys'], fn (string $key) => ! isset($usedKeys[$key])));
+                foreach ($draft['issue_keys'] as $key) {
+                    $usedKeys[$key] = true;
+                }
+
                 return $draft;
             })->filter(fn (array $draft) => $draft['issue_keys'])->values()->all();
-            if (!$drafts) throw new \RuntimeException('OpenAI returned no achievement drafts.');
+            if (! $drafts) {
+                throw new \RuntimeException('OpenAI returned no achievement drafts.');
+            }
             Log::info('chatgpt response', ['status' => 'success', 'issue_count' => count($issues), 'draft_count' => count($drafts), 'drafts' => $drafts]);
+
             return $drafts;
         } catch (\Throwable $exception) {
             Log::warning('chatgpt response', ['status' => 'failed', 'issue_count' => count($issues), 'error' => $exception->getMessage()]);
+
             return $fallback;
         }
     }

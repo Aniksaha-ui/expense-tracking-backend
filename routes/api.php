@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProviderConfigurationController;
 use App\Http\Controllers\Api\PublicationController;
 use App\Http\Controllers\Api\PublicBlogController;
+use App\Http\Controllers\Api\PublicPortfolioController;
 use App\Http\Controllers\Api\RecurringExpenseController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ServiceController;
@@ -33,11 +34,23 @@ use App\Repository\Services\Menu\MenuPermissionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Read-only blog feed for the portfolio website. Configure PORTFOLIO_BLOG_API_TOKEN
-// and send it in the X-Portfolio-Token request header.
+// Read-only portfolio feed & contact endpoint for the public portfolio website.
+// Configure PORTFOLIO_BLOG_API_TOKEN and send it in the X-Portfolio-Token request header.
 Route::prefix('public')->middleware('portfolio.token')->group(function () {
     Route::get('blogs', [PublicBlogController::class, 'index']);
+    Route::get('blogs/categories', [PublicBlogController::class, 'categories']);
     Route::get('blogs/{blogId}', [PublicBlogController::class, 'show'])->whereNumber('blogId');
+    Route::get('profile', [PublicPortfolioController::class, 'profile']);
+    Route::get('home', [PublicPortfolioController::class, 'home']);
+    Route::get('experiences', [PublicPortfolioController::class, 'experiences']);
+    Route::get('projects', [PublicPortfolioController::class, 'projects']);
+    Route::get('projects/{projectId}', [PublicPortfolioController::class, 'project'])->whereNumber('projectId');
+    Route::get('publications', [PublicPortfolioController::class, 'publications']);
+    Route::get('testimonials', [PublicPortfolioController::class, 'testimonials']);
+    Route::get('trainings', [PublicPortfolioController::class, 'trainings']);
+    Route::get('services', [PublicPortfolioController::class, 'services']);
+    Route::get('achievements', [PublicPortfolioController::class, 'achievements']);
+    Route::post('contact', [PublicPortfolioController::class, 'storeContact'])->middleware('throttle:5,1');
 });
 
 Route::prefix('auth')->group(function () {

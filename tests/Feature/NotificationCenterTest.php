@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
@@ -16,7 +17,7 @@ class NotificationCenterTest extends TestCase
     {
         $token = $this->register('notification-owner@example.com');
         $service = app(NotificationService::class);
-        $userId = \App\Models\User::where('email', 'notification-owner@example.com')->value('id');
+        $userId = User::where('email', 'notification-owner@example.com')->value('id');
         $service->create($userId, 'budget_threshold', 'Budget alert', 'Budget is nearly used.', 'budget:1:80', [], '/budgets');
         $service->create($userId, 'budget_threshold', 'Budget alert', 'Budget is nearly used.', 'budget:1:80', [], '/budgets');
 

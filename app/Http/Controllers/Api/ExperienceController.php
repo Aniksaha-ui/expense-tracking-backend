@@ -13,9 +13,7 @@ use RuntimeException;
 
 class ExperienceController extends Controller
 {
-    public function __construct(private readonly ExperienceService $experienceService)
-    {
-    }
+    public function __construct(private readonly ExperienceService $experienceService) {}
 
     public function index(Request $request): JsonResponse
     {

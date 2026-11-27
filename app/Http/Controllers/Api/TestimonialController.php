@@ -13,9 +13,7 @@ use RuntimeException;
 
 class TestimonialController extends Controller
 {
-    public function __construct(private readonly TestimonialService $testimonialService)
-    {
-    }
+    public function __construct(private readonly TestimonialService $testimonialService) {}
 
     public function index(Request $request): JsonResponse
     {

@@ -306,6 +306,7 @@
         foreach ($rows as $row) {
             $max = max($max, (float) ($row[$key] ?? 0));
         }
+
         return $max > 0 ? $max : 1;
     };
     $barWidth = function ($value, $max): int {
@@ -321,8 +322,8 @@
 
         return str_repeat('|', $length);
     };
-    $svgText = fn($value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-    $svgMoney = fn($value): string => number_format((float) $value, 2);
+    $svgText = fn ($value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+    $svgMoney = fn ($value): string => number_format((float) $value, 2);
     $svgBarChart = function ($rows, string $valueKey, string $labelKey, string $title) use ($svgText, $svgMoney) {
         $rows = collect($rows)->values();
         $rowHeight = 24;
@@ -331,27 +332,27 @@
         $labelWidth = 185;
         $plotWidth = 555;
         $valueX = $labelWidth + $plotWidth + 28;
-        $max = max(1, (float) $rows->max(fn($row) => (float) data_get($row, $valueKey, 0)));
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' . $width . '" height="' . $height . '" viewBox="0 0 ' . $width . ' ' . $height . '">';
+        $max = max(1, (float) $rows->max(fn ($row) => (float) data_get($row, $valueKey, 0)));
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$width.'" height="'.$height.'" viewBox="0 0 '.$width.' '.$height.'">';
         $svg .= '<rect width="100%" height="100%" fill="#fbfcfe"/>';
-        $svg .= '<text x="18" y="25" fill="#172033" font-family="Helvetica, Arial" font-size="17" font-weight="700">' . $svgText($title) . '</text>';
-        $svg .= '<line x1="' . $labelWidth . '" y1="45" x2="' . ($labelWidth + $plotWidth) . '" y2="45" stroke="#d8e2eb" stroke-width="1"/>';
-        $svg .= '<line x1="' . $labelWidth . '" y1="45" x2="' . $labelWidth . '" y2="' . ($height - 18) . '" stroke="#d8e2eb" stroke-width="1"/>';
+        $svg .= '<text x="18" y="25" fill="#172033" font-family="Helvetica, Arial" font-size="17" font-weight="700">'.$svgText($title).'</text>';
+        $svg .= '<line x1="'.$labelWidth.'" y1="45" x2="'.($labelWidth + $plotWidth).'" y2="45" stroke="#d8e2eb" stroke-width="1"/>';
+        $svg .= '<line x1="'.$labelWidth.'" y1="45" x2="'.$labelWidth.'" y2="'.($height - 18).'" stroke="#d8e2eb" stroke-width="1"/>';
 
         foreach ($rows as $index => $row) {
             $y = 58 + ($index * $rowHeight);
             $value = (float) data_get($row, $valueKey, 0);
             $barWidth = max(2, (int) round(($value / $max) * $plotWidth));
             $label = $svgText(data_get($row, $labelKey, data_get($row, 'category_name', 'N/A')));
-            $svg .= '<text x="18" y="' . ($y + 12) . '" fill="#172033" font-family="Helvetica, Arial" font-size="10" font-weight="700">' . $label . '</text>';
-            $svg .= '<rect x="' . $labelWidth . '" y="' . $y . '" width="' . $plotWidth . '" height="14" fill="#e9eef4"/>';
-            $svg .= '<rect x="' . $labelWidth . '" y="' . $y . '" width="' . $barWidth . '" height="14" fill="#147d64"/>';
-            $svg .= '<text x="' . $valueX . '" y="' . ($y + 12) . '" fill="#475467" font-family="Helvetica, Arial" font-size="10" font-weight="700">' . $svgMoney($value) . '</text>';
+            $svg .= '<text x="18" y="'.($y + 12).'" fill="#172033" font-family="Helvetica, Arial" font-size="10" font-weight="700">'.$label.'</text>';
+            $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$plotWidth.'" height="14" fill="#e9eef4"/>';
+            $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$barWidth.'" height="14" fill="#147d64"/>';
+            $svg .= '<text x="'.$valueX.'" y="'.($y + 12).'" fill="#475467" font-family="Helvetica, Arial" font-size="10" font-weight="700">'.$svgMoney($value).'</text>';
         }
 
         $svg .= '</svg>';
 
-        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+        return 'data:image/svg+xml;base64,'.base64_encode($svg);
     };
     $svgGroupedBarChart = function ($rows, string $firstValueKey, string $secondValueKey, string $labelKey, string $title, string $firstLabel, string $secondLabel) use ($svgText, $svgMoney) {
         $rows = collect($rows)->values();
@@ -361,12 +362,12 @@
         $labelWidth = 210;
         $plotWidth = 520;
         $valueX = $labelWidth + $plotWidth + 28;
-        $max = max(1, (float) $rows->max(fn($row) => max((float) data_get($row, $firstValueKey, 0), (float) data_get($row, $secondValueKey, 0))));
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' . $width . '" height="' . $height . '" viewBox="0 0 ' . $width . ' ' . $height . '">';
+        $max = max(1, (float) $rows->max(fn ($row) => max((float) data_get($row, $firstValueKey, 0), (float) data_get($row, $secondValueKey, 0))));
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$width.'" height="'.$height.'" viewBox="0 0 '.$width.' '.$height.'">';
         $svg .= '<rect width="100%" height="100%" fill="#fbfcfe"/>';
-        $svg .= '<text x="18" y="25" fill="#172033" font-family="Helvetica, Arial" font-size="17" font-weight="700">' . $svgText($title) . '</text>';
-        $svg .= '<rect x="18" y="39" width="12" height="12" fill="#147d64"/><text x="36" y="50" fill="#475467" font-family="Helvetica, Arial" font-size="11">' . $svgText($firstLabel) . '</text>';
-        $svg .= '<rect x="145" y="39" width="12" height="12" fill="#f59e0b"/><text x="163" y="50" fill="#475467" font-family="Helvetica, Arial" font-size="11">' . $svgText($secondLabel) . '</text>';
+        $svg .= '<text x="18" y="25" fill="#172033" font-family="Helvetica, Arial" font-size="17" font-weight="700">'.$svgText($title).'</text>';
+        $svg .= '<rect x="18" y="39" width="12" height="12" fill="#147d64"/><text x="36" y="50" fill="#475467" font-family="Helvetica, Arial" font-size="11">'.$svgText($firstLabel).'</text>';
+        $svg .= '<rect x="145" y="39" width="12" height="12" fill="#f59e0b"/><text x="163" y="50" fill="#475467" font-family="Helvetica, Arial" font-size="11">'.$svgText($secondLabel).'</text>';
 
         foreach ($rows as $index => $row) {
             $y = 66 + ($index * $rowHeight);
@@ -375,18 +376,18 @@
             $firstWidth = max(2, (int) round(($firstValue / $max) * $plotWidth));
             $secondWidth = max(2, (int) round(($secondValue / $max) * $plotWidth));
             $label = $svgText(data_get($row, $labelKey, 'N/A'));
-            $svg .= '<text x="18" y="' . ($y + 16) . '" fill="#172033" font-family="Helvetica, Arial" font-size="9" font-weight="700">' . $label . '</text>';
-            $svg .= '<rect x="' . $labelWidth . '" y="' . $y . '" width="' . $plotWidth . '" height="10" fill="#e9eef4"/>';
-            $svg .= '<rect x="' . $labelWidth . '" y="' . $y . '" width="' . $firstWidth . '" height="10" fill="#147d64"/>';
-            $svg .= '<rect x="' . $labelWidth . '" y="' . ($y + 13) . '" width="' . $plotWidth . '" height="10" fill="#e9eef4"/>';
-            $svg .= '<rect x="' . $labelWidth . '" y="' . ($y + 13) . '" width="' . $secondWidth . '" height="10" fill="#f59e0b"/>';
-            $svg .= '<text x="' . $valueX . '" y="' . ($y + 9) . '" fill="#147d64" font-family="Helvetica, Arial" font-size="9" font-weight="700">' . $svgMoney($firstValue) . '</text>';
-            $svg .= '<text x="' . $valueX . '" y="' . ($y + 22) . '" fill="#b45309" font-family="Helvetica, Arial" font-size="9" font-weight="700">' . $svgMoney($secondValue) . '</text>';
+            $svg .= '<text x="18" y="'.($y + 16).'" fill="#172033" font-family="Helvetica, Arial" font-size="9" font-weight="700">'.$label.'</text>';
+            $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$plotWidth.'" height="10" fill="#e9eef4"/>';
+            $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$firstWidth.'" height="10" fill="#147d64"/>';
+            $svg .= '<rect x="'.$labelWidth.'" y="'.($y + 13).'" width="'.$plotWidth.'" height="10" fill="#e9eef4"/>';
+            $svg .= '<rect x="'.$labelWidth.'" y="'.($y + 13).'" width="'.$secondWidth.'" height="10" fill="#f59e0b"/>';
+            $svg .= '<text x="'.$valueX.'" y="'.($y + 9).'" fill="#147d64" font-family="Helvetica, Arial" font-size="9" font-weight="700">'.$svgMoney($firstValue).'</text>';
+            $svg .= '<text x="'.$valueX.'" y="'.($y + 22).'" fill="#b45309" font-family="Helvetica, Arial" font-size="9" font-weight="700">'.$svgMoney($secondValue).'</text>';
         }
 
         $svg .= '</svg>';
 
-        return 'data:image/svg+xml;base64,' . base64_encode($svg);
+        return 'data:image/svg+xml;base64,'.base64_encode($svg);
     };
     ?>
 
@@ -420,15 +421,15 @@
         </tr>
     </table>
 
-    <?php if (! empty($report['excluded_months'])): ?>
+    <?php if (! empty($report['excluded_months'])) { ?>
         <div class="section-note">
             Excluded months: <?= e(implode(', ', $report['excluded_months'])) ?>. Transactions inside these months are not used in this report's calculations.
         </div>
-    <?php endif; ?>
+    <?php } ?>
 
-    <?php if (($summary['transaction_count'] ?? 0) === 0 && ($summary['total_expense'] ?? '0.00') === '0.00'): ?>
+    <?php if (($summary['transaction_count'] ?? 0) === 0 && ($summary['total_expense'] ?? '0.00') === '0.00') { ?>
         <div class="empty">No expense data was found for this period.</div>
-    <?php else: ?>
+    <?php } else { ?>
         <table class="summary-table">
             <tr>
                 <td class="summary-card">
@@ -458,32 +459,32 @@
             </tr>
         </table>
 
-        <?php if (! empty($report['definitions'])): ?>
+        <?php if (! empty($report['definitions'])) { ?>
             <div class="section-title">How to read this report</div>
             <div class="section-note">These definitions explain the metrics and calculations used in this PDF.</div>
             <table class="guide-table">
-                <?php foreach ($report['definitions'] as $definition): ?>
+                <?php foreach ($report['definitions'] as $definition) { ?>
                     <tr>
                         <th><?= e($definition['name']) ?></th>
                         <td><?= e($definition['definition']) ?></td>
                     </tr>
-                <?php endforeach; ?>
+                <?php } ?>
             </table>
-        <?php endif; ?>
+        <?php } ?>
 
-        <?php if (! empty($report['section_guides'])): ?>
+        <?php if (! empty($report['section_guides'])) { ?>
             <div class="section-title">Report section guide</div>
             <table class="guide-table">
-                <?php foreach ($report['section_guides'] as $guide): ?>
+                <?php foreach ($report['section_guides'] as $guide) { ?>
                     <tr>
                         <th><?= e($guide['section']) ?></th>
                         <td><?= e($guide['definition']) ?></td>
                     </tr>
-                <?php endforeach; ?>
+                <?php } ?>
             </table>
-        <?php endif; ?>
+        <?php } ?>
 
-        <?php if ($frequency === 'daily'): ?>
+        <?php if ($frequency === 'daily') { ?>
             <div class="section-title">Today at a glance</div>
             <table class="data-table">
                 <tr>
@@ -499,9 +500,9 @@
                     <td><?= e($summary['largest_transaction']['amount'] ?? '0.00') ?></td>
                 </tr>
             </table>
-        <?php endif; ?>
+        <?php } ?>
 
-        <?php if (! empty($report['efficiency_report'])): ?>
+        <?php if (! empty($report['efficiency_report'])) { ?>
             <div class="section-title">Efficiency report</div>
             <div class="section-note">This section replaces the every-day costing table with the most useful decision metrics from the selected period.</div>
             <table class="data-table">
@@ -510,13 +511,13 @@
                     <th>Value</th>
                     <th class="left">How to use it</th>
                 </tr>
-                <?php foreach ($report['efficiency_report']['scorecard'] as $row): ?>
+                <?php foreach ($report['efficiency_report']['scorecard'] as $row) { ?>
                     <tr>
                         <td class="left"><?= e($row['metric']) ?></td>
                         <td><?= e($row['value']) ?></td>
                         <td class="left"><?= e($row['meaning']) ?></td>
                     </tr>
-                <?php endforeach; ?>
+                <?php } ?>
             </table>
             <table class="data-table">
                 <tr>
@@ -552,17 +553,17 @@
                     <td><?= e($report['efficiency_report']['daily_extremes']['average_active_day_expense']) ?></td>
                 </tr>
             </table>
-            <?php if (! empty($report['efficiency_report']['actions'])): ?>
+            <?php if (! empty($report['efficiency_report']['actions'])) { ?>
                 <div class="section-note">Data-backed action hints</div>
                 <ul class="list">
-                    <?php foreach ($report['efficiency_report']['actions'] as $action): ?>
+                    <?php foreach ($report['efficiency_report']['actions'] as $action) { ?>
                         <li><?= e($action) ?></li>
-                    <?php endforeach; ?>
+                    <?php } ?>
                 </ul>
-            <?php endif; ?>
-        <?php endif; ?>
+            <?php } ?>
+        <?php } ?>
 
-        <?php if (! empty($report['comparison'])): ?>
+        <?php if (! empty($report['comparison'])) { ?>
             <div class="section-title">Period comparison</div>
             <table class="data-table">
                 <tr>
@@ -578,9 +579,9 @@
                     <td><?= e($report['comparison']['growth_percentage'] ?? 'N/A') ?><?= $report['comparison']['growth_percentage'] === null ? '' : '%' ?></td>
                 </tr>
             </table>
-        <?php endif; ?>
+        <?php } ?>
 
-        <?php if (! empty($report['next_week_risk_report']) && $report['next_week_risk_report']['rows']->isNotEmpty()): ?>
+        <?php if (! empty($report['next_week_risk_report']) && $report['next_week_risk_report']['rows']->isNotEmpty()) { ?>
             <div class="section-title">Next week risk report</div>
             <div class="section-note"><?= e($report['next_week_risk_report']['basis']) ?> Baseline month: <?= e($report['next_week_risk_report']['baseline_month']) ?>.</div>
             <table class="data-table">
@@ -609,7 +610,7 @@
                     <th>Score</th>
                     <th>Risk</th>
                 </tr>
-                <?php foreach ($report['next_week_risk_report']['rows'] as $row): ?>
+                <?php foreach ($report['next_week_risk_report']['rows'] as $row) { ?>
                     <tr>
                         <td class="name"><?= e($row['category_name']) ?></td>
                         <td><?= e($row['current_expense']) ?></td>
@@ -621,9 +622,9 @@
                         <td class="score"><?= e($row['opportunity_score']) ?>/100</td>
                         <td><?= e($row['risk_level']) ?></td>
                     </tr>
-                <?php endforeach; ?>
+                <?php } ?>
             </table>
-        <?php endif; ?>
+        <?php } ?>
 
         <div class="section-title">Category analysis</div>
         <table class="data-table">
@@ -642,7 +643,7 @@
                 </tr>
             </thead>
             <tbody>
-                <?php foreach (($report['category_rows'] ?? collect())->take(14) as $row): ?>
+                <?php foreach (($report['category_rows'] ?? collect())->take(14) as $row) { ?>
                     <tr>
                         <td class="name"><?= e($row['category_name']) ?></td>
                         <td><?= e($row['current_expense']) ?></td>
@@ -655,8 +656,8 @@
                         <td><?= e($row['average_transaction']) ?></td>
                         <td class="score"><?= e($row['opportunity_score']) ?></td>
                     </tr>
-                <?php endforeach; ?>
-                <?php if (! empty($report['totals']['category'])): ?>
+                <?php } ?>
+                <?php if (! empty($report['totals']['category'])) { ?>
                     <tr>
                         <th class="name">Total costing</th>
                         <th><?= e($report['totals']['category']['current_expense']) ?></th>
@@ -669,11 +670,11 @@
                         <th><?= e($report['totals']['category']['average_transaction']) ?></th>
                         <th>N/A</th>
                     </tr>
-                <?php endif; ?>
+                <?php } ?>
             </tbody>
         </table>
 
-        <?php if (! empty($report['opportunities']) && $report['opportunities']->isNotEmpty()): ?>
+        <?php if (! empty($report['opportunities']) && $report['opportunities']->isNotEmpty()) { ?>
             <div class="section-title">Cost reduction opportunity ranking</div>
             <table class="data-table">
                 <tr>
@@ -684,7 +685,7 @@
                     <th>Score</th>
                     <th>Estimated Saving</th>
                 </tr>
-                <?php foreach ($report['opportunities'] as $row): ?>
+                <?php foreach ($report['opportunities'] as $row) { ?>
                     <tr>
                         <td class="name"><?= e($row['category_name']) ?></td>
                         <td><?= e($row['current_expense']) ?></td>
@@ -693,18 +694,18 @@
                         <td class="score"><?= e($row['opportunity_score']) ?>/100</td>
                         <td><?= e($row['potential_saving']) ?></td>
                     </tr>
-                <?php endforeach; ?>
-                <?php if (! empty($report['totals']['opportunity'])): ?>
+                <?php } ?>
+                <?php if (! empty($report['totals']['opportunity'])) { ?>
                     <tr>
                         <th class="name">Total estimated saving</th>
                         <th colspan="4"><?= e($report['totals']['opportunity']['category_count']) ?> ranked categories</th>
                         <th><?= e($report['totals']['opportunity']['estimated_saving']) ?></th>
                     </tr>
-                <?php endif; ?>
+                <?php } ?>
             </table>
-        <?php endif; ?>
+        <?php } ?>
 
-        <?php if (! empty($report['account_rows']) && $report['account_rows']->isNotEmpty()): ?>
+        <?php if (! empty($report['account_rows']) && $report['account_rows']->isNotEmpty()) { ?>
             <div class="section-title">Account-based spending section</div>
             <table class="data-table">
                 <tr>
@@ -714,7 +715,7 @@
                     <th>Total Expense</th>
                     <th>Average</th>
                 </tr>
-                <?php foreach ($report['account_rows'] as $row): ?>
+                <?php foreach ($report['account_rows'] as $row) { ?>
                     <tr>
                         <td class="name"><?= e($row['account_name']) ?></td>
                         <td><?= e($row['account_type']) ?></td>
@@ -722,8 +723,8 @@
                         <td><?= e($row['total_expense']) ?></td>
                         <td><?= e($row['average_expense']) ?></td>
                     </tr>
-                <?php endforeach; ?>
-                <?php if (! empty($report['totals']['account'])): ?>
+                <?php } ?>
+                <?php if (! empty($report['totals']['account'])) { ?>
                     <tr>
                         <th class="name">Total</th>
                         <th>All accounts</th>
@@ -731,11 +732,11 @@
                         <th><?= e($report['totals']['account']['total_expense']) ?></th>
                         <th><?= e($report['totals']['account']['average_expense']) ?></th>
                     </tr>
-                <?php endif; ?>
+                <?php } ?>
             </table>
-        <?php endif; ?>
+        <?php } ?>
 
-        <?php if (! empty($report['largest_expenses']) && $report['largest_expenses']->isNotEmpty()): ?>
+        <?php if (! empty($report['largest_expenses']) && $report['largest_expenses']->isNotEmpty()) { ?>
             <div class="section-title">Largest expenses</div>
             <table class="data-table">
                 <tr>
@@ -745,7 +746,7 @@
                     <th>Note</th>
                     <th>Amount</th>
                 </tr>
-                <?php foreach ($report['largest_expenses'] as $expense): ?>
+                <?php foreach ($report['largest_expenses'] as $expense) { ?>
                     <tr>
                         <td class="left"><?= e($expense['transaction_date']) ?></td>
                         <td class="left"><?= e($expense['category_name'] ?? 'Uncategorized') ?></td>
@@ -753,9 +754,9 @@
                         <td class="left"><?= e($expense['note'] ?? '') ?></td>
                         <td><?= e($expense['amount']) ?></td>
                     </tr>
-                <?php endforeach; ?>
+                <?php } ?>
             </table>
-        <?php endif; ?>
+        <?php } ?>
 
         <div class="section-title">Money leakage</div>
         <table class="data-table">
@@ -775,7 +776,7 @@
             </tr>
         </table>
 
-        <?php if (! empty($report['leakage']['repeated_similar_expenses']) && $report['leakage']['repeated_similar_expenses']->isNotEmpty()): ?>
+        <?php if (! empty($report['leakage']['repeated_similar_expenses']) && $report['leakage']['repeated_similar_expenses']->isNotEmpty()) { ?>
             <div class="section-title">Repeated similar expenses</div>
             <table class="data-table">
                 <tr>
@@ -785,7 +786,7 @@
                     <th>Total</th>
                     <th>Average</th>
                 </tr>
-                <?php foreach ($report['leakage']['repeated_similar_expenses'] as $row): ?>
+                <?php foreach ($report['leakage']['repeated_similar_expenses'] as $row) { ?>
                     <tr>
                         <td class="name"><?= e($row['category_name'] ?? 'Uncategorized') ?></td>
                         <td class="left"><?= e($row['note_pattern'] ?: 'No note') ?></td>
@@ -793,11 +794,11 @@
                         <td><?= e($row['total_amount']) ?></td>
                         <td><?= e($row['average_amount']) ?></td>
                     </tr>
-                <?php endforeach; ?>
+                <?php } ?>
             </table>
-        <?php endif; ?>
+        <?php } ?>
 
-        <?php if (! empty($report['anomalies']) && $report['anomalies']->isNotEmpty()): ?>
+        <?php if (! empty($report['anomalies']) && $report['anomalies']->isNotEmpty()) { ?>
             <div class="section-title">Expense anomaly detection</div>
             <table class="data-table">
                 <tr>
@@ -808,7 +809,7 @@
                     <th>Deviation</th>
                     <th>Note</th>
                 </tr>
-                <?php foreach ($report['anomalies']->take(8) as $row): ?>
+                <?php foreach ($report['anomalies']->take(8) as $row) { ?>
                     <tr>
                         <td class="left"><?= e($row['transaction_date']) ?></td>
                         <td class="name"><?= e($row['category_name']) ?></td>
@@ -817,11 +818,11 @@
                         <td><?= e($row['deviation_percentage']) ?>%</td>
                         <td class="left"><?= e($row['note'] ?? '') ?></td>
                     </tr>
-                <?php endforeach; ?>
+                <?php } ?>
             </table>
-        <?php endif; ?>
+        <?php } ?>
 
-        <?php if (! empty($report['plan'])): ?>
+        <?php if (! empty($report['plan'])) { ?>
             <div class="section-title"><?= $frequency === 'bi-weekly' ? 'Next bi-week spending plan' : 'Next week spending plan' ?></div>
             <table class="data-table">
                 <tr>
@@ -837,10 +838,10 @@
                     <td><?= e($report['plan']['target_high']) ?></td>
                 </tr>
             </table>
-        <?php endif; ?>
+        <?php } ?>
 
-        <?php if ($frequency === 'monthly'): ?>
-            <?php if (! empty($report['recurring'])): ?>
+        <?php if ($frequency === 'monthly') { ?>
+            <?php if (! empty($report['recurring'])) { ?>
                 <div class="section-title">Recurring expense analysis</div>
                 <table class="data-table">
                     <tr>
@@ -858,9 +859,9 @@
                         <td><?= e($report['recurring']['largest']['amount'] ?? '0.00') ?></td>
                     </tr>
                 </table>
-            <?php endif; ?>
+            <?php } ?>
 
-            <?php if (! empty($report['behavior'])): ?>
+            <?php if (! empty($report['behavior'])) { ?>
                 <div class="section-title">Spending behavior analysis</div>
                 <table class="data-table">
                     <tr>
@@ -878,7 +879,7 @@
                         <td><?= e($report['behavior']['highest_spending_period']['transaction_count'] ?? 0) ?></td>
                     </tr>
                 </table>
-            <?php endif; ?>
+            <?php } ?>
 
             <div class="section-title">Next month forecast and budget</div>
             <div class="section-note"><?= e($report['forecast']['basis']) ?></div>
@@ -915,28 +916,28 @@
                     <td><?= e($report['potential_savings']['annual_high']) ?></td>
                 </tr>
             </table>
-        <?php endif; ?>
+        <?php } ?>
 
-        <?php if (! empty($report['calculation_hints'])): ?>
+        <?php if (! empty($report['calculation_hints'])) { ?>
             <div class="section-title">Calculation hints</div>
             <ul class="list">
-                <?php foreach ($report['calculation_hints'] as $hint): ?>
+                <?php foreach ($report['calculation_hints'] as $hint) { ?>
                     <li><?= e($hint) ?></li>
-                <?php endforeach; ?>
+                <?php } ?>
             </ul>
-        <?php endif; ?>
+        <?php } ?>
 
-        <?php foreach (['insights' => 'Insights', 'alerts' => 'Alerts', 'risks' => 'Next month risk areas', 'recommendations' => 'Recommendations / Action plan'] as $key => $label): ?>
-            <?php if (! empty($report[$key])): ?>
+        <?php foreach (['insights' => 'Insights', 'alerts' => 'Alerts', 'risks' => 'Next month risk areas', 'recommendations' => 'Recommendations / Action plan'] as $key => $label) { ?>
+            <?php if (! empty($report[$key])) { ?>
                 <div class="section-title"><?= e($label) ?></div>
                 <ul class="list">
-                    <?php foreach ($report[$key] as $item): ?>
+                    <?php foreach ($report[$key] as $item) { ?>
                         <li><?= e($item) ?></li>
-                    <?php endforeach; ?>
+                    <?php } ?>
                 </ul>
-            <?php endif; ?>
-        <?php endforeach; ?>
-    <?php endif; ?>
+            <?php } ?>
+        <?php } ?>
+    <?php } ?>
 
     <div class="footer">
         <?= e(config('app.name')) ?> &middot; <?= e($title) ?> &middot;

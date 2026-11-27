@@ -19,6 +19,7 @@ class PublicationController extends Controller
     {
         try {
             $search = trim((string) $request->query('search', ''));
+
             return $this->successResponse(PublicationResource::collection($this->publications->list(min(max($request->integer('per_page', 15), 1), 100), $search ?: null)));
         } catch (\Throwable) {
             return $this->errorResponse('Unable to fetch publications.', status: 500);
@@ -58,6 +59,7 @@ class PublicationController extends Controller
     {
         try {
             $this->publications->delete($publicationId);
+
             return $this->successResponse([], 'Publication deleted successfully.');
         } catch (RuntimeException $exception) {
             return $this->errorResponse($exception->getMessage(), status: 404);

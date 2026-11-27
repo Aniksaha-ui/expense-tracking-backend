@@ -12,16 +12,14 @@ class CategoryExpenseReportService
     public function __construct(
         private readonly ReportService $reportService,
         private readonly PdfService $pdfService,
-    ) {
-    }
+    ) {}
 
     public function generate(
         User $user,
         CarbonImmutable $fromDate,
         CarbonImmutable $toDate,
         ?array $summary = null,
-    ): array
-    {
+    ): array {
         $summary ??= $this->summary($user, $fromDate, $toDate);
         $viewData = [
             'user' => $user,

@@ -253,9 +253,9 @@
         </tr>
     </table>
 
-    <?php if ($rows->where('transaction_count', '>', 0)->isEmpty()): ?>
+    <?php if ($rows->where('transaction_count', '>', 0)->isEmpty()) { ?>
         <div class="empty">No expenses were recorded for this period.</div>
-    <?php else: ?>
+    <?php } else { ?>
         <table class="summary-table">
             <tr>
                 <td class="summary-card">
@@ -291,23 +291,23 @@
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($chartRows as $row): ?>
+                <?php foreach ($chartRows as $row) { ?>
                     <tr>
                         <td class="name"><?= e($row['category_name']) ?></td>
                         <td><?= e($row['current_month_expense']) ?></td>
                     </tr>
-                <?php endforeach; ?>
+                <?php } ?>
             </tbody>
         </table>
 
-        <?php if ($alerts->isNotEmpty()): ?>
+        <?php if ($alerts->isNotEmpty()) { ?>
             <div class="section-title">Data-driven alerts</div>
             <ul class="alert-list">
-                <?php foreach ($alerts->take(8) as $alert): ?>
+                <?php foreach ($alerts->take(8) as $alert) { ?>
                     <li><?= e($alert) ?></li>
-                <?php endforeach; ?>
+                <?php } ?>
             </ul>
-        <?php endif; ?>
+        <?php } ?>
 
         <div class="section-title">Category opportunities</div>
         <div class="section-note">Opportunity score uses expense share, positive growth, frequency, and positive historical deviation.</div>
@@ -328,7 +328,7 @@
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($rows as $row): ?>
+                <?php foreach ($rows as $row) { ?>
                     <tr>
                         <td class="name"><?= e($row['category_name']) ?></td>
                         <td><?= e($row['current_month_expense']) ?></td>
@@ -342,10 +342,10 @@
                         <td class="score"><?= e($row['opportunity_score']) ?></td>
                         <td><?= e($row['potential_saving']) ?></td>
                     </tr>
-                <?php endforeach; ?>
+                <?php } ?>
             </tbody>
         </table>
-    <?php endif; ?>
+    <?php } ?>
 
     <div class="footer">
         <?= e(config('app.name')) ?> &middot; Cost Reduction Report &middot;

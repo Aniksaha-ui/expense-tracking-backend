@@ -13,9 +13,7 @@ use RuntimeException;
 
 class BlogController extends Controller
 {
-    public function __construct(private readonly BlogService $blogService)
-    {
-    }
+    public function __construct(private readonly BlogService $blogService) {}
 
     public function index(Request $request): JsonResponse
     {

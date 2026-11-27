@@ -31,6 +31,7 @@ class SavingsOffersReportService
         $months = max(1, $from->startOfMonth()->diffInMonths($to->startOfMonth()) + 1);
         $offers = $this->analysisService->generate($offerSpending, $offers, $months);
         $viewData = compact('user', 'from', 'to', 'spending', 'total', 'offers', 'location', 'months', 'searchStatus');
+
         return [...$viewData, 'pdf' => $this->pdfService->render('reports.savings-offers-pdf', $viewData), 'filename' => "savings-offers-{$from->toDateString()}-to-{$to->toDateString()}.pdf"];
     }
 
@@ -46,12 +47,15 @@ class SavingsOffersReportService
             return [[], 'Offers are available only for food and shopping purchases in this report.'];
         }
 
-        if ($key === '') return [[], 'Live offer search is unavailable because SERPER_API_KEY is not configured.'];
+        if ($key === '') {
+            return [[], 'Live offer search is unavailable because SERPER_API_KEY is not configured.'];
+        }
 
         // Search only food and product-shopping categories. Results remain
         // source-linked search results and are never presented as verified offers.
         $queries = collect($spending)->take(5)->flatMap(function (array $row) use ($location): array {
             $category = strtolower($row['category']);
+
             return [
                 "{$category} food or shopping discount offers near {$location}",
                 "site:facebook.com {$category} offer discount {$location}",
@@ -76,7 +80,11 @@ class SavingsOffersReportService
             return [[], $failures === []
                 ? 'No live food or shopping offers were found for this period.'
                 : 'Live offer search was rejected by Serper (HTTP '.implode(', ', array_unique($failures)).'). Check the active SERPER_API_KEY and Serper quota.'];
-        } catch (\Throwable $exception) { report($exception); return [[], 'Live offer search is unavailable. Check the internet connection, Serper API key, and quota.']; }
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return [[], 'Live offer search is unavailable. Check the internet connection, Serper API key, and quota.'];
+        }
     }
 
     private function offerEligibleSpending(array $spending): array
@@ -127,7 +135,7 @@ class SavingsOffersReportService
 
     private function pageDescription(string $html): ?string
     {
-        $document = new \DOMDocument();
+        $document = new \DOMDocument;
         $previous = libxml_use_internal_errors(true);
 
         try {

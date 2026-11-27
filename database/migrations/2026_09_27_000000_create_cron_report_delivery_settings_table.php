@@ -4,7 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('cron_report_delivery_settings', function (Blueprint $table) {
@@ -20,6 +21,7 @@ return new class extends Migration {
             $table->unique(['user_id', 'job_key']);
         });
     }
+
     public function down(): void
     {
         Schema::dropIfExists('cron_report_delivery_settings');

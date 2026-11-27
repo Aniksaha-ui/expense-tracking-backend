@@ -24,8 +24,7 @@ class ExpenseIntelligenceReportMail extends Mailable
         public readonly array $summary,
         private readonly string $pdf,
         private readonly string $filename,
-    ) {
-    }
+    ) {}
 
     public function envelope(): Envelope
     {

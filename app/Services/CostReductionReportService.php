@@ -10,8 +10,7 @@ class CostReductionReportService
     public function __construct(
         private readonly CategoryExpenseAnalyzer $categoryExpenseAnalyzer,
         private readonly PdfService $pdfService,
-    ) {
-    }
+    ) {}
 
     public function generate(User $user, CarbonImmutable $fromDate, CarbonImmutable $toDate, ?array $analysis = null): array
     {

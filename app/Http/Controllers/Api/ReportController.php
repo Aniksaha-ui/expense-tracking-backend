@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Reports\ReportFilterRequest;
 use App\Http\Resources\Api\AccountResource;
 use App\Http\Resources\Api\RecurringExpenseResource;
-use App\Http\Resources\Api\CategoryResource;
 use App\Services\ReportService;
 use Illuminate\Http\JsonResponse;
 

@@ -51,7 +51,7 @@ class ProviderConfigurationService
                 $values = $profile['values'] ?? [];
                 $id = filter_var($profile['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
                 $record = $id ? ProviderConfiguration::find($id) : null;
-                $record ??= new ProviderConfiguration();
+                $record ??= new ProviderConfiguration;
 
                 $attributes = [
                     'name' => $profile['name'],

@@ -15,8 +15,7 @@ class ExpenseIntelligenceReportService
 {
     public function __construct(
         private readonly PdfService $pdfService,
-    ) {
-    }
+    ) {}
 
     public function generate(User $user, string $frequency, CarbonImmutable $fromDate, CarbonImmutable $toDate): array
     {

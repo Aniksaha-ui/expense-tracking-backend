@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Api\Transactions\StoreDepositRequest;
 use App\Http\Requests\Api\Transactions\StoreBulkTransactionRequest;
+use App\Http\Requests\Api\Transactions\StoreDepositRequest;
 use App\Http\Requests\Api\Transactions\StoreExpenseRequest;
 use App\Http\Requests\Api\Transactions\StoreIncomeRequest;
 use App\Http\Requests\Api\Transactions\TransactionFilterRequest;
@@ -17,8 +17,7 @@ class TransactionController extends Controller
 {
     public function __construct(
         private readonly TransactionService $transactionService,
-    ) {
-    }
+    ) {}
 
     public function index(TransactionFilterRequest $request): JsonResponse
     {

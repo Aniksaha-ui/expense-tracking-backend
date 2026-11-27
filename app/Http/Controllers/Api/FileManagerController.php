@@ -22,8 +22,7 @@ class FileManagerController extends Controller
         private readonly FileManagerService $fileManagerService,
         private readonly FileManagerVersionService $fileManagerVersionService,
         private readonly FileManagerTextEditorService $fileManagerTextEditorService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -56,6 +55,7 @@ class FileManagerController extends Controller
     {
         try {
             $this->fileManagerService->deleteFolder(auth()->id(), $folderId);
+
             return $this->successResponse([], 'Folder and its contents deleted successfully.');
         } catch (\RuntimeException $exception) {
             return $this->errorResponse($exception->getMessage(), status: 404);
@@ -85,6 +85,7 @@ class FileManagerController extends Controller
         try {
             $this->fileManagerVersionService->purgeStorage(auth()->id(), $fileId);
             $this->fileManagerService->deleteFile(auth()->id(), $fileId);
+
             return $this->successResponse([], 'File deleted successfully.');
         } catch (\RuntimeException $exception) {
             return $this->errorResponse($exception->getMessage(), status: 404);
@@ -122,9 +123,10 @@ class FileManagerController extends Controller
     {
         try {
             $file = $this->fileManagerService->getFile(auth()->id(), $fileId);
-            if (!Storage::disk($file->disk)->exists($file->path)) {
-                return $this->errorResponse("The stored file is unavailable.", status: 404);
+            if (! Storage::disk($file->disk)->exists($file->path)) {
+                return $this->errorResponse('The stored file is unavailable.', status: 404);
             }
+
             return response()->file(Storage::disk($file->disk)->path($file->path));
         } catch (\RuntimeException $exception) {
             return $this->errorResponse($exception->getMessage(), status: 404);
@@ -143,11 +145,12 @@ class FileManagerController extends Controller
     public function updateTextContent(Request $request, int $fileId): JsonResponse
     {
         try {
-            $content = $request->input("content");
-            if (!is_string($content)) {
-                return $this->errorResponse("Document content is required.", status: 422);
+            $content = $request->input('content');
+            if (! is_string($content)) {
+                return $this->errorResponse('Document content is required.', status: 422);
             }
-            return $this->successResponse($this->fileManagerTextEditorService->save(auth()->id(), $fileId, $content), "Document saved as a new version.");
+
+            return $this->successResponse($this->fileManagerTextEditorService->save(auth()->id(), $fileId, $content), 'Document saved as a new version.');
         } catch (\RuntimeException $exception) {
             return $this->errorResponse($exception->getMessage(), status: 422);
         }
@@ -157,7 +160,7 @@ class FileManagerController extends Controller
     {
         try {
             $file = $this->fileManagerService->getFile(auth()->id(), $fileId);
-            if (!Storage::disk($file->disk)->exists($file->path)) {
+            if (! Storage::disk($file->disk)->exists($file->path)) {
                 return $this->errorResponse('The stored file is unavailable.', status: 404);
             }
 
@@ -176,6 +179,7 @@ class FileManagerController extends Controller
             }
 
             $zipPath = $this->fileManagerService->createZip($files);
+
             return response()->download($zipPath, 'file-manager-download.zip')->deleteFileAfterSend(true);
         } catch (\RuntimeException $exception) {
             return $this->errorResponse($exception->getMessage(), status: 422);

@@ -13,9 +13,7 @@ use RuntimeException;
 
 class ServiceController extends Controller
 {
-    public function __construct(private readonly ServiceService $serviceService)
-    {
-    }
+    public function __construct(private readonly ServiceService $serviceService) {}
 
     public function index(Request $request): JsonResponse
     {

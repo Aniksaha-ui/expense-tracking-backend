@@ -43,7 +43,7 @@ class EmailCategoryExpenseReports extends Command
             $query->whereKey((int) $this->option('user'));
         }
 
-        $query->chunkById(100, function ($users) use ($reportService, $notificationService, $fromDate, $toDate, $recipient, $cc, $bcc, &$sent, &$skipped, &$failed): void {
+        $query->chunkById(100, function ($users) use ($reportService, $notificationService, $fromDate, $toDate, &$sent, &$skipped, &$failed): void {
             foreach ($users as $user) {
                 try {
                     $summary = $reportService->summary($user, $fromDate, $toDate);
@@ -54,6 +54,7 @@ class EmailCategoryExpenseReports extends Command
                         && ! $this->option('include-empty')
                     ) {
                         $skipped++;
+
                         continue;
                     }
 

@@ -248,8 +248,8 @@
         $labelWidth = 220;
         $plotWidth = 520;
         $valueX = $labelWidth + $plotWidth + 24;
-        $maxAmount = max(1, (float) $chartRows->max(fn(array $row): float => (float) $row['total_amount']));
-        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' . $chartWidth . '" height="' . $chartHeight . '" viewBox="0 0 ' . $chartWidth . ' ' . $chartHeight . '">';
+        $maxAmount = max(1, (float) $chartRows->max(fn (array $row): float => (float) $row['total_amount']));
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'.$chartWidth.'" height="'.$chartHeight.'" viewBox="0 0 '.$chartWidth.' '.$chartHeight.'">';
         $svg .= '<rect width="100%" height="100%" fill="#fbfcfe"/>';
         $svg .= '<text x="18" y="25" fill="#172033" font-family="Helvetica, Arial" font-size="17" font-weight="700">Spending by category</text>';
         $svg .= '<text x="18" y="45" fill="#667085" font-family="Helvetica, Arial" font-size="10">Bar length shows each category’s share of the largest spend.</text>';
@@ -260,14 +260,14 @@
             $barWidth = max(2, (int) round(($amount / $maxAmount) * $plotWidth));
             $name = htmlspecialchars((string) $row['category_name'], ENT_QUOTES, 'UTF-8');
             $amountLabel = number_format($amount, 2);
-            $svg .= '<text x="18" y="' . ($y + 13) . '" fill="#172033" font-family="Helvetica, Arial" font-size="10" font-weight="700">' . $name . '</text>';
-            $svg .= '<rect x="' . $labelWidth . '" y="' . $y . '" width="' . $plotWidth . '" height="14" fill="#e8eef3"/>';
-            $svg .= '<rect x="' . $labelWidth . '" y="' . $y . '" width="' . $barWidth . '" height="14" fill="#147d64"/>';
-            $svg .= '<text x="' . $valueX . '" y="' . ($y + 12) . '" fill="#475467" font-family="Helvetica, Arial" font-size="10" font-weight="700">BDT ' . $amountLabel . '</text>';
+            $svg .= '<text x="18" y="'.($y + 13).'" fill="#172033" font-family="Helvetica, Arial" font-size="10" font-weight="700">'.$name.'</text>';
+            $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$plotWidth.'" height="14" fill="#e8eef3"/>';
+            $svg .= '<rect x="'.$labelWidth.'" y="'.$y.'" width="'.$barWidth.'" height="14" fill="#147d64"/>';
+            $svg .= '<text x="'.$valueX.'" y="'.($y + 12).'" fill="#475467" font-family="Helvetica, Arial" font-size="10" font-weight="700">BDT '.$amountLabel.'</text>';
         }
 
         $svg .= '</svg>';
-        $chartDataUri = 'data:image/svg+xml;base64,' . base64_encode($svg);
+        $chartDataUri = 'data:image/svg+xml;base64,'.base64_encode($svg);
     }
     ?>
 
@@ -305,9 +305,9 @@
         </tr>
     </table>
 
-    <?php if ($rows->isEmpty()): ?>
+    <?php if ($rows->isEmpty()) { ?>
         <div class="empty">No expenses were recorded for this period.</div>
-    <?php else: ?>
+    <?php } else { ?>
         <table class="summary-table">
             <tr>
                 <td class="summary-card">
@@ -332,47 +332,47 @@
         <div class="section-title">Expense distribution</div>
         <div class="section-note">The graph makes the largest spending categories immediately visible; the detailed tables below retain every category.</div>
 
-        <?php if ($chartDataUri): ?>
+        <?php if ($chartDataUri) { ?>
             <div class="chart-box">
                 <img src="<?= e($chartDataUri) ?>" alt="Bar chart of spending by category">
             </div>
-        <?php endif; ?>
+        <?php } ?>
 
-        <?php foreach ($categoryGroups as $group): ?>
+        <?php foreach ($categoryGroups as $group) { ?>
             <div class="category-group">
                 <table class="category-table">
                     <thead>
                         <tr>
                             <th class="metric">Metric</th>
-                            <?php foreach ($group as $row): ?>
+                            <?php foreach ($group as $row) { ?>
                                 <th><?= e($row['category_name']) ?></th>
-                            <?php endforeach; ?>
+                            <?php } ?>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td class="metric">Amount</td>
-                            <?php foreach ($group as $row): ?>
+                            <?php foreach ($group as $row) { ?>
                                 <td class="amount"><?= e($row['total_amount']) ?></td>
-                            <?php endforeach; ?>
+                            <?php } ?>
                         </tr>
                         <tr>
                             <td class="metric">Transactions</td>
-                            <?php foreach ($group as $row): ?>
+                            <?php foreach ($group as $row) { ?>
                                 <td><?= e($row['transaction_count']) ?></td>
-                            <?php endforeach; ?>
+                            <?php } ?>
                         </tr>
                         <tr>
                             <td class="metric">Share of total</td>
-                            <?php foreach ($group as $row): ?>
+                            <?php foreach ($group as $row) { ?>
                                 <td class="share"><?= e($row['percentage']) ?>%</td>
-                            <?php endforeach; ?>
+                            <?php } ?>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        <?php endforeach; ?>
-    <?php endif; ?>
+        <?php } ?>
+    <?php } ?>
 
     <div class="footer">
         <?= e(config('app.name')) ?> &middot; Category-wise Expense Report &middot;

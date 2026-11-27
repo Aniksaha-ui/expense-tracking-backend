@@ -137,7 +137,7 @@ class FileManagerService
     public function getFile(int $userId, int $fileId): object
     {
         $file = DB::table('file_manager_files')->where('user_id', $userId)->where('id', $fileId)->first();
-        if (!$file) {
+        if (! $file) {
             throw new RuntimeException('File not found.');
         }
 
@@ -157,7 +157,7 @@ class FileManagerService
     public function createZip(Collection $files): string
     {
         $zipPath = tempnam(sys_get_temp_dir(), 'file-manager-');
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
 
         if ($zip->open($zipPath, ZipArchive::OVERWRITE) !== true) {
             throw new RuntimeException('Unable to create the download archive.');
@@ -174,22 +174,22 @@ class FileManagerService
 
     private function storeVersion(object $file, int $version): void
     {
-        DB::table("file_manager_file_versions")->insert([
-            "file_id" => $file->id,
-            "user_id" => $file->user_id,
-            "version" => $version,
-            "original_name" => $file->original_name,
-            "path" => $file->path,
-            "mime_type" => $file->mime_type,
-            "size" => $file->size,
-            "created_at" => now(),
+        DB::table('file_manager_file_versions')->insert([
+            'file_id' => $file->id,
+            'user_id' => $file->user_id,
+            'version' => $version,
+            'original_name' => $file->original_name,
+            'path' => $file->path,
+            'mime_type' => $file->mime_type,
+            'size' => $file->size,
+            'created_at' => now(),
         ]);
     }
 
     private function getFolder(int $userId, int $folderId): object
     {
         $folder = DB::table('file_manager_folders')->where('user_id', $userId)->where('id', $folderId)->first();
-        if (!$folder) {
+        if (! $folder) {
             throw new RuntimeException('Folder not found.');
         }
 

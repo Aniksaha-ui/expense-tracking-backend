@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests\Api\Publications;
 
-use App\Http\Requests\ApiFormRequest;
-
 class UpdatePublicationRequest extends StorePublicationRequest
 {
     public function rules(): array

@@ -5,12 +5,13 @@ namespace App\Services;
 use App\Enums\AccountType;
 use App\Enums\TransactionType;
 use App\Support\MoneyHelper;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class TransferService extends BaseFinanceService
 {
-    public function listTransfers(int $userId, array $filters): \Illuminate\Support\Collection
+    public function listTransfers(int $userId, array $filters): Collection
     {
         $query = DB::table('transfers')
             ->join('accounts as from_accounts', 'from_accounts.id', '=', 'transfers.from_account_id')

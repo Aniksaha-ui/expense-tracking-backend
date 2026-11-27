@@ -24,8 +24,7 @@ class CategoryExpenseReportMail extends Mailable
         public readonly string $total,
         private readonly string $pdf,
         private readonly string $filename,
-    ) {
-    }
+    ) {}
 
     public function envelope(): Envelope
     {

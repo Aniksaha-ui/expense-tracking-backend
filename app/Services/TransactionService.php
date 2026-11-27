@@ -5,12 +5,13 @@ namespace App\Services;
 use App\Enums\TransactionType;
 use App\Support\MoneyHelper;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class TransactionService extends BaseFinanceService
 {
-    public function listTransactions(int $userId, array $filters): \Illuminate\Support\Collection
+    public function listTransactions(int $userId, array $filters): Collection
     {
         $query = DB::table('transactions')
             ->join('accounts', 'accounts.id', '=', 'transactions.account_id')
@@ -148,10 +149,10 @@ class TransactionService extends BaseFinanceService
             $existingTransaction = $this->getOwnedTransaction($userId, $transactionId, true);
 
             if (! in_array($existingTransaction->type, [
-                    TransactionType::INCOME->value,
-                    TransactionType::EXPENSE->value,
-                    TransactionType::DEPOSIT->value,
-                ], true)) {
+                TransactionType::INCOME->value,
+                TransactionType::EXPENSE->value,
+                TransactionType::DEPOSIT->value,
+            ], true)) {
                 throw new RuntimeException('Only income, expense, and deposit transactions can be updated.');
             }
 

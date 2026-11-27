@@ -15,8 +15,7 @@ class TransferController extends Controller
 {
     public function __construct(
         private readonly TransferService $transferService,
-    ) {
-    }
+    ) {}
 
     public function index(TransferFilterRequest $request): JsonResponse
     {

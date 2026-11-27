@@ -17,8 +17,7 @@ class RecurringExpenseController extends Controller
 {
     public function __construct(
         private readonly RecurringExpenseService $recurringExpenseService,
-    ) {
-    }
+    ) {}
 
     public function index(RecurringExpenseFilterRequest $request): JsonResponse
     {

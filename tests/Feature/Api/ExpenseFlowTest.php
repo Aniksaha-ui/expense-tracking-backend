@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Api;
 
-use Illuminate\Support\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use Tests\TestCase;
 

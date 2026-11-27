@@ -4,11 +4,12 @@ namespace App\Services;
 
 use App\Enums\TransactionType;
 use App\Support\MoneyHelper;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AccountService extends BaseFinanceService
 {
-    public function listAccounts(int $userId): \Illuminate\Support\Collection
+    public function listAccounts(int $userId): Collection
     {
         return DB::table('accounts')
             ->where('user_id', $userId)

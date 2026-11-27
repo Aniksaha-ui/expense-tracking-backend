@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\RecurringFrequency;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
@@ -11,10 +12,9 @@ class RecurringExpenseService extends BaseFinanceService
 {
     public function __construct(
         private readonly TransactionService $transactionService,
-    ) {
-    }
+    ) {}
 
-    public function listRecurringExpenses(int $userId, array $filters): \Illuminate\Support\Collection
+    public function listRecurringExpenses(int $userId, array $filters): Collection
     {
         $query = DB::table('recurring_expenses')
             ->join('accounts', 'accounts.id', '=', 'recurring_expenses.account_id')

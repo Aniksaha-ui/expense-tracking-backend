@@ -15,9 +15,8 @@ class PdfService
         array $data = [],
         ?string $paper = null,
         ?string $orientation = null,
-    ): string
-    {
-        $options = new Options();
+    ): string {
+        $options = new Options;
 
         foreach (config('dompdf.options', []) as $name => $value) {
             $options->set($name, $value);
